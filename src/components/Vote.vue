@@ -49,8 +49,8 @@
         >
           <div class="relative w-full h-[380px] overflow-hidden bg-gray-50">
             <img
-              :src="candidat.photo_url || defaultPhoto"
-              :alt="candidat.first_name"
+              :src="candidat.profile_photo_url || defaultPhoto"
+              :alt="candidat.full_name"
               class="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-102"
               @error="(e) => e.target.src = defaultPhoto"
             />
@@ -60,7 +60,7 @@
               :class="isVisible ? 'rank-visible' : ''"
               :style="{ transitionDelay: isVisible ? `${0.3 + index * 0.08}s` : '0s' }"
             >
-              N<sup>o</sup> {{ getDisplayId(candidat) }}
+              N<sup>o</sup> {{ formatBadgeNumber(index) }}
             </div>
           </div>
 
@@ -68,7 +68,7 @@
             <div class="flex justify-between items-end">
               <div class="space-y-0.5">
                 <h3 class="text-gray-900 font-heading font-black text-lg uppercase tracking-wide">
-                  {{ candidat.first_name }} {{ candidat.last_name }}
+                  {{ candidat.full_name }}
                 </h3>
 
                 <p class="text-gray-500 font-sans font-medium text-xs tracking-wider uppercase">
@@ -111,7 +111,7 @@
       <div class="bg-white/95 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6 animate-slide-up">
         <div class="flex items-center justify-between mb-5">
           <h3 class="text-lg font-heading font-black text-gray-900">
-            Voter pour <span class="text-awac-primary">{{ selectedCandidate?.first_name || '' }}</span>
+            Voter pour <span class="text-awac-primary">{{ selectedCandidate?.full_name || '' }}</span>
           </h3>
           <button @click="closeVoteModal" class="p-1 rounded-lg hover:bg-gray-100 transition-colors">
             <span class="material-icons">close</span>
@@ -204,7 +204,7 @@
               >
                 <span class="material-icons text-sm">add</span>
               </button>
-              <span class="text-sm text-gray-500">× 100 FCFA = {{ formatPrix(voteForm.quantity) }} F</span>
+              <span class="text-sm text-gray-500">× {{ unitPrice }} {{ currency }} = {{ formatPrix(voteForm.quantity) }} F</span>
             </div>
           </div>
 
@@ -258,7 +258,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { supabase, supabaseAdmin } from '@/services/supabase'
+import { voteService } from '@/services/voteService'
 
 const sectionRef = ref(null)
 const isVisible = ref(false)
@@ -271,6 +271,8 @@ const submitting = ref(false)
 
 const defaultPhoto = new URL('../assets/img/candidat/candidat.jpg', import.meta.url).href
 const candidats = ref([])
+const unitPrice = ref(100)
+const currency = ref('FCFA')
 
 const voteForm = ref({
   first_name: '',
@@ -281,19 +283,15 @@ const voteForm = ref({
   quantity: 1,
 })
 
-// ===== AFFICHAGE DE L'ID À PARTIR DE unique_code =====
-const getDisplayId = (candidate) => {
-  if (!candidate || !candidate.unique_code) return '--'
-  // Extraire les derniers chiffres après le dernier tiret
-  const parts = candidate.unique_code.split('-')
-  const lastPart = parts[parts.length - 1] // ex: "0001", "0012", "0123"
-  // Si le nombre total de candidats est < 100, on prend les 2 derniers chiffres
-  // Sinon, on prend les 3 derniers
-  const totalCandidates = candidats.value.length
-  if (totalCandidates < 100) {
-    return lastPart.slice(-2) // "01", "12", "23"
-  } else {
-    return lastPart.slice(-3) // "001", "012", "123"
+const formatBadgeNumber = (index) => String(index + 1).padStart(2, '0')
+
+const loadVotePricing = async () => {
+  try {
+    const pricing = await voteService.getVotePricing()
+    unitPrice.value = pricing.vote_unit_price
+    currency.value = pricing.currency === 'XOF' ? 'FCFA' : pricing.currency
+  } catch (err) {
+    console.error('Erreur chargement prix du vote:', err)
   }
 }
 
@@ -301,47 +299,7 @@ const loadCandidates = async () => {
   loading.value = true
   error.value = ''
   try {
-    const { data, err } = await supabase
-      .from('candidates')
-      .select('*')
-      .eq('status', 'approved')
-      .order('created_at', { ascending: true })
-
-    if (err) throw err
-
-    if (data && data.length > 0) {
-      const candidateIds = data.map(c => c.id)
-      const { data: voteData, error: voteErr } = await supabase
-        .from('public_votes')
-        .select('candidate_id, amount')
-        .in('candidate_id', candidateIds)
-
-      if (voteErr) throw voteErr
-
-      const voteMap = {}
-      if (voteData) {
-        voteData.forEach(v => {
-          if (!voteMap[v.candidate_id]) voteMap[v.candidate_id] = 0
-          voteMap[v.candidate_id] += (v.amount || 0) / 100
-        })
-      }
-
-      for (const candidate of data) {
-        if (candidate.photo_path) {
-          const { data: urlData } = supabase.storage
-            .from('candidates-photos')
-            .getPublicUrl(candidate.photo_path)
-          candidate.photo_url = urlData?.publicUrl || defaultPhoto
-        } else {
-          candidate.photo_url = defaultPhoto
-        }
-        candidate.vote_count = voteMap[candidate.id] || 0
-      }
-
-      data.sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0))
-    }
-
-    candidats.value = data || []
+    candidats.value = await voteService.getCandidates()
   } catch (err) {
     console.error('Erreur chargement candidats:', err)
     error.value = 'Impossible de charger les candidats.'
@@ -394,29 +352,16 @@ const submitVote = async () => {
 
   submitting.value = true
   try {
-    const amount = voteForm.value.quantity * 100
-
-    const { data, error: insertErr } = await supabaseAdmin
-      .from('public_votes')
-      .insert({
-        candidate_id: candidate.id,
-        competition_id: candidate.competition_id,
-        operator: voteForm.value.operator,
-        transaction_reference: 'VOTE-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
-        phone_number: voteForm.value.phone_number.trim(),
-        amount: amount,
-        status: 'completed',
-        vote_date: new Date().toISOString(),
-        voter_name: (voteForm.value.first_name + ' ' + voteForm.value.last_name).trim(),
-        voter_email: voteForm.value.email?.trim() || null,
-      })
-      .select()
-
-    if (insertErr) throw insertErr
+    const result = await voteService.submitVote({
+      candidateId: candidate.id,
+      quantity: voteForm.value.quantity,
+      paymentProvider: voteForm.value.operator,
+      voterPhone: voteForm.value.phone_number.trim(),
+    })
 
     const updatedCandidate = candidats.value.find(c => c.id === candidate.id)
     if (updatedCandidate) {
-      updatedCandidate.vote_count = (updatedCandidate.vote_count || 0) + voteForm.value.quantity
+      updatedCandidate.vote_count = result.votes_after
       candidats.value.sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0))
     }
 
@@ -424,7 +369,7 @@ const submitVote = async () => {
     showThanksModal.value = true
 
   } catch (err) {
-    console.error('❌ Erreur lors du vote:', err)
+    console.error('Erreur lors du vote:', err)
     alert('❌ Erreur : ' + (err.message || 'Impossible d\'enregistrer le vote'))
   } finally {
     submitting.value = false
@@ -432,7 +377,7 @@ const submitVote = async () => {
 }
 
 const formatPrix = (quantite) => {
-  const total = (parseInt(quantite) || 0) * 100
+  const total = (parseInt(quantite) || 0) * unitPrice.value
   return new Intl.NumberFormat('fr-FR').format(total)
 }
 
@@ -440,6 +385,7 @@ let observer = null
 
 onMounted(() => {
   loadCandidates()
+  loadVotePricing()
   observer = new IntersectionObserver(
     ([entry]) => {
       if (entry.isIntersecting) {
