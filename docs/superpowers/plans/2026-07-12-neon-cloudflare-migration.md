@@ -2,6 +2,16 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **⚠️ PIVOT DE STACK (2026-07-12, décision utilisateur)** : le backend est finalement **Node/Hono déployé sur Railway** (pas Cloudflare Workers) + **Cloudinary** pour les photos (pas R2). Substitutions à appliquer sur toutes les tâches :
+> - `wrangler` / workerd → `@hono/node-server` (`node --watch src/server.js`), déjà en place.
+> - `@neondatabase/serverless` → driver `postgres` (déjà en place, `src/db.js`).
+> - PBKDF2 Web Crypto → **bcryptjs** (pas de budget CPU 10ms sur Railway) ; format stocké = hash bcrypt standard.
+> - `jose` → **jsonwebtoken** (HS256, `{ sub, role }`, 7 jours — inchangé).
+> - R2 binding / `R2_PUBLIC_URL` → **Cloudinary** (`CLOUDINARY_URL` en env) ; upload/delete via SDK, URLs servies par Cloudinary CDN.
+> - `.dev.vars` → `api/.env` (gitignoré, déjà en place).
+> - Le schéma SQL (Task 5) est **déjà appliqué** sur Neon (10 tables). Reste à committer le fichier de migration de référence.
+> - Task 1 (scaffold + health) : **déjà faite** (commit 3298871).
+
 **Goal:** Build a Cloudflare Worker API (Hono) backed by Neon Postgres and Cloudflare R2 that replaces Supabase for the awac couturier voting contest, plus rewire the Vue SPA's data/auth layer to talk to it — delivering a working end-to-end slice (admin login → dashboard aggregates; jury login → submit evaluation; public → cast a paid vote).
 
 **Architecture:** A standalone `api/` workspace holds a Hono app deployed to Cloudflare Workers. Route handlers read their dependencies (`db`, `r2`, `jwtSecret`) from Hono's request context, which a single context-middleware populates from `c.env` in production and which tests populate with fakes — so every route is unit-testable without a live database or the workerd runtime. Pure security-critical units (password hashing, JWT, ranking math) are plain ES modules tested with vanilla Vitest. The Vue SPA keeps living on Vercel and calls the Worker over HTTPS with a bearer JWT.
