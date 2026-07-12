@@ -1,6 +1,9 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { getDb } from './db.js'
+import candidatesRouter from './routes/candidates.js'
+import votesRouter from './routes/votes.js'
+import settingsRouter from './routes/settings.js'
 
 export function createApp({ withDb = true } = {}) {
   const app = new Hono()
@@ -16,11 +19,9 @@ export function createApp({ withDb = true } = {}) {
 
   app.get('/health', (c) => c.json({ status: 'ok' }))
 
-  app.get('/db-check', async (c) => {
-    const db = c.get('db')
-    const rows = await db`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name`
-    return c.json({ connected: true, tables: rows.map((r) => r.table_name) })
-  })
+  app.route('/candidates', candidatesRouter)
+  app.route('/votes', votesRouter)
+  app.route('/settings', settingsRouter)
 
   app.notFound((c) => c.json({ error: { code: 'not_found', message: 'Ressource introuvable' } }, 404))
   app.onError((err, c) => {
