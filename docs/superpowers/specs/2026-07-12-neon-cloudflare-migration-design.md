@@ -9,9 +9,19 @@ Le projet awac (AWAC MONO — concours de couture) est actuellement un SPA Vue 3
 
 Décision : remplacer Supabase entièrement par **Neon** (Postgres) + **Cloudflare Workers** (backend API) + **Cloudflare R2** (storage), avec une auth maison.
 
-Le projet est **pré-lancement** : aucune donnée réelle en production (candidats, votes, comptes jury). Pas de script de migration de données nécessaire — uniquement le schéma.
+Le projet est **pré-lancement** : aucune donnée réelle en production. Pas de script de migration de données nécessaire — uniquement le schéma.
 
-## Architecture cible
+## Objectif produit (redéfini)
+
+Site de **vote en ligne pour un concours d'apprentis couturiers**, avec trois surfaces :
+
+1. **Site public** : présentation des candidats, vote payant (site vitrine inchangé — composants `Navbar`/`Hero`/`Works`/`Vote`/`Prix`/`Footer` déjà stables).
+2. **Dashboard admin** (organisateur) : nombre de votes (total + par candidat), revenu généré (total + par candidat), ajout/suppression/mise à jour des candidats, gestion des critères de notation, gestion des comptes jury, réglage de la pondération vote/jury.
+3. **Application jury** : notation des candidats selon des critères configurables, avec appréciations et fautes en commentaire libre.
+
+Ceci **remplace** la portée précédemment documentée dans `.github/CONVENTIONS.md` (étapes à %, formulaires dynamiques type Google Forms, certificats, groupes de jury avec président, notifications, logs d'audit) — jugée trop complexe pour le besoin réel. Cette v1 est volontairement plus simple ; ces fonctionnalités pourront être ajoutées plus tard si le besoin se confirme, sans que l'architecture (Worker + Neon + R2) n'ait à changer.
+
+## Architecture technique
 
 ```
 Vue 3 SPA (Vite) — hébergé Vercel (déjà en place, inchangé)
@@ -22,94 +32,145 @@ Cloudflare Worker (Hono) — API REST
         ▼
 Neon Postgres (projet "awac", région AWS eu-west-2 London — déjà créé)
         +
-Cloudflare R2 — photos candidats / créations
+Cloudflare R2 — photos candidats (profil + travaux)
 ```
 
-Le site vitrine (Navbar, Hero, Works, Vote, Prix, Footer) reste inchangé — il ne consomme pas Supabase aujourd'hui et n'est pas concerné par cette migration.
+## Pourquoi cette stack
 
-## Pourquoi cette stack (résumé des choix faits en amont)
+- **Backend obligatoire** : un connection string Postgres ne doit jamais être exposé au navigateur. Neon = Postgres brut, donc un serveur intermédiaire est requis.
+- **Cloudflare Workers** plutôt que Railway/Vercel Functions pour ~100k requêtes/jour attendues :
+  - Vercel Hobby : cap dur à 1M invocations/**mois** (~33k/jour en moyenne) → dépassé au ~10e jour à ce volume, et CGU "personal non-commercial use only".
+  - Railway : $5 de crédit gratuit, expire à 30 jours ou épuisement — pas tenable en continu.
+  - Cloudflare Workers Free : **100 000 requêtes/jour, gratuit en continu**, pas de carte bancaire requise. Edge distribué (pas de cold start, bon pour les pics de trafic en fin de concours) + anti-DDoS/anti-bot Cloudflare inclus — pertinent pour un site de vote public.
+- **Neon** : déjà provisionné (projet "awac", région `eu-west-2` / London — meilleure latence Bénin/Afrique de l'Ouest que les régions US).
+- **R2** : cohérent avec l'écosystème Workers déjà choisi, binding natif, pas de credentials S3 séparés.
 
-- **Backend obligatoire** : un connection string Postgres ne doit jamais être exposé au navigateur. Neon = Postgres brut, donc un serveur intermédiaire est requis (contrairement à Supabase qui expose un client sûr côté navigateur via RLS + clé anon).
-- **Cloudflare Workers plutôt que Railway/Vercel Functions** : volume attendu ~100k requêtes/jour.
-  - Vercel Hobby : cap dur à 1M invocations/**mois** (~33k/jour en moyenne) → dépassé dès le ~10e jour à ce volume, et CGU "personal non-commercial use only".
-  - Railway : $5 de crédit gratuit, expire à 30 jours ou épuisement — pas tenable en continu à ce volume.
-  - Cloudflare Workers Free : **100 000 requêtes/jour, gratuit en continu**, pas de carte bancaire requise. Bonus pour un site de vote : édge distribué (pas de cold start, bon pour les pics de trafic en fin de concours) + anti-DDoS/anti-bot Cloudflare inclus.
-- **Neon** : déjà provisionné (projet "awac", région `eu-west-2` / London — meilleure latence vers le Bénin/Afrique de l'Ouest que les régions US, via les câbles sous-marins UK–Afrique de l'Ouest).
-- **R2** plutôt que Vercel Blob : cohérent avec l'écosystème Cloudflare déjà choisi pour le compute, binding natif depuis le Worker, pas de credentials S3 séparés à gérer.
+## Modèle de données
 
-## Composants détaillés
+```
+admins              id, email, password_hash, full_name, created_at
+
+jury_members        id, username, password_hash, full_name, is_active,
+                     created_by → admins, created_at
+
+candidates          id, full_name, atelier, commune, phone,
+                     profile_photo_url, created_at, updated_at
+
+candidate_photos     id, candidate_id → candidates, photo_url, caption,
+                     photo_order, created_at
+                     — plusieurs photos par candidat (travaux, créations, présentation),
+                       nombre illimité, ordonnables
+
+criteria             id, name, description, weight_percentage, created_at
+                     — configurable par l'admin, somme des weight_percentage = 100%
+
+evaluations          id, candidate_id → candidates, jury_id → jury_members,
+                     submitted_at, is_locked, created_at, updated_at
+                     — une évaluation = un passage d'un juré sur un candidat
+
+evaluation_scores    evaluation_id → evaluations, criterion_id → criteria, score
+
+evaluation_notes     evaluation_id → evaluations, type (appreciation | fault), content
+                     — appréciations et fautes du juré, texte libre
+
+votes                id, candidate_id → candidates, quantity, unit_price,
+                     total_amount, currency, payment_provider, payment_status,
+                     payment_reference, created_at
+                     — un vote payant = achat d'une quantité de voix pour un candidat
+
+settings             vote_weight_percentage, jury_weight_percentage,
+                     vote_unit_price, currency
+                     — réglages globaux modifiables par l'admin
+```
+
+Rôles simplifiés par rapport à l'ancien schéma : uniquement **admin** (un seul, crée les comptes jury) et **jury_member** (note, ne gère rien d'autre). Pas de `super_admin`/`moderator`/président de jury/groupes — ce découpage n'existe plus dans cette v1.
+
+### Classement combiné
+
+Calculé à la volée (jamais stocké), pour que changer les pourcentages dans `settings` reflète instantanément le classement :
+
+```
+score_jury_normalisé(candidat)  = moyenne pondérée des evaluation_scores
+                                    (pondération par criteria.weight_percentage),
+                                    ramenée sur 100
+score_vote_normalisé(candidat)  = votes du candidat / votes du candidat en tête × 100
+score_final(candidat)           = settings.jury_weight_percentage% × score_jury_normalisé
+                                 + settings.vote_weight_percentage%  × score_vote_normalisé
+```
+
+Le dashboard admin affiche les trois valeurs séparément (score jury, score vote, score combiné) pour chaque candidat, pas seulement le score final.
+
+### Verrouillage des notes
+
+Une fois `evaluations.is_locked = true` (juré soumet définitivement sa notation d'un candidat), plus aucune modification possible — règle métier reprise de la version précédente.
+
+### Portée volontairement exclue de cette v1
+
+- Catégories Homme/Femme séparées (un seul classement général pour l'instant).
+- Éditions/sessions multiples (concours unique, pas d'archivage annuel pour l'instant).
+- Assignation de candidats spécifiques à des jurés (chaque juré voit et note tous les candidats).
+- Approbation/modération des photos avant publication (upload direct, pas de workflow de validation).
+
+Ces points sont ajoutables plus tard sans remise en cause du schéma de base (ajout de colonnes/tables, pas de refonte).
+
+## Composants applicatifs
 
 ### 1. API (Cloudflare Worker + Hono)
 
-Un seul Worker, routes REST regroupées par domaine métier :
+Un seul Worker, routes REST par domaine :
 
-- `/auth` — login, refresh (si ajouté plus tard), logout côté client (suppression du token)
-- `/candidates` — CRUD candidats + upload photo (proxy vers R2)
-- `/competitions`, `/steps` — gestion des étapes et % de notation
-- `/scoring` — soumission/consultation des notes de jury
-- `/votes` — vote public (simulé, pas de vrai Mobile Money pour l'instant)
-- `/jury` — groupes de jury, présidents, assignations
-- `/certificates` — génération attestations (bloqué tant que le concours n'est pas clôturé, règle métier existante)
+- `/auth` — login admin/jury
+- `/candidates` — CRUD candidats (admin), upload photos (admin), lecture publique (site vitrine)
+- `/criteria` — CRUD critères de notation (admin)
+- `/evaluations` — soumission de notes + appréciations/fautes (jury), lecture (admin, jury sur ses propres évaluations)
+- `/votes` — achat de votes (public, paiement simulé pour l'instant)
+- `/settings` — lecture/écriture des pondérations et du prix du vote (admin)
+- `/dashboard` — agrégats prêts à afficher (total votes, revenu, classement) pour éviter de recalculer côté client
 
-Chaque route passe par un middleware d'autorisation qui :
-1. Décode et vérifie le JWT (signature + expiration).
-2. Résout le rôle de l'utilisateur (`super_admin`, `administrator`/`admin`, `moderator`, `jury_member`, + statut président dérivé de `step_juries.is_president`).
-3. Vérifie la permission requise via la même matrice que `src/config/roles.js` (portée côté serveur — source unique de vérité pour l'autorisation, réutilisée telle quelle plutôt que dupliquée).
+Middleware d'autorisation par route : décode le JWT, vérifie le rôle (`admin` ou `jury_member`), refuse sinon (403).
 
 ### 2. Authentification (maison, JWT + bcrypt)
 
-- Table `profiles` : `email`, `password_hash` (bcrypt), `role`, `full_name`.
-- `POST /auth/login` : vérifie bcrypt, signe un JWT (HS256, secret dans une variable d'env Worker `JWT_SECRET`), expiration **7 jours**.
-- Le client stocke le token côté SPA et l'envoie en `Authorization: Bearer <token>` sur chaque requête. Pas de cookie cross-domain : SPA (Vercel) et API (Workers) sont sur des domaines différents, un bearer token évite les complications CORS/SameSite d'un cookie cross-site.
-- Pas de refresh token dans cette v1 (YAGNI) — expiration 7j jugée suffisante pour ce cas d'usage (outil interne jury/admin + vote public simulé, pas une app bancaire). Reconnectable si le token expire.
+- `admins.password_hash` / `jury_members.password_hash` en bcrypt.
+- `POST /auth/login` : vérifie bcrypt, signe un JWT (HS256, secret dans variable d'env Worker `JWT_SECRET`), expiration **7 jours**, contient `{ sub, role }`.
+- Bearer token côté client (pas de cookie cross-domain, SPA et API sur domaines différents).
+- Pas de refresh token en v1 (YAGNI) — reconnexion après expiration si besoin.
 
-### 3. Autorisation : abandon des RLS Postgres
+### 3. Storage (Cloudflare R2)
 
-Les policies actuelles (`supabase/policies/`) reposent sur `auth.uid()`, une fonction spécifique à Supabase Auth qui n'existe pas sur Neon brut. Plutôt que de réimplémenter un équivalent RLS complexe, l'autorisation est portée **entièrement par le middleware du Worker** (voir §1). C'est un choix délibéré de simplicité (YAGNI) : le Worker est le seul point d'accès à la base (Neon n'est jamais exposé directement), donc l'enforcement applicatif est suffisant. Défense en profondeur (RLS Postgres réintroduite) pourra être ajoutée plus tard si le besoin se confirme, mais n'est pas nécessaire pour le lancement.
+Binding R2 direct depuis le Worker. Deux usages :
+- `candidates.profile_photo_url` — une photo de profil par candidat, remplaçable.
+- `candidate_photos` — table dédiée, plusieurs photos par candidat (travaux/créations/présentation), chacune avec sa propre clé R2.
 
-### 4. Schéma de données
+### 4. Vote payant
 
-Les 10 migrations SQL existantes (`supabase/migrations/0001_initial_schema.sql` → `0010_form_responses.sql`) sont du Postgres standard (types, contraintes, index) — elles se rejouent telles quelles sur Neon, sans adaptation de schéma. Seules les policies RLS (`0002_rls_policies.sql` et équivalents) ne sont pas reprises (voir §3). Le diagramme relationnel complet reste celui documenté dans `supabase/erd/awac_erd.md`.
+- Prix fixe par vote (`settings.vote_unit_price`), achat en quantité choisie par le votant en une transaction.
+- Paiement Mobile Money **simulé** pour l'instant (`payment_status = 'simulated'`) — le schéma prévoit déjà `payment_provider`/`payment_reference` pour brancher MTN/Moov/Celtis plus tard sans changer la table.
 
-Pas de script d'export/import de données : projet pré-lancement, aucune donnée réelle à préserver.
-
-### 5. Storage (Cloudflare R2)
-
-Remplace Supabase Storage pour les photos candidats et créations. Binding R2 direct depuis le Worker (pas de credentials S3 à gérer côté client ni côté secrets applicatifs séparés). Upload : le client envoie le fichier au Worker (`/candidates/:id/photo`), qui l'écrit dans le bucket R2 et enregistre la clé résultante dans la table existante `candidate_photos` (colonnes `candidate_id`, `photo_type` — enum `profile`/`creation` —, `is_primary`, `is_approved`), conformément au schéma déjà défini dans `supabase/migrations/0003_candidates_and_photos.sql`.
-
-### 6. Règles métier conservées (inchangées, portées dans le Worker)
-
-- Somme des `percentage` des étapes d'une compétition = 100%.
-- Un juré ne peut jamais modifier une note déjà validée.
-- Un modérateur ne voit jamais les signatures officielles.
-- Classements Homme/Femme indépendants.
-- Attestations de mérite bloquées tant que le concours n'est pas clôturé.
-- Vote : Mobile Money (MTN/Moov/Celtis) toujours simulé — la logique de vote est conçue pour permettre l'intégration future sans réécriture (contrat d'interface stable entre le endpoint `/votes` et un futur provider de paiement).
-- Anti-fraude vote : contrainte `UNIQUE` en base (candidat_id, identifiant votant) + vérification applicative. Le recalcul de classement n'est **pas** fait sur le chemin critique du vote (job séparé / à la demande) pour rester sous la limite de 10ms CPU/requête du plan gratuit Workers.
-
-### 7. Gestion d'erreurs
+### 5. Gestion d'erreurs
 
 Réponses JSON uniformes :
 ```json
 { "error": { "code": "invalid_credentials", "message": "Email ou mot de passe incorrect" } }
 ```
-Jamais de stack trace, de message Postgres brut, ni de détail interne renvoyé au client (cohérent avec la règle globale du projet contre la fuite d'information).
+Jamais de stack trace, de message Postgres brut, ni de détail interne renvoyé au client.
 
-### 8. Tests
+### 6. Tests
 
-Aucun test runner n'est configuré dans awac actuellement — à ajouter (Vitest, cohérent avec le reste de l'écosystème du repo).
-- **Unitaires** : hash/vérification bcrypt, signature/vérification JWT, matrice de permissions (`src/config/roles.js` réutilisée côté serveur).
-- **Intégration** : endpoints critiques (`/auth/login`, `/votes`, `/scoring`) contre une branche Neon dédiée aux tests (Neon supporte le branching de BD nativement — permet de tester sans toucher aux données de dev/prod).
+Aucun test runner configuré dans awac actuellement — Vitest à ajouter.
+- **Unitaires** : hash/vérification bcrypt, signature/vérification JWT, calcul du score combiné (normalisation vote/jury).
+- **Intégration** : endpoints critiques (`/auth/login`, `/votes`, `/evaluations`) contre une branche Neon dédiée aux tests (branching natif Neon).
 
-## Hors scope (explicitement exclu de cette migration)
+## Hors scope (explicitement exclu de cette migration/version)
 
-- Intégration Mobile Money réelle (MTN/Moov/Celtis) — reste simulée comme avant.
-- Toute modification du site vitrine (design, contenu, composants existants) — stable, à ne jamais toucher sans demande explicite (règle déjà actée dans `.github/CONVENTIONS.md`).
+- Intégration Mobile Money réelle — reste simulée.
+- Toute modification du site vitrine (design, contenu, composants existants).
 - Refresh token / rotation de session avancée.
-- RLS Postgres au niveau base (reportée, voir §3).
+- Catégories Homme/Femme, éditions multiples, assignation jury→candidat, modération de photos (voir "Portée volontairement exclue" ci-dessus).
 
 ## Risques identifiés
 
-- **Limite CPU Workers (10ms/requête, plan gratuit)** : à surveiller sur les routes qui agrègent beaucoup de données (ex: dashboard admin, classements). Mitigation : caching / calcul asynchrone plutôt que recalcul synchrone à chaque requête.
-- **Limite 100k requêtes/jour** : filet de sécurité pas cher si dépassé (plan payant Workers = 5$/mois pour 10M requêtes) — pas bloquant pour le lancement.
-- **JWT sans refresh** : un utilisateur devra se reconnecter après 7 jours d'inactivité — acceptable pour ce cas d'usage, à revisiter si ça gêne l'expérience jury/admin en pratique.
+- **Limite CPU Workers (10ms/requête, plan gratuit)** : à surveiller sur `/dashboard` (agrégats). Mitigation : requêtes SQL agrégées côté Neon plutôt que calcul en mémoire dans le Worker, éventuellement mise en cache courte.
+- **Limite 100k requêtes/jour** : filet de sécurité pas cher si dépassé (plan payant Workers = 5$/mois pour 10M requêtes).
+- **JWT sans refresh** : reconnexion après 7 jours d'inactivité — acceptable pour ce cas d'usage.
+- **Pondération vote/jury modifiable à tout moment par l'admin** : si changée pendant que le concours est encore ouvert, le classement affiché change rétroactivement pour tout le monde — comportement voulu (l'admin garde la main), mais à documenter clairement dans l'UI admin pour éviter la confusion.
