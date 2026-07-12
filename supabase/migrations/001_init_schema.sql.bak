@@ -1,0 +1,586 @@
+-- AWAC MONO - Supabase Migrations
+-- Migration: 001_init_schema
+-- Description: Create complete database schema for AWAC competition platform
+
+-- Enable required extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- Create custom types/enums
+CREATE TYPE competition_status AS ENUM ('planning', 'registrations', 'in_progress', 'closed');
+CREATE TYPE step_status AS ENUM ('draft', 'active', 'closed');
+CREATE TYPE form_type AS ENUM ('scoring', 'feedback', 'evaluation');
+CREATE TYPE field_type AS ENUM ('numeric', 'slider', 'checkbox', 'text_short', 'text_long', 'suggestion');
+CREATE TYPE candidate_status AS ENUM ('registered', 'approved', 'rejected', 'withdrawn');
+CREATE TYPE user_role AS ENUM ('administrator', 'moderator', 'jury_president', 'jury_member');
+CREATE TYPE gender AS ENUM ('male', 'female', 'other');
+CREATE TYPE photo_type AS ENUM ('profile', 'creation');
+CREATE TYPE jury_role AS ENUM ('member', 'president');
+CREATE TYPE candidate_assignment_status AS ENUM ('pending', 'in_progress', 'completed', 'skipped');
+CREATE TYPE score_status AS ENUM ('pending', 'submitted', 'validated');
+CREATE TYPE vote_operator AS ENUM ('mtn', 'moov', 'celtis', 'demo');
+CREATE TYPE result_status AS ENUM ('pending', 'finalized', 'published');
+CREATE TYPE certificate_status AS ENUM ('draft', 'pending_signature', 'signed', 'revoked');
+CREATE TYPE signature_type AS ENUM ('director', 'jury_president', 'moderator');
+CREATE TYPE notification_type AS ENUM ('info', 'warning', 'success', 'error');
+CREATE TYPE setting_type AS ENUM ('string', 'numeric', 'boolean', 'json');
+CREATE TYPE special_status AS ENUM ('closed', 'reopened');
+
+-- 1. PROFILES (extends auth.users)
+CREATE TABLE profiles (
+    id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    email varchar(255) UNIQUE NOT NULL,
+    full_name varchar(255),
+    avatar_url text,
+    phone varchar(20),
+    role user_role NOT NULL DEFAULT 'jury_member',
+    is_active boolean DEFAULT true,
+    last_login timestamp,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now()
+);
+
+CREATE INDEX idx_profiles_email ON profiles(email);
+CREATE INDEX idx_profiles_role ON profiles(role);
+CREATE INDEX idx_profiles_is_active ON profiles(is_active);
+
+-- 2. COMPETITIONS
+CREATE TABLE competitions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    name varchar(255) NOT NULL,
+    description text,
+    start_date timestamp,
+    end_date timestamp,
+    status competition_status DEFAULT 'planning',
+    logo_url text,
+    rules_document_url text,
+    max_candidates integer,
+    is_active boolean DEFAULT true,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    created_by uuid NOT NULL REFERENCES profiles(id)
+);
+
+CREATE INDEX idx_competitions_status ON competitions(status);
+CREATE INDEX idx_competitions_is_active ON competitions(is_active);
+
+-- 3. SYSTEM_SETTINGS
+CREATE TABLE system_settings (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    competition_id uuid NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    setting_key varchar(255) NOT NULL,
+    setting_value text NOT NULL,
+    setting_type setting_type NOT NULL,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    UNIQUE(competition_id, setting_key)
+);
+
+-- 4. COMPETITION_STATUS_LOGS
+CREATE TABLE competition_status_logs (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    competition_id uuid NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    old_status competition_status,
+    new_status competition_status NOT NULL,
+    reason text,
+    changed_by uuid NOT NULL REFERENCES profiles(id),
+    changed_at timestamp DEFAULT now(),
+    created_at timestamp DEFAULT now()
+);
+
+CREATE INDEX idx_competition_status_logs_competition ON competition_status_logs(competition_id, changed_at);
+
+-- 5. STEPS
+CREATE TABLE steps (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    competition_id uuid NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    name varchar(255) NOT NULL,
+    description text,
+    step_order integer NOT NULL,
+    percentage numeric(5,2) NOT NULL CHECK (percentage >= 0 AND percentage <= 100),
+    start_date timestamp,
+    end_date timestamp,
+    status step_status DEFAULT 'draft',
+    allows_dynamic_form boolean DEFAULT false,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    UNIQUE(competition_id, step_order)
+);
+
+CREATE INDEX idx_steps_competition ON steps(competition_id, step_order);
+CREATE INDEX idx_steps_status ON steps(status);
+
+-- 6. CRITERIA
+CREATE TABLE criteria (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    step_id uuid NOT NULL REFERENCES steps(id) ON DELETE CASCADE,
+    name varchar(255) NOT NULL,
+    description text,
+    weight numeric(3,2) NOT NULL CHECK (weight >= 0 AND weight <= 1),
+    min_score numeric NOT NULL,
+    max_score numeric NOT NULL,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    CHECK (min_score < max_score)
+);
+
+CREATE INDEX idx_criteria_step ON criteria(step_id);
+
+-- 7. FORMS
+CREATE TABLE forms (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    step_id uuid NOT NULL REFERENCES steps(id) ON DELETE CASCADE,
+    name varchar(255) NOT NULL,
+    description text,
+    form_type form_type NOT NULL,
+    is_active boolean DEFAULT true,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now()
+);
+
+CREATE INDEX idx_forms_step ON forms(step_id);
+
+-- 8. FORM_FIELDS
+CREATE TABLE form_fields (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    form_id uuid NOT NULL REFERENCES forms(id) ON DELETE CASCADE,
+    field_name varchar(255) NOT NULL,
+    field_type field_type NOT NULL,
+    field_order integer NOT NULL,
+    is_required boolean DEFAULT false,
+    min_value numeric,
+    max_value numeric,
+    description text,
+    placeholder varchar(255),
+    created_at timestamp DEFAULT now(),
+    UNIQUE(form_id, field_order)
+);
+
+CREATE INDEX idx_form_fields_form ON form_fields(form_id, field_order);
+
+-- 9. FIELD_OPTIONS
+CREATE TABLE field_options (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    form_field_id uuid NOT NULL REFERENCES form_fields(id) ON DELETE CASCADE,
+    option_label varchar(255) NOT NULL,
+    option_value varchar(255) NOT NULL,
+    option_order integer NOT NULL,
+    created_at timestamp DEFAULT now(),
+    UNIQUE(form_field_id, option_order)
+);
+
+-- 10. CANDIDATES
+CREATE TABLE candidates (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    competition_id uuid NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    first_name varchar(255) NOT NULL,
+    last_name varchar(255) NOT NULL,
+    email varchar(255),
+    phone varchar(20),
+    unique_code varchar(50) NOT NULL,
+    gender gender NOT NULL,
+    category varchar(100) NOT NULL,
+    workshop_name varchar(255) NOT NULL,
+    commune varchar(255),
+    registration_date timestamp DEFAULT now(),
+    status candidate_status DEFAULT 'registered',
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    UNIQUE(competition_id, unique_code)
+);
+
+CREATE INDEX idx_candidates_competition ON candidates(competition_id);
+CREATE INDEX idx_candidates_gender_category ON candidates(gender, category);
+CREATE INDEX idx_candidates_unique_code ON candidates(competition_id, unique_code);
+
+-- 11. CANDIDATE_PHOTOS
+CREATE TABLE candidate_photos (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    candidate_id uuid NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+    photo_type photo_type NOT NULL,
+    storage_path text NOT NULL,
+    file_size integer,
+    mime_type varchar(50),
+    uploaded_at timestamp DEFAULT now(),
+    is_approved boolean DEFAULT false
+);
+
+CREATE INDEX idx_candidate_photos_candidate ON candidate_photos(candidate_id, photo_type);
+
+-- 12. JURY_GROUPS
+CREATE TABLE jury_groups (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    competition_id uuid NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    president_id uuid REFERENCES profiles(id) ON DELETE SET NULL,
+    name varchar(255) NOT NULL,
+    description text,
+    group_order integer NOT NULL,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    UNIQUE(competition_id, group_order)
+);
+
+CREATE INDEX idx_jury_groups_competition ON jury_groups(competition_id);
+CREATE INDEX idx_jury_groups_president ON jury_groups(president_id);
+
+-- 13. JURY_GROUP_MEMBERS
+CREATE TABLE jury_group_members (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    jury_group_id uuid NOT NULL REFERENCES jury_groups(id) ON DELETE CASCADE,
+    profile_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    role jury_role NOT NULL DEFAULT 'member',
+    join_date timestamp DEFAULT now(),
+    is_active boolean DEFAULT true,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    UNIQUE(jury_group_id, profile_id)
+);
+
+CREATE INDEX idx_jury_group_members_group ON jury_group_members(jury_group_id);
+CREATE INDEX idx_jury_group_members_profile ON jury_group_members(profile_id);
+CREATE INDEX idx_jury_group_members_role ON jury_group_members(jury_group_id, role);
+
+-- 14. JURY_GROUP_STEPS
+CREATE TABLE jury_group_steps (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    jury_group_id uuid NOT NULL REFERENCES jury_groups(id) ON DELETE CASCADE,
+    step_id uuid NOT NULL REFERENCES steps(id) ON DELETE CASCADE,
+    assignment_date timestamp DEFAULT now(),
+    created_at timestamp DEFAULT now(),
+    UNIQUE(jury_group_id, step_id)
+);
+
+CREATE INDEX idx_jury_group_steps_group ON jury_group_steps(jury_group_id);
+CREATE INDEX idx_jury_group_steps_step ON jury_group_steps(step_id);
+
+-- 15. CANDIDATE_ASSIGNMENTS
+CREATE TABLE candidate_assignments (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    candidate_id uuid NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+    step_id uuid NOT NULL REFERENCES steps(id) ON DELETE CASCADE,
+    jury_group_id uuid NOT NULL REFERENCES jury_groups(id) ON DELETE CASCADE,
+    passage_order integer NOT NULL,
+    assigned_date timestamp DEFAULT now(),
+    status candidate_assignment_status DEFAULT 'pending',
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    UNIQUE(candidate_id, step_id, jury_group_id)
+);
+
+CREATE INDEX idx_candidate_assignments_candidate ON candidate_assignments(candidate_id);
+CREATE INDEX idx_candidate_assignments_step_group ON candidate_assignments(step_id, jury_group_id);
+CREATE INDEX idx_candidate_assignments_passage ON candidate_assignments(jury_group_id, passage_order);
+
+-- 16. FORM_RESPONSES
+CREATE TABLE form_responses (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    form_id uuid NOT NULL REFERENCES forms(id) ON DELETE CASCADE,
+    candidate_assignment_id uuid NOT NULL REFERENCES candidate_assignments(id) ON DELETE CASCADE,
+    submitted_by uuid NOT NULL REFERENCES profiles(id),
+    submitted_at timestamp DEFAULT now(),
+    is_completed boolean DEFAULT false,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now()
+);
+
+CREATE INDEX idx_form_responses_form ON form_responses(form_id);
+CREATE INDEX idx_form_responses_assignment ON form_responses(candidate_assignment_id);
+
+-- 17. FORM_RESPONSE_VALUES
+CREATE TABLE form_response_values (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    form_response_id uuid NOT NULL REFERENCES form_responses(id) ON DELETE CASCADE,
+    form_field_id uuid NOT NULL REFERENCES form_fields(id) ON DELETE CASCADE,
+    field_option_id uuid REFERENCES field_options(id) ON DELETE SET NULL,
+    value text,
+    numeric_value numeric,
+    text_value text,
+    created_at timestamp DEFAULT now()
+);
+
+CREATE INDEX idx_form_response_values_response ON form_response_values(form_response_id);
+CREATE INDEX idx_form_response_values_field ON form_response_values(form_field_id);
+
+-- 18. CANDIDATE_SCORES
+CREATE TABLE candidate_scores (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    candidate_id uuid NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+    step_id uuid NOT NULL REFERENCES steps(id) ON DELETE CASCADE,
+    criterion_id uuid NOT NULL REFERENCES criteria(id) ON DELETE CASCADE,
+    submitted_by uuid NOT NULL REFERENCES profiles(id),
+    jury_group_id uuid NOT NULL REFERENCES jury_groups(id) ON DELETE CASCADE,
+    score numeric NOT NULL,
+    validated boolean DEFAULT false,
+    validated_at timestamp,
+    validated_by uuid REFERENCES profiles(id) ON DELETE SET NULL,
+    is_edited boolean DEFAULT false,
+    edited_at timestamp,
+    edited_by uuid REFERENCES profiles(id) ON DELETE SET NULL,
+    notes text,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    CHECK (score IS NOT NULL)
+);
+
+CREATE INDEX idx_candidate_scores_candidate ON candidate_scores(candidate_id);
+CREATE INDEX idx_candidate_scores_step_group ON candidate_scores(step_id, jury_group_id);
+CREATE INDEX idx_candidate_scores_submitted_by ON candidate_scores(submitted_by);
+CREATE INDEX idx_candidate_scores_validated ON candidate_scores(validated);
+
+-- 19. CANDIDATE_COMMENTS
+CREATE TABLE candidate_comments (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    candidate_id uuid NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+    step_id uuid NOT NULL REFERENCES steps(id) ON DELETE CASCADE,
+    submitted_by uuid NOT NULL REFERENCES profiles(id),
+    comment text NOT NULL,
+    is_visible_to_candidate boolean DEFAULT false,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now()
+);
+
+CREATE INDEX idx_candidate_comments_candidate ON candidate_comments(candidate_id, step_id);
+
+-- 20. CANDIDATE_SUGGESTIONS
+CREATE TABLE candidate_suggestions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    candidate_id uuid NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+    step_id uuid NOT NULL REFERENCES steps(id) ON DELETE CASCADE,
+    submitted_by uuid NOT NULL REFERENCES profiles(id),
+    suggestion text NOT NULL,
+    is_mandatory boolean DEFAULT false,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now()
+);
+
+CREATE INDEX idx_candidate_suggestions_candidate ON candidate_suggestions(candidate_id, step_id);
+
+-- 21. PUBLIC_VOTES
+CREATE TABLE public_votes (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    candidate_id uuid NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+    competition_id uuid NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    operator vote_operator NOT NULL DEFAULT 'demo',
+    transaction_reference varchar(255),
+    phone_number varchar(20),
+    amount numeric,
+    vote_date timestamp DEFAULT now(),
+    is_verified boolean DEFAULT false,
+    created_at timestamp DEFAULT now(),
+    UNIQUE(candidate_id, transaction_reference)
+);
+
+CREATE INDEX idx_public_votes_candidate ON public_votes(candidate_id);
+CREATE INDEX idx_public_votes_operator ON public_votes(operator);
+CREATE INDEX idx_public_votes_verified ON public_votes(is_verified);
+
+-- 22. COMPETITION_RESULTS
+CREATE TABLE competition_results (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    competition_id uuid NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    candidate_id uuid NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+    jury_score numeric,
+    public_score numeric,
+    final_score numeric,
+    gender_rank integer,
+    overall_rank integer,
+    status result_status DEFAULT 'pending',
+    finalized_at timestamp,
+    published_at timestamp,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    UNIQUE(competition_id, candidate_id)
+);
+
+CREATE INDEX idx_competition_results_competition ON competition_results(competition_id, status);
+CREATE INDEX idx_competition_results_gender_rank ON competition_results(gender_rank);
+
+-- 23. SPECIAL_AWARDS
+CREATE TABLE special_awards (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    competition_id uuid NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    name varchar(255) NOT NULL,
+    description text,
+    award_order integer NOT NULL,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    UNIQUE(competition_id, award_order)
+);
+
+CREATE INDEX idx_special_awards_competition ON special_awards(competition_id);
+
+-- 24. CERTIFICATE_TYPES
+CREATE TABLE certificate_types (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    competition_id uuid NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    name varchar(255) NOT NULL,
+    description text,
+    is_active boolean DEFAULT true,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    UNIQUE(competition_id, name)
+);
+
+-- 25. CERTIFICATE_TEMPLATES
+CREATE TABLE certificate_templates (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    certificate_type_id uuid NOT NULL REFERENCES certificate_types(id) ON DELETE CASCADE,
+    template_name varchar(255) NOT NULL,
+    template_content text NOT NULL,
+    design_url text,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now()
+);
+
+CREATE INDEX idx_certificate_templates_type ON certificate_templates(certificate_type_id);
+
+-- 26. CERTIFICATES
+CREATE TABLE certificates (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    candidate_id uuid NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+    competition_id uuid NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    certificate_template_id uuid NOT NULL REFERENCES certificate_templates(id),
+    special_award_id uuid REFERENCES special_awards(id) ON DELETE SET NULL,
+    certificate_number varchar(50) UNIQUE NOT NULL,
+    status certificate_status DEFAULT 'draft',
+    issue_date timestamp,
+    pdf_url text,
+    is_locked boolean DEFAULT false,
+    locked_at timestamp,
+    locked_by uuid REFERENCES profiles(id) ON DELETE SET NULL,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now()
+);
+
+CREATE INDEX idx_certificates_candidate ON certificates(candidate_id);
+CREATE INDEX idx_certificates_competition ON certificates(competition_id);
+CREATE INDEX idx_certificates_number ON certificates(certificate_number);
+CREATE INDEX idx_certificates_status ON certificates(status);
+
+-- 27. SIGNATURES
+CREATE TABLE signatures (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    certificate_id uuid NOT NULL REFERENCES certificates(id) ON DELETE CASCADE,
+    signer_id uuid NOT NULL REFERENCES profiles(id),
+    signature_type signature_type NOT NULL,
+    signature_data text NOT NULL,
+    signed_at timestamp DEFAULT now(),
+    created_at timestamp DEFAULT now(),
+    UNIQUE(certificate_id, signature_type)
+);
+
+CREATE INDEX idx_signatures_certificate ON signatures(certificate_id);
+
+-- 28. OFFICIAL_STAMPS
+CREATE TABLE official_stamps (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    certificate_id uuid NOT NULL REFERENCES certificates(id) ON DELETE CASCADE,
+    stamp_image_url text NOT NULL,
+    stamp_applied_at timestamp DEFAULT now(),
+    created_at timestamp DEFAULT now()
+);
+
+CREATE INDEX idx_official_stamps_certificate ON official_stamps(certificate_id);
+
+-- 29. NOTIFICATIONS
+CREATE TABLE notifications (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    recipient_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    competition_id uuid REFERENCES competitions(id) ON DELETE SET NULL,
+    notification_type notification_type NOT NULL,
+    subject varchar(255) NOT NULL,
+    message text NOT NULL,
+    action_url text,
+    is_read boolean DEFAULT false,
+    read_at timestamp,
+    created_at timestamp DEFAULT now()
+);
+
+CREATE INDEX idx_notifications_recipient ON notifications(recipient_id, is_read);
+CREATE INDEX idx_notifications_created ON notifications(created_at DESC);
+
+-- 30. AUDIT_LOGS
+CREATE TABLE audit_logs (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    actor_id uuid NOT NULL REFERENCES profiles(id),
+    competition_id uuid REFERENCES competitions(id) ON DELETE SET NULL,
+    action varchar(255) NOT NULL,
+    resource_type varchar(100) NOT NULL,
+    resource_id uuid NOT NULL,
+    changes jsonb,
+    ip_address inet,
+    user_agent text,
+    created_at timestamp DEFAULT now()
+);
+
+CREATE INDEX idx_audit_logs_actor ON audit_logs(actor_id, created_at DESC);
+CREATE INDEX idx_audit_logs_resource ON audit_logs(resource_type, resource_id);
+CREATE INDEX idx_audit_logs_competition ON audit_logs(competition_id, created_at DESC);
+CREATE INDEX idx_audit_logs_created ON audit_logs(created_at DESC);
+
+-- 31. DASHBOARD_CACHE
+CREATE TABLE dashboard_cache (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    competition_id uuid NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    created_by uuid NOT NULL REFERENCES profiles(id),
+    cache_key varchar(255) NOT NULL,
+    cache_data jsonb NOT NULL,
+    expires_at timestamp NOT NULL,
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    UNIQUE(competition_id, cache_key)
+);
+
+CREATE INDEX idx_dashboard_cache_competition ON dashboard_cache(competition_id, expires_at);
+CREATE INDEX idx_dashboard_cache_expires ON dashboard_cache(expires_at);
+
+-- 32. STEP_CLOSURES
+CREATE TABLE step_closures (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    step_id uuid NOT NULL REFERENCES steps(id) ON DELETE CASCADE,
+    group_id uuid NOT NULL REFERENCES jury_groups(id) ON DELETE CASCADE,
+    closed_by uuid NOT NULL REFERENCES profiles(id),
+    closed_at timestamp DEFAULT now(),
+    final_status special_status DEFAULT 'closed',
+    reason text,
+    created_at timestamp DEFAULT now(),
+    UNIQUE(step_id, group_id)
+);
+
+CREATE INDEX idx_step_closures_step ON step_closures(step_id);
+CREATE INDEX idx_step_closures_group ON step_closures(group_id);
+
+-- Enable Row Level Security on all tables
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE competitions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE steps ENABLE ROW LEVEL SECURITY;
+ALTER TABLE criteria ENABLE ROW LEVEL SECURITY;
+ALTER TABLE forms ENABLE ROW LEVEL SECURITY;
+ALTER TABLE form_fields ENABLE ROW LEVEL SECURITY;
+ALTER TABLE field_options ENABLE ROW LEVEL SECURITY;
+ALTER TABLE candidates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE candidate_photos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE jury_groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE jury_group_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE jury_group_steps ENABLE ROW LEVEL SECURITY;
+ALTER TABLE candidate_assignments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE form_responses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE form_response_values ENABLE ROW LEVEL SECURITY;
+ALTER TABLE candidate_scores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE candidate_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE candidate_suggestions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public_votes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE competition_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE special_awards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE certificate_types ENABLE ROW LEVEL SECURITY;
+ALTER TABLE certificate_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE certificates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE signatures ENABLE ROW LEVEL SECURITY;
+ALTER TABLE official_stamps ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE system_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE competition_status_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE dashboard_cache ENABLE ROW LEVEL SECURITY;
+ALTER TABLE step_closures ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public_votes ENABLE ROW LEVEL SECURITY;

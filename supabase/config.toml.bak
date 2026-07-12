@@ -1,0 +1,196 @@
+# Supabase Project Configuration
+# Documentation: https://supabase.com/docs/guides/local-development/cli/config
+
+# Project Metadata
+project_id = "awac-mono"
+account_id = "awac-account"
+region = "eu-west-1"
+
+# Database Configuration
+[db]
+major_version = 15
+port = 5432
+
+# PostgreSQL Extensions
+[[db.extensions]]
+name = "uuid-ossp"
+schema = "public"
+
+[[db.extensions]]
+name = "pgcrypto"
+schema = "public"
+
+# Vector Extension (for future AI features)
+[[db.extensions]]
+name = "vector"
+schema = "public"
+
+# JWT Configuration
+[auth.jwt]
+# 36500 days = 100 years (for dev, use shorter in prod)
+exp = 36500
+aud = "authenticated"
+secret = "super-secret-jwt-token-change-in-production"
+
+# Auth Providers
+[auth.external.google]
+enabled = false
+
+[auth.external.github]
+enabled = false
+
+# Email Provider (for password recovery, invites)
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+double_confirm_changes = false
+secure_email_change_enabled = true
+autoconfirm_change_email = false
+
+# SMTP Configuration (for production)
+[auth.email.smtp]
+max_frequency = "15m"
+host = "smtp.resend.com"
+port = 465
+sender_name = "AWAC MONO"
+sender_email = "noreply@awac.local"
+
+# Session Configuration
+[auth.session]
+# 24 hours
+duration = 86400
+
+# Rate Limiting (Auth)
+[auth.rate_limit]
+anonymous_signup_session = "15/1m"
+verified_factor_signup_session = "15/1m"
+
+# API Configuration
+[api]
+# CORS settings
+allowed_origins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173"
+]
+
+# Request size limits
+max_request_size = "10mb"
+
+# Timeout
+request_timeout = "30s"
+
+# Database Limits
+[db]
+# Connection pool
+max_connections = 100
+min_connections = 10
+
+# Statement timeout (queries max execution time)
+statement_timeout = "30s"
+
+# Idle in transaction session timeout
+idle_in_transaction_session_timeout = "60s"
+
+# Vector Search (if using embeddings)
+[vector]
+enabled = false
+
+# Storage Configuration
+[storage]
+file_size_limit = 10737418240 # 10GB
+max_upload_size = 52428800 # 50MB
+
+# Storage buckets (created during setup)
+[[storage.buckets]]
+name = "candidates-photos"
+public = false
+file_size_limit = 5242880 # 5MB
+
+[[storage.buckets]]
+name = "competition-documents"
+public = true
+file_size_limit = 10485760 # 10MB
+
+[[storage.buckets]]
+name = "certificates"
+public = false
+file_size_limit = 2097152 # 2MB
+
+[[storage.buckets]]
+name = "templates"
+public = true
+file_size_limit = 1048576 # 1MB
+
+[[storage.buckets]]
+name = "audit-exports"
+public = false
+file_size_limit = 52428800 # 50MB
+
+# Real-time Configuration
+[realtime]
+enabled = true
+# Max connections
+max_connections = 200
+# Tenant id (JWT claim)
+tenant_id = "user_id"
+
+# Features
+features = [
+  "presence",
+  "broadcast",
+  "postgres_changes"
+]
+
+# Webhooks
+[webhook]
+# max_retries = 3
+# timeout_secs = 10
+
+# Edge Functions
+[edge_runtime]
+policy = "wasm"
+main_service_path = "functions"
+
+# Observability
+[logging]
+vector_enabled = false
+postgres_logs = true
+realtime_logs = true
+
+# Backup Configuration
+[backup]
+# Point-in-time recovery: 7, 14, or 30 days
+wal_retention_days = 7
+
+# Metrics & Monitoring
+[metrics]
+enabled = true
+
+# Performance Insights
+[performance_insights]
+enabled = true
+
+# Development Settings
+[dev]
+# Restart after file changes
+detect_schema_changes = true
+
+# Seed on restart
+reset_on_restart = false
+
+# Show docs on startup
+show_docs_on_startup = false
+
+# Links
+[links]
+docs = "https://supabase.com/docs"
+discord = "https://discord.supabase.com"
+github_discussions = "https://github.com/supabase/supabase/discussions"
+
+# Project URLs
+[urls]
+# These are set automatically after project creation
+api = "https://pmnrmgopsvdnghxotdmc.supabase.co"
+anon_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+service_role_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
