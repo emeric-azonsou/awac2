@@ -4,9 +4,13 @@ import { createClient } from '@supabase/supabase-js'
 // ============================================================
 // CONFIGURATION
 // ============================================================
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://pmnrmgopsvdnghxotdmc.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtbnJtZ29wc3ZkbmdoeG90ZG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5NDU3NDUsImV4cCI6MjA5ODUyMTc0NX0.3a67JvcZhkdsBH5Q3JWDQ698Uh7RVF6DW3V53ReZoTY'
-const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtbnJtZ29wc3ZkbmdoeG90ZG1jIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Mjk0NTc0NSwiZXhwIjoyMDk4NTIxNzQ1fQ._p0e5rT8YqtVDUkArQVLaR5DoLol8gtrkOL8RXvVsz0'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY doivent être définies (.env)')
+}
 
 // ============================================================
 // CLIENTS
