@@ -47,7 +47,11 @@
           ]"
           :style="{ transitionDelay: isVisible ? `${0.1 + index * 0.08}s` : '0s' }"
         >
-          <div class="relative w-full h-[380px] overflow-hidden bg-gray-50">
+          <router-link
+            :to="`/candidat/${candidat.id}`"
+            class="relative block w-full h-[380px] overflow-hidden bg-gray-50"
+            :aria-label="`Voir les réalisations de ${candidat.full_name}`"
+          >
             <img
               :src="candidat.profile_photo_url || defaultPhoto"
               :alt="candidat.full_name"
@@ -62,13 +66,18 @@
             >
               N<sup>o</sup> {{ formatBadgeNumber(index) }}
             </div>
-          </div>
+          </router-link>
 
           <div class="p-6 space-y-5 bg-white relative">
             <div class="flex justify-between items-end">
               <div class="space-y-0.5">
                 <h3 class="text-gray-900 font-heading font-black text-lg uppercase tracking-wide">
-                  {{ candidat.full_name }}
+                  <router-link
+                    :to="`/candidat/${candidat.id}`"
+                    class="hover:text-awac-primary transition-colors duration-300"
+                  >
+                    {{ candidat.full_name }}
+                  </router-link>
                 </h3>
 
                 <p class="text-gray-500 font-sans font-medium text-xs tracking-wider uppercase">
@@ -102,165 +111,33 @@
       </div>
     </div>
 
-    <!-- ===== MODAL DE VOTE ===== -->
-    <div
-      v-if="showVoteModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-      @click.self="closeVoteModal"
-    >
-      <div class="bg-white/95 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6 animate-slide-up">
-        <div class="flex items-center justify-between mb-5">
-          <h3 class="text-lg font-heading font-black text-gray-900">
-            Voter pour <span class="text-awac-primary">{{ selectedCandidate?.full_name || '' }}</span>
-          </h3>
-          <button @click="closeVoteModal" class="p-1 rounded-lg hover:bg-gray-100 transition-colors">
-            <span class="material-icons">close</span>
-          </button>
-        </div>
-
-        <form @submit.prevent="submitVote" class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Opérateur mobile <span class="text-red-500">*</span></label>
-            <select
-              v-model="voteForm.operator"
-              required
-              class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm"
-            >
-              <option value="">Sélectionner</option>
-              <option value="mtn">MTN</option>
-              <option value="moov">MOOV</option>
-              <option value="celtis">CELTIS</option>
-              <option value="demo">Démo (simulation)</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Numéro de téléphone <span class="text-red-500">*</span></label>
-            <input
-              v-model="voteForm.phone_number"
-              type="tel"
-              required
-              class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm"
-              placeholder="+229 99 99 99 99"
-            />
-          </div>
-
-
- 
-
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Nombre de votes <span class="text-red-500">*</span></label>
-            <div class="flex items-center gap-3">
-              <button
-                type="button"
-                @click="voteForm.quantity = Math.max(1, voteForm.quantity - 1)"
-                class="w-10 h-10 rounded-xl border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors"
-              >
-                <span class="material-icons text-sm">remove</span>
-              </button>
-              <input
-                v-model.number="voteForm.quantity"
-                type="number"
-                min="1"
-                required
-                class="w-20 text-center px-3 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm font-bold"
-              />
-              <button
-                type="button"
-                @click="voteForm.quantity += 1"
-                class="w-10 h-10 rounded-xl border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors"
-              >
-                <span class="material-icons text-sm">add</span>
-              </button>
-              <span class="text-sm text-gray-500">× {{ unitPrice }} {{ currency }} = {{ formatPrix(voteForm.quantity) }} F</span>
-            </div>
-          </div>
-
-          <div class="flex flex-col-reverse sm:flex-row items-center gap-3 pt-2">
-            <button
-              type="button"
-              @click="closeVoteModal"
-              class="w-full sm:w-auto px-5 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              class="w-full sm:w-auto flex-1 px-5 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primary/90 transition-colors shadow-sm text-sm flex items-center justify-center gap-2 disabled:opacity-70"
-              :disabled="submitting"
-            >
-              <span v-if="submitting" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
-              {{ submitting ? 'Envoi...' : 'Confirmer le vote' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- ===== MODAL DE REMERCIEMENT ===== -->
-    <div
-      v-if="showThanksModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-      @click.self="showThanksModal = false"
-    >
-      <div class="bg-white/95 backdrop-blur-xl rounded-3xl border border-green-500/30 shadow-2xl w-full max-w-sm p-8 text-center animate-slide-up">
-        <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5">
-          <span class="material-icons text-4xl text-green-500">check_circle</span>
-        </div>
-        <h3 class="text-2xl font-heading font-black text-gray-900 mb-2">
-          Merci pour votre vote !
-        </h3>
-        <p class="text-sm text-gray-600 mb-6">
-          Chaque voix compte. Continuez à voter pour pousser votre candidat favori vers la victoire !
-        </p>
-        <button
-          @click="showThanksModal = false"
-          class="px-6 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primary/90 transition-colors"
-        >
-          Continuer
-        </button>
-      </div>
-    </div>
+    <VoteModal
+      :candidate="selectedCandidate"
+      :unit-price="unitPrice"
+      :currency="currency"
+      @close="selectedCandidate = null"
+      @voted="onVoted"
+    />
   </section>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { voteService } from '@/services/voteService'
+import { useVotePricing } from '@/composables/useVotePricing'
+import VoteModal from '@/components/VoteModal.vue'
 
 const sectionRef = ref(null)
 const isVisible = ref(false)
 const loading = ref(true)
 const error = ref('')
-const showVoteModal = ref(false)
-const showThanksModal = ref(false)
 const selectedCandidate = ref(null)
-const submitting = ref(false)
 
 const defaultPhoto = new URL('../assets/img/candidat/candidat.jpg', import.meta.url).href
 const candidats = ref([])
-const unitPrice = ref(100)
-const currency = ref('FCFA')
-
-const emptyVoteForm = () => ({
-  phone_number: '',
-  operator: '',
-  quantity: 1,
-})
-
-const voteForm = ref(emptyVoteForm())
+const { unitPrice, currency, loadVotePricing } = useVotePricing()
 
 const formatBadgeNumber = (index) => String(index + 1).padStart(2, '0')
-
-const loadVotePricing = async () => {
-  try {
-    const pricing = await voteService.getVotePricing()
-    unitPrice.value = pricing.vote_unit_price
-    currency.value = pricing.currency === 'XOF' ? 'FCFA' : pricing.currency
-  } catch (err) {
-    console.error('Erreur chargement prix du vote:', err)
-  }
-}
 
 const loadCandidates = async () => {
   loading.value = true
@@ -278,57 +155,14 @@ const loadCandidates = async () => {
 const openVoteModal = (candidat) => {
   if (!candidat) return
   selectedCandidate.value = candidat
-  voteForm.value = emptyVoteForm()
-  showVoteModal.value = true
 }
 
-const closeVoteModal = () => {
-  showVoteModal.value = false
-  selectedCandidate.value = null
-  voteForm.value = emptyVoteForm()
-}
-
-const submitVote = async () => {
-  const candidate = selectedCandidate.value
-  if (!candidate) {
-    alert('Aucun candidat sélectionné.')
-    return
+const onVoted = (result) => {
+  const updatedCandidate = candidats.value.find(c => c.id === selectedCandidate.value?.id)
+  if (updatedCandidate) {
+    updatedCandidate.vote_count = result.votes_after
+    candidats.value.sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0))
   }
-
-  if (!voteForm.value.phone_number?.trim() || !voteForm.value.operator) {
-    alert('Veuillez remplir tous les champs obligatoires.')
-    return
-  }
-
-  submitting.value = true
-  try {
-    const result = await voteService.submitVote({
-      candidateId: candidate.id,
-      quantity: voteForm.value.quantity,
-      paymentProvider: voteForm.value.operator,
-      voterPhone: voteForm.value.phone_number.trim(),
-    })
-
-    const updatedCandidate = candidats.value.find(c => c.id === candidate.id)
-    if (updatedCandidate) {
-      updatedCandidate.vote_count = result.votes_after
-      candidats.value.sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0))
-    }
-
-    closeVoteModal()
-    showThanksModal.value = true
-
-  } catch (err) {
-    console.error('Erreur lors du vote:', err)
-    alert('❌ Erreur : ' + (err.message || 'Impossible d\'enregistrer le vote'))
-  } finally {
-    submitting.value = false
-  }
-}
-
-const formatPrix = (quantite) => {
-  const total = (parseInt(quantite) || 0) * unitPrice.value
-  return new Intl.NumberFormat('fr-FR').format(total)
 }
 
 let observer = null
@@ -381,7 +215,5 @@ input[type='number'] { transition:all 0.2s ease; }
 input[type='number']:focus { color:#ef7952; }
 .group:hover .rank-badge { background:rgba(239,121,82,0.9) !important; border-color:rgba(239,121,82,0.3) !important; }
 .group:hover img { transform:scale(1.05); }
-@keyframes slideUp { from { transform:translateY(20px) scale(0.98); opacity:0; } to { transform:translateY(0) scale(1); opacity:1; } }
-.animate-slide-up { animation:slideUp 0.25s ease-out both; }
 @media (max-width:768px) { .card-visible { animation-duration:0.6s; } }
 </style>
