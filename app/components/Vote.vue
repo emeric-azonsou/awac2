@@ -85,19 +85,15 @@
                 </h3>
 
                 <p class="text-gray-500 font-sans font-medium text-xs tracking-wider uppercase">
-                  <span class="text-gray-900 font-heading font-black text-sm">{{
-                    candidat.vote_count || 0
-                  }}</span>
                   votes obtenus
                 </p>
               </div>
 
               <div
-                class="rank-medallion shrink-0 grid place-items-center w-12 h-12 rounded-full font-heading font-black text-xl leading-none ring-1 ring-black/5 select-none"
-                :aria-label="`Classement : ${index + 1}${index === 0 ? 'er' : 'e'}`"
+                class="rank-medallion shrink-0 grid place-items-center w-14 h-14 rounded-full font-heading font-black text-base leading-none ring-1 ring-black/5 select-none px-1"
+                :aria-label="`${candidat.vote_count || 0} votes obtenus`"
               >
-                <span v-if="index === 0" class="material-icons text-[22px] leading-none" aria-hidden="true">emoji_events</span>
-                <span v-else>{{ index + 1 }}</span>
+                {{ formatVotes(candidat.vote_count || 0) }}
               </div>
             </div>
 
@@ -151,6 +147,14 @@ const candidats = ref([])
 const { unitPrice, currency, loadVotePricing } = useVotePricing()
 
 const formatBadgeNumber = (index) => String(index + 1).padStart(2, '0')
+
+// Compte de votes compact pour tenir dans le médaillon (ex. 1250 -> 1,2k)
+const formatVotes = (count) => {
+  const value = Number(count) || 0
+  if (value >= 10000) return `${Math.round(value / 1000)}k`
+  if (value >= 1000) return `${(value / 1000).toFixed(1).replace('.', ',').replace(',0', '')}k`
+  return String(value)
+}
 
 const loadCandidates = async () => {
   loading.value = true
