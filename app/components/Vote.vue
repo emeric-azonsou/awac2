@@ -49,7 +49,7 @@
         >
           <router-link
             :to="`/candidat/${candidat.id}`"
-            class="relative block w-full h-[380px] overflow-hidden bg-gradient-to-b from-[#FBF7F4] via-[#F6EFEA] to-[#EFE6DF]"
+            class="relative block w-full h-[280px] overflow-hidden bg-gradient-to-b from-[#FBF7F4] via-[#F6EFEA] to-[#EFE6DF]"
             :aria-label="`Voir les réalisations de ${candidat.full_name}`"
           >
             <img
@@ -72,7 +72,7 @@
             </div>
           </router-link>
 
-          <div class="p-6 space-y-5 bg-white relative">
+          <div class="p-5 space-y-4 bg-white relative">
             <div class="flex justify-between items-end">
               <div class="space-y-0.5">
                 <h3 class="text-gray-900 font-heading font-black text-lg uppercase tracking-wide">
