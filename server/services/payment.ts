@@ -26,8 +26,11 @@ interface CacheEntry {
 const cacheByClient = new WeakMap<SebpayClient, Map<string, CacheEntry>>()
 
 async function cached<T>(sebpay: SebpayClient, key: string, loader: () => Promise<T>): Promise<T> {
-  const clientCache = cacheByClient.get(sebpay) ?? new Map<string, CacheEntry>()
-  cacheByClient.set(sebpay, clientCache)
+  let clientCache = cacheByClient.get(sebpay)
+  if (!clientCache) {
+    clientCache = new Map<string, CacheEntry>()
+    cacheByClient.set(sebpay, clientCache)
+  }
   const entry = clientCache.get(key)
   if (entry && Date.now() - entry.at < CACHE_TTL_MS) return entry.value as T
   const value = await loader()

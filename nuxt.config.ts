@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2026-07-13',
@@ -5,6 +7,24 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxtjs/supabase'],
   css: ['~/assets/css/tailwind.css'],
+  hooks: {
+    // Restaure l'enveloppe d'erreur historique { error: { code, message } }
+    // pour les throws inattendus sur /api/*, sans toucher au rendu d'erreur
+    // Nuxt des pages HTML : notre handler est prepended devant celui que
+    // Nuxt vient d'assigner (ci-dessus dans nitroConfig.errorHandler) et ne
+    // "handle" la réponse (via send()) que pour /api/* ; sinon il ne fait
+    // rien et la chaîne Nitro passe au handler par défaut de Nuxt.
+    'nitro:config': (nitroConfig) => {
+      const configuredHandlers = Array.isArray(nitroConfig.errorHandler)
+        ? nitroConfig.errorHandler
+        : [nitroConfig.errorHandler]
+      const existingHandlers = configuredHandlers.filter((handler): handler is string => Boolean(handler))
+      nitroConfig.errorHandler = [
+        fileURLToPath(new URL('./server/lib/apiErrorHandler.ts', import.meta.url)),
+        ...existingHandlers,
+      ]
+    },
+  },
   tailwindcss: { configPath: '~~/tailwind.config.ts' },
   supabase: {
     // pas de redirection auto pour l'instant (auth traitée en phase 3)
