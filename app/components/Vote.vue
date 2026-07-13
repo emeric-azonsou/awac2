@@ -49,15 +49,19 @@
         >
           <router-link
             :to="`/candidat/${candidat.id}`"
-            class="relative block w-full h-[380px] overflow-hidden bg-gray-50"
+            class="relative block w-full h-[380px] overflow-hidden bg-gradient-to-b from-[#FBF7F4] via-[#F6EFEA] to-[#EFE6DF]"
             :aria-label="`Voir les réalisations de ${candidat.full_name}`"
           >
             <img
               :src="candidat.profile_photo_url || defaultPhoto"
               :alt="candidat.full_name"
-              class="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-102"
+              class="w-full h-full object-cover object-top transition-transform duration-700"
               @error="(e) => e.target.src = defaultPhoto"
             />
+
+            <div
+              class="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white via-white/70 to-transparent"
+            ></div>
 
             <div
               class="absolute top-4 left-4 z-20 bg-black/40 backdrop-blur-md border border-white/20 text-white font-heading font-black text-[10px] tracking-widest px-3 py-1.5 rounded-full shadow-sm rank-badge"
@@ -88,11 +92,13 @@
                 </p>
               </div>
 
-              <span
-                class="font-heading font-black text-4xl text-awac-primary group-hover:text-awac-primary transition-colors duration-300 select-none"
+              <div
+                class="rank-medallion shrink-0 grid place-items-center w-12 h-12 rounded-full font-heading font-black text-xl leading-none ring-1 ring-black/5 select-none"
+                :aria-label="`Classement : ${index + 1}${index === 0 ? 'er' : 'e'}`"
               >
-                {{ index === 0 ? '🏆' :  + (index + 1) }}
-              </span>
+                <span v-if="index === 0" class="material-icons text-[22px] leading-none" aria-hidden="true">emoji_events</span>
+                <span v-else>{{ index + 1 }}</span>
+              </div>
             </div>
 
             <div class="h-[1px] w-full bg-gray-100"></div>
@@ -211,6 +217,13 @@ onBeforeUnmount(() => {
 .card-third .rank-badge { background: linear-gradient(135deg, #CD7F32, #B87333) !important; border-color: #CD7F32 !important; color: #1a1a1a !important; }
 .card-other { border-color: #e5e7eb !important; }
 .card-other .rank-badge { background: rgba(0,0,0,0.4) !important; border-color: rgba(255,255,255,0.2) !important; color: white !important; }
+
+/* Médaillon de classement — hérite des couleurs podium (or/argent/bronze) */
+.rank-medallion { background:#f3f4f6; color:#6b7280; transition: transform 0.3s cubic-bezier(0.22,1,0.36,1); }
+.card-first .rank-medallion { background:linear-gradient(135deg,#FFD700,#FFA500); color:#1a1a1a; box-shadow:0 6px 16px rgba(255,183,0,0.4); }
+.card-second .rank-medallion { background:linear-gradient(135deg,#DADADA,#B4B4B4); color:#1a1a1a; box-shadow:0 6px 16px rgba(160,160,160,0.32); }
+.card-third .rank-medallion { background:linear-gradient(135deg,#CD7F32,#B87333); color:#fff; box-shadow:0 6px 16px rgba(205,127,50,0.32); }
+.group:hover .rank-medallion { transform: scale(1.06) rotate(-3deg); }
 
 .card-first:hover { box-shadow: 0 0 50px rgba(255,215,0,0.25), 0 30px 60px rgba(0,0,0,0.08) !important; border-color: #FFD700 !important; }
 .card-second:hover { box-shadow: 0 0 35px rgba(192,192,192,0.2), 0 30px 60px rgba(0,0,0,0.08) !important; border-color: #C0C0C0 !important; }
