@@ -10,6 +10,14 @@ export default defineNuxtConfig({
     // pas de redirection auto pour l'instant (auth traitée en phase 3)
     redirect: false,
   },
+  typescript: {
+    strict: true,
+    tsConfig: {
+      compilerOptions: {
+        noUncheckedIndexedAccess: true,
+      },
+    },
+  },
   runtimeConfig: {
     // serveur-only (jamais dans le bundle client)
     databaseUrl: process.env.DATABASE_URL ?? '',
