@@ -41,7 +41,7 @@
             class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm disabled:opacity-60"
           >
             <option value="">{{ metaLoading ? 'Chargement…' : 'Sélectionner' }}</option>
-            <option v-for="operator in operators" :key="operator.slug" :value="operator.slug">
+            <option v-for="operator in operators" :key="operator.slug" :value="operator.code || operator.slug">
               {{ operator.name }}
             </option>
           </select>
@@ -56,7 +56,7 @@
               type="tel"
               required
               class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm"
-              placeholder="97 00 00 00"
+              placeholder="01 97 00 00 00"
             />
           </div>
         </div>
@@ -167,10 +167,10 @@ const formattedTotal = computed(() => {
   return new Intl.NumberFormat('fr-FR').format(total)
 })
 
-const selectedPrefix = computed(() => {
-  const country = countries.value.find((entry) => entry.country_code === form.value.country)
-  return country?.prefix || ''
-})
+const selectedCountry = computed(() =>
+  countries.value.find((entry) => entry.country_code === form.value.country),
+)
+const selectedPrefix = computed(() => selectedCountry.value?.prefix || '')
 
 const loadCountries = async () => {
   metaLoading.value = true
@@ -194,7 +194,7 @@ const loadOperators = async () => {
   try {
     const { operators: list } = await voteService.getOperators(form.value.country)
     operators.value = list
-    if (list.length === 1) form.value.operator = list[0].slug
+    if (list.length === 1) form.value.operator = list[0].code || list[0].slug
   } catch (err) {
     console.error('Erreur chargement opérateurs:', err)
     operators.value = []
@@ -253,6 +253,7 @@ const submitVote = async () => {
       operator: form.value.operator,
       voterPhone: `${selectedPrefix.value}${form.value.phone_number.trim()}`,
       country: form.value.country,
+      currency: selectedCountry.value?.currency?.code,
     })
 
     if (result.provider_link) window.open(result.provider_link, '_blank', 'noopener')

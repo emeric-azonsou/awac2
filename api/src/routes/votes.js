@@ -46,7 +46,10 @@ router.post('/', async (c) => {
   const voteCount = candidateRows[0].vote_count
 
   const settingsRows = await db`SELECT vote_unit_price, currency FROM settings WHERE id = 1`
-  const { vote_unit_price: unitPrice, currency } = settingsRows[0]
+  const { vote_unit_price: unitPrice, currency: defaultCurrency } = settingsRows[0]
+  // Devise du pays choisi (SebPay exige la cohérence pays/devise). Repli : devise des réglages.
+  const requestedCurrency = typeof body.currency === 'string' ? body.currency.trim().toUpperCase() : ''
+  const currency = /^[A-Z]{3}$/.test(requestedCurrency) ? requestedCurrency : defaultCurrency
   const totalAmount = Number(unitPrice) * quantity
   const receiptCode = generateReceiptCode()
 
