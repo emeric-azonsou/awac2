@@ -76,6 +76,7 @@ describe('submitVote — mode simulé', () => {
     expect(res.status).toBe(201)
     expect((res.body as { payment_status: string }).payment_status).toBe('confirmed')
     expect((res.body as { receipt_code: string }).receipt_code).toMatch(/^AWAC-/)
+    expect((res.body as { votes_after: number }).votes_after).toBe(13)
     expect(db._state.voteCount).toBe(13)
   })
 })

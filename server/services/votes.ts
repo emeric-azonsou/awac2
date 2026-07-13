@@ -98,9 +98,11 @@ export async function submitVote(deps: VoteDeps, body: unknown): Promise<HttpRes
     RETURNING id, receipt_code`
 
   let paymentStatus = 'pending'
+  let votesAfter: number | null = null
   if (simulated) {
-    await confirmVote(db, receiptCode, null)
+    const confirmation = await confirmVote(db, receiptCode, null)
     paymentStatus = 'confirmed'
+    votesAfter = confirmation.votesAfter ?? null
   }
 
   return ok({
@@ -110,6 +112,7 @@ export async function submitVote(deps: VoteDeps, body: unknown): Promise<HttpRes
     provider_link: providerLink,
     amount: totalAmount,
     currency,
+    votes_after: votesAfter,
   }, 201)
 }
 
