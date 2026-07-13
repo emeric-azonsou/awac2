@@ -1,9 +1,18 @@
 import { Hono } from 'hono'
 
-// Liste de repli quand SebPay n'est pas configuré (dev sans clés) :
-// permet de voter en mode simulé.
+// Liste de repli quand SebPay n'est pas configuré (dev sans clés).
+// En production, la liste réelle vient de GET /countries de SebPay et remplace celle-ci.
+// Zone UEMOA : toutes ces devises sont le Franc CFA (XOF), donc prix de vote identique.
+const XOF = { code: 'XOF', name: 'Franc CFA (UEMOA)' }
 const FALLBACK_COUNTRIES = [
-  { country_code: 'BJ', country_name: 'Bénin', prefix: '+229', currency: { code: 'XOF', name: 'Franc CFA' } },
+  { country_code: 'BJ', country_name: 'Bénin', prefix: '+229', currency: XOF },
+  { country_code: 'TG', country_name: 'Togo', prefix: '+228', currency: XOF },
+  { country_code: 'CI', country_name: "Côte d'Ivoire", prefix: '+225', currency: XOF },
+  { country_code: 'SN', country_name: 'Sénégal', prefix: '+221', currency: XOF },
+  { country_code: 'BF', country_name: 'Burkina Faso', prefix: '+226', currency: XOF },
+  { country_code: 'ML', country_name: 'Mali', prefix: '+223', currency: XOF },
+  { country_code: 'NE', country_name: 'Niger', prefix: '+227', currency: XOF },
+  { country_code: 'GW', country_name: 'Guinée-Bissau', prefix: '+245', currency: XOF },
 ]
 const FALLBACK_OPERATORS = [
   { slug: 'demo', name: 'Démo (simulation)', otp_required: false },
