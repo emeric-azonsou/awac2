@@ -98,6 +98,14 @@
             <div class="h-[1px] w-full bg-gray-100"></div>
 
             <div class="flex flex-col gap-3 w-full">
+              <router-link
+                :to="`/candidat/${candidat.id}`"
+                class="w-full border border-gray-200 text-gray-700 font-heading font-bold text-[11px] tracking-widest uppercase py-3 rounded-xl transition-all duration-300 hover:border-awac-primary hover:text-awac-primary flex items-center justify-center gap-2 px-4 active:scale-[0.98]"
+              >
+                <span class="material-icons text-base shrink-0">photo_library</span>
+                <span class="font-heading font-black tracking-wider">Voir ses réalisations</span>
+              </router-link>
+
               <button
                 @click="openVoteModal(candidat)"
                 class="relative w-full overflow-hidden bg-awac-dark text-white font-heading font-bold text-[11px] tracking-widest uppercase py-3.5 rounded-xl shadow-sm transition-all duration-300 transform hover:-translate-y-0.5 isolation-auto z-10 before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-awac-primary before:to-awac-accent before:transition-opacity before:duration-300 hover:before:opacity-0 flex items-center justify-center gap-2 px-4 hover:shadow-lg active:scale-[0.98]"
