@@ -99,6 +99,14 @@
             <p class="text-gray-500 font-sans text-sm md:text-base leading-relaxed max-w-md mx-auto md:mx-0">
               Chaque vote de 100 F rapproche {{ firstName }} de la victoire aux Awards des Couturier·e·s du Mono.
             </p>
+
+            <button
+              @click="showVote = true"
+              class="relative overflow-hidden bg-gradient-to-r from-awac-primary to-awac-accent text-white font-heading font-black text-xs tracking-widest uppercase py-4 px-8 rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98] inline-flex items-center gap-2"
+            >
+              <span class="material-icons text-lg">how_to_vote</span>
+              Voter pour {{ firstName }}
+            </button>
           </div>
         </div>
       </section>
