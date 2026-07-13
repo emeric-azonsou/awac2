@@ -1,4 +1,13 @@
-export function errorResponse(c, status, code, message) {
+import type { Context } from 'hono'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
+
+export interface ErrorEntry {
+  status: ContentfulStatusCode
+  code: string
+  message: string
+}
+
+export function errorResponse(c: Context, status: ContentfulStatusCode, code: string, message: string) {
   return c.json({ error: { code, message } }, status)
 }
 
@@ -10,8 +19,8 @@ export const ERRORS = Object.freeze({
   VALIDATION: { status: 400, code: 'validation_error', message: 'Données invalides' },
   CONFLICT: { status: 409, code: 'conflict', message: 'Conflit' },
   LOCKED: { status: 409, code: 'locked', message: 'Ressource verrouillée' },
-})
+}) satisfies Record<string, ErrorEntry>
 
-export function sendError(c, entry, messageOverride) {
+export function sendError(c: Context, entry: ErrorEntry, messageOverride?: string) {
   return errorResponse(c, entry.status, entry.code, messageOverride ?? entry.message)
 }

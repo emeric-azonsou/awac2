@@ -11,11 +11,18 @@ const CAPTIONS = [
 
 const PHOTOS_PER_CANDIDATE = 4
 
-const sql = postgres(process.env.DATABASE_URL, { ssl: 'require' })
+const connectionString = process.env.DATABASE_URL
+if (!connectionString) {
+  console.error('DATABASE_URL manquant dans api/.env')
+  process.exit(1)
+}
+
+const sql = postgres(connectionString, { ssl: 'require' })
 
 const existing = await sql`SELECT count(*)::int AS count FROM candidate_photos`
-if (existing[0].count > 0) {
-  console.log(`candidate_photos non vide (${existing[0].count}) — seed ignoré`)
+const existingCount = existing[0]?.count ?? 0
+if (existingCount > 0) {
+  console.log(`candidate_photos non vide (${existingCount}) — seed ignoré`)
 } else {
   const candidates = await sql`SELECT id, full_name FROM candidates ORDER BY created_at`
   let inserted = 0
@@ -28,7 +35,7 @@ if (existing[0].count > 0) {
           ${candidate.id},
           ${`https://picsum.photos/seed/${photoSeed}/900/1100`},
           ${`demo/${photoSeed}.jpg`},
-          ${CAPTIONS[photoIndex % CAPTIONS.length]},
+          ${CAPTIONS[photoIndex % CAPTIONS.length] ?? ''},
           ${photoIndex + 1}
         )`
       inserted++

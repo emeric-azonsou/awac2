@@ -1,23 +1,24 @@
 import { Hono } from 'hono'
-import { sendError, ERRORS } from '../lib/errors.js'
-import { isUuid } from './candidates.js'
-import { verifyWebhookSignature } from '../lib/sebpay.js'
-import { confirmVote, rejectVote } from '../services/voteConfirmation.js'
+import type { AppEnv } from '../types'
+import { sendError, ERRORS, type ErrorEntry } from '../lib/errors.ts'
+import { isUuid } from './candidates.ts'
+import { verifyWebhookSignature } from '../lib/sebpay.ts'
+import { confirmVote, rejectVote } from '../services/voteConfirmation.ts'
 
 const MAX_QUANTITY_PER_VOTE = 1000000
 const DEFAULT_COUNTRY = 'BJ'
-const PAYMENT_ERROR = { status: 502, code: 'payment_error', message: 'Le paiement a échoué' }
+const PAYMENT_ERROR: ErrorEntry = { status: 502, code: 'payment_error', message: 'Le paiement a échoué' }
 
 function generateReceiptCode() {
   return `AWAC-${Date.now()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`
 }
 
 // SebPay attend un numéro international sans le « + ».
-function normalizePhone(phone) {
+function normalizePhone(phone: string): string {
   return phone.replace(/[^0-9]/g, '')
 }
 
-const router = new Hono()
+const router = new Hono<AppEnv>()
 
 router.post('/', async (c) => {
   const body = await c.req.json().catch(() => ({}))
@@ -42,11 +43,14 @@ router.post('/', async (c) => {
   const config = c.get('paymentConfig')
 
   const candidateRows = await db`SELECT id, vote_count FROM candidates WHERE id = ${candidateId}`
-  if (candidateRows.length === 0) return sendError(c, ERRORS.NOT_FOUND, 'Candidat introuvable')
-  const voteCount = candidateRows[0].vote_count
+  const candidate = candidateRows[0]
+  if (!candidate) return sendError(c, ERRORS.NOT_FOUND, 'Candidat introuvable')
+  const voteCount = candidate.vote_count
 
   const settingsRows = await db`SELECT vote_unit_price, currency FROM settings WHERE id = 1`
-  const { vote_unit_price: unitPrice, currency: defaultCurrency } = settingsRows[0]
+  const settings = settingsRows[0]
+  if (!settings) return sendError(c, ERRORS.NOT_FOUND, 'Réglages introuvables')
+  const { vote_unit_price: unitPrice, currency: defaultCurrency } = settings
   // Devise du pays choisi (SebPay exige la cohérence pays/devise). Repli : devise des réglages.
   const requestedCurrency = typeof body.currency === 'string' ? body.currency.trim().toUpperCase() : ''
   const currency = /^[A-Z]{3}$/.test(requestedCurrency) ? requestedCurrency : defaultCurrency
@@ -71,7 +75,7 @@ router.post('/', async (c) => {
       transactionId = collection.transaction_id ?? null
       providerLink = collection.provider_link ?? null
     } catch (err) {
-      return sendError(c, PAYMENT_ERROR, err.message)
+      return sendError(c, PAYMENT_ERROR, err instanceof Error ? err.message : undefined)
     }
   }
 
@@ -91,7 +95,7 @@ router.post('/', async (c) => {
   }
 
   return c.json({
-    id: inserted[0].id,
+    id: inserted[0]?.id,
     receipt_code: receiptCode,
     payment_status: paymentStatus,
     provider_link: providerLink,
@@ -107,19 +111,20 @@ router.get('/:id/status', async (c) => {
   const db = c.get('db')
   const sebpay = c.get('sebpay')
   const rows = await db`SELECT id, receipt_code, payment_status, votes_after FROM votes WHERE id = ${id}`
-  if (rows.length === 0) return sendError(c, ERRORS.NOT_FOUND, 'Vote introuvable')
+  const vote = rows[0]
+  if (!vote) return sendError(c, ERRORS.NOT_FOUND, 'Vote introuvable')
 
-  let { payment_status: paymentStatus, votes_after: votesAfter } = rows[0]
+  let { payment_status: paymentStatus, votes_after: votesAfter } = vote
 
   if (paymentStatus === 'pending' && sebpay) {
     try {
-      const collection = await sebpay.getCollection(rows[0].receipt_code)
+      const collection = await sebpay.getCollection(vote.receipt_code)
       if (collection.status === 'approved') {
-        const result = await confirmVote(db, rows[0].receipt_code, collection.transaction_id)
+        const result = await confirmVote(db, vote.receipt_code, collection.transaction_id)
         paymentStatus = result.status === 'not_found' ? paymentStatus : 'confirmed'
         votesAfter = result.votesAfter ?? votesAfter
       } else if (collection.status === 'rejected') {
-        await rejectVote(db, rows[0].receipt_code)
+        await rejectVote(db, vote.receipt_code)
         paymentStatus = 'rejected'
       }
     } catch {

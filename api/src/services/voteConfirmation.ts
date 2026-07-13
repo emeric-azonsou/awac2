@@ -1,11 +1,29 @@
 // Confirmation / rejet d'un vote après retour de paiement SebPay.
 // Point d'entrée unique partagé par le webhook et le polling de statut :
 // idempotent, transactionnel, le compteur candidat ne s'incrémente qu'une fois.
+import type { Db } from '../types'
 
-const TERMINAL_STATUSES = Object.freeze(['confirmed', 'rejected'])
+const TERMINAL_STATUSES = ['confirmed', 'rejected'] as const
 
-async function loadVoteForUpdate(tx, receiptCode) {
-  const rows = await tx`
+interface VoteRow {
+  receipt_code: string
+  candidate_id: string
+  quantity: number
+  payment_status: string
+  votes_before: number
+  votes_after: number
+}
+
+export interface VoteConfirmationResult {
+  status: string
+  alreadyProcessed?: boolean
+  votesAfter?: number
+}
+
+type Tx = Parameters<Parameters<Db['begin']>[1]>[0]
+
+async function loadVoteForUpdate(tx: Tx, receiptCode: string): Promise<VoteRow | null> {
+  const rows = await tx<VoteRow[]>`
     SELECT receipt_code, candidate_id, quantity, payment_status, votes_before, votes_after
     FROM votes
     WHERE receipt_code = ${receiptCode}
@@ -13,17 +31,25 @@ async function loadVoteForUpdate(tx, receiptCode) {
   return rows[0] ?? null
 }
 
-export async function confirmVote(db, receiptCode, transactionId) {
-  return db.begin(async (tx) => {
+function isTerminal(status: string): boolean {
+  return (TERMINAL_STATUSES as readonly string[]).includes(status)
+}
+
+export async function confirmVote(
+  db: Db,
+  receiptCode: string,
+  transactionId: string | null,
+): Promise<VoteConfirmationResult> {
+  return db.begin(async (tx): Promise<VoteConfirmationResult> => {
     const vote = await loadVoteForUpdate(tx, receiptCode)
     if (!vote) return { status: 'not_found' }
-    if (TERMINAL_STATUSES.includes(vote.payment_status)) {
+    if (isTerminal(vote.payment_status)) {
       return { status: vote.payment_status, alreadyProcessed: true }
     }
 
-    const candidateRows = await tx`
+    const candidateRows = await tx<{ vote_count: number }[]>`
       SELECT vote_count FROM candidates WHERE id = ${vote.candidate_id} FOR UPDATE`
-    const votesBefore = candidateRows[0].vote_count
+    const votesBefore = candidateRows[0]?.vote_count ?? vote.votes_before
     const votesAfter = votesBefore + vote.quantity
 
     await tx`UPDATE candidates SET vote_count = ${votesAfter}, updated_at = now() WHERE id = ${vote.candidate_id}`
@@ -36,18 +62,18 @@ export async function confirmVote(db, receiptCode, transactionId) {
       WHERE receipt_code = ${receiptCode}`
 
     return { status: 'confirmed', votesAfter }
-  })
+  }) as Promise<VoteConfirmationResult>
 }
 
-export async function rejectVote(db, receiptCode) {
-  return db.begin(async (tx) => {
+export async function rejectVote(db: Db, receiptCode: string): Promise<VoteConfirmationResult> {
+  return db.begin(async (tx): Promise<VoteConfirmationResult> => {
     const vote = await loadVoteForUpdate(tx, receiptCode)
     if (!vote) return { status: 'not_found' }
-    if (TERMINAL_STATUSES.includes(vote.payment_status)) {
+    if (isTerminal(vote.payment_status)) {
       return { status: vote.payment_status, alreadyProcessed: true }
     }
 
     await tx`UPDATE votes SET payment_status = ${'rejected'} WHERE receipt_code = ${receiptCode}`
     return { status: 'rejected' }
-  })
+  }) as Promise<VoteConfirmationResult>
 }

@@ -10,11 +10,18 @@ const CANDIDATES = [
   { full_name: 'Marcellin Todan', atelier: 'Style du Mono', commune: 'Houéyogbé' },
 ]
 
-const sql = postgres(process.env.DATABASE_URL, { ssl: 'require' })
+const connectionString = process.env.DATABASE_URL
+if (!connectionString) {
+  console.error('DATABASE_URL manquant dans api/.env')
+  process.exit(1)
+}
+
+const sql = postgres(connectionString, { ssl: 'require' })
 
 const existing = await sql`SELECT count(*)::int AS count FROM candidates`
-if (existing[0].count > 0) {
-  console.log(`candidates non vide (${existing[0].count}) — seed ignoré`)
+const existingCount = existing[0]?.count ?? 0
+if (existingCount > 0) {
+  console.log(`candidates non vide (${existingCount}) — seed ignoré`)
 } else {
   for (const candidate of CANDIDATES) {
     await sql`INSERT INTO candidates ${sql(candidate)}`

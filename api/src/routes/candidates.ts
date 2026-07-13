@@ -1,13 +1,14 @@
 import { Hono } from 'hono'
-import { sendError, ERRORS } from '../lib/errors.js'
+import type { AppEnv } from '../types'
+import { sendError, ERRORS } from '../lib/errors.ts'
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-export function isUuid(value) {
+export function isUuid(value: unknown): value is string {
   return typeof value === 'string' && UUID_PATTERN.test(value)
 }
 
-const router = new Hono()
+const router = new Hono<AppEnv>()
 
 router.get('/', async (c) => {
   const db = c.get('db')

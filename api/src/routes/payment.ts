@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import type { AppEnv } from '../types'
 
 // Liste de repli quand SebPay n'est pas configuré (dev sans clés).
 // En production, la liste réelle vient de GET /countries de SebPay et remplace celle-ci.
@@ -21,17 +22,21 @@ const FALLBACK_OPERATORS = [
 // Cache mémoire léger : les listes pays/opérateurs bougent rarement,
 // inutile de taper SebPay à chaque affichage du formulaire.
 const CACHE_TTL_MS = 60 * 60 * 1000
-const cache = new Map()
+interface CacheEntry {
+  value: unknown
+  at: number
+}
+const cache = new Map<string, CacheEntry>()
 
-async function cached(key, loader) {
+async function cached<T>(key: string, loader: () => Promise<T>): Promise<T> {
   const entry = cache.get(key)
-  if (entry && Date.now() - entry.at < CACHE_TTL_MS) return entry.value
+  if (entry && Date.now() - entry.at < CACHE_TTL_MS) return entry.value as T
   const value = await loader()
   cache.set(key, { value, at: Date.now() })
   return value
 }
 
-const router = new Hono()
+const router = new Hono<AppEnv>()
 
 router.get('/countries', async (c) => {
   const sebpay = c.get('sebpay')

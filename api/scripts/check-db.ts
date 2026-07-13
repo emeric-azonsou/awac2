@@ -16,7 +16,7 @@ try {
   console.log(`Connecté à Neon. ${tables.length} tables :`)
   console.log(tables.map((t) => t.table_name).join(', '))
 } catch (err) {
-  console.error('Échec connexion Neon :', err.message)
+  console.error('Échec connexion Neon :', err instanceof Error ? err.message : err)
   process.exit(1)
 } finally {
   await sql.end()

@@ -1,14 +1,15 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { getDb } from './db.js'
-import { createSebpayFromEnv } from './lib/sebpay.js'
-import candidatesRouter from './routes/candidates.js'
-import votesRouter from './routes/votes.js'
-import settingsRouter from './routes/settings.js'
-import paymentRouter from './routes/payment.js'
+import type { AppEnv } from './types'
+import { getDb } from './db.ts'
+import { createSebpayFromEnv } from './lib/sebpay.ts'
+import candidatesRouter from './routes/candidates.ts'
+import votesRouter from './routes/votes.ts'
+import settingsRouter from './routes/settings.ts'
+import paymentRouter from './routes/payment.ts'
 
 export function createApp({ withDb = true } = {}) {
-  const app = new Hono()
+  const app = new Hono<AppEnv>()
 
   app.use('*', cors())
 
