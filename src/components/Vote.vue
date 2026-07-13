@@ -120,38 +120,6 @@
 
         <form @submit.prevent="submitVote" class="space-y-4">
           <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Nom <span class="text-red-500">*</span></label>
-            <input
-              v-model="voteForm.last_name"
-              type="text"
-              required
-              class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm"
-              placeholder="Votre nom"
-            />
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Prénom <span class="text-red-500">*</span></label>
-            <input
-              v-model="voteForm.first_name"
-              type="text"
-              required
-              class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm"
-              placeholder="Votre prénom"
-            />
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Email <span class="text-gray-400">(optionnel)</span></label>
-            <input
-              v-model="voteForm.email"
-              type="email"
-              class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm"
-              placeholder="votre@email.com"
-            />
-          </div>
-
-          <div>
             <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Opérateur mobile <span class="text-red-500">*</span></label>
             <select
               v-model="voteForm.operator"
@@ -274,14 +242,13 @@ const candidats = ref([])
 const unitPrice = ref(100)
 const currency = ref('FCFA')
 
-const voteForm = ref({
-  first_name: '',
-  last_name: '',
-  email: '',
+const emptyVoteForm = () => ({
   phone_number: '',
   operator: '',
   quantity: 1,
 })
+
+const voteForm = ref(emptyVoteForm())
 
 const formatBadgeNumber = (index) => String(index + 1).padStart(2, '0')
 
@@ -311,28 +278,14 @@ const loadCandidates = async () => {
 const openVoteModal = (candidat) => {
   if (!candidat) return
   selectedCandidate.value = candidat
-  voteForm.value = {
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone_number: '',
-    operator: '',
-    quantity: 1,
-  }
+  voteForm.value = emptyVoteForm()
   showVoteModal.value = true
 }
 
 const closeVoteModal = () => {
   showVoteModal.value = false
   selectedCandidate.value = null
-  voteForm.value = {
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone_number: '',
-    operator: '',
-    quantity: 1,
-  }
+  voteForm.value = emptyVoteForm()
 }
 
 const submitVote = async () => {
@@ -342,10 +295,7 @@ const submitVote = async () => {
     return
   }
 
-  if (!voteForm.value.first_name?.trim() || 
-      !voteForm.value.last_name?.trim() || 
-      !voteForm.value.phone_number?.trim() || 
-      !voteForm.value.operator) {
+  if (!voteForm.value.phone_number?.trim() || !voteForm.value.operator) {
     alert('Veuillez remplir tous les champs obligatoires.')
     return
   }
