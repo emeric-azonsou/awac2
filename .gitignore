@@ -41,3 +41,8 @@ __screenshots__/
 .env
 .vercel
 .gstack/
+
+# Nuxt
+.nuxt
+.output
+.data
