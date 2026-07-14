@@ -314,26 +314,12 @@ onBeforeUnmount(() => {
   color: white !important;
 }
 
-/* Médaillon de classement — hérite des couleurs podium (or/argent/bronze) */
+/* Médaillon du compteur de votes — même couleur or sur toutes les cartes */
 .rank-medallion {
-  background: #f3f4f6;
-  color: #6b7280;
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.card-first .rank-medallion {
   background: linear-gradient(135deg, #ffd700, #ffa500);
   color: #1a1a1a;
   box-shadow: 0 6px 16px rgba(255, 183, 0, 0.4);
-}
-.card-second .rank-medallion {
-  background: linear-gradient(135deg, #dadada, #b4b4b4);
-  color: #1a1a1a;
-  box-shadow: 0 6px 16px rgba(160, 160, 160, 0.32);
-}
-.card-third .rank-medallion {
-  background: linear-gradient(135deg, #cd7f32, #b87333);
-  color: #fff;
-  box-shadow: 0 6px 16px rgba(205, 127, 50, 0.32);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .group:hover .rank-medallion {
   transform: scale(1.06) rotate(-3deg);
