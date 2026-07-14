@@ -14,9 +14,10 @@
       class="container mx-auto px-6 relative z-10 h-full flex flex-col items-center justify-center overflow-y-auto"
     >
       <div class="text-center space-y-6 max-w-2xl mx-auto flex flex-col items-center py-4">
-        
         <!-- BADGE AVEC ANIMATION D'ENTRÉE -->
-        <div class="animate-fade-down relative inline-flex items-center justify-center px-4 py-1.5 bg-[#FAF9F5] border border-dashed border-gray-400 shadow-[2px_2px_0px_rgba(0,0,0,0.08)] transform -rotate-1 select-none">
+        <div
+          class="animate-fade-down relative inline-flex items-center justify-center px-4 py-1.5 bg-[#FAF9F5] border border-dashed border-gray-400 shadow-[2px_2px_0px_rgba(0,0,0,0.08)] transform -rotate-1 select-none"
+        >
           <div class="absolute -left-1 top-1/2 w-2 h-[1px] bg-gray-400 opacity-60"></div>
           <div class="absolute -right-1 top-1/2 w-2 h-[1px] bg-gray-400 opacity-60"></div>
           <span class="text-gray-900 font-heading font-black text-[9px] tracking-[0.2em] uppercase">
@@ -31,7 +32,7 @@
           >
             AWAC - MONO
           </h1>
-          
+
           <p
             class="text-gray-800 font-sans font-semibold text-xs md:text-sm tracking-widest uppercase text-awac-accent animate-fade-up"
             style="animation-delay: 0.2s"
@@ -41,26 +42,42 @@
         </div>
 
         <!-- PHRASE D'ACTION -->
-        <p class="text-gray-600 font-sans text-sm md:text-base leading-relaxed max-w-xl animate-fade-up" style="animation-delay: 0.3s">
+        <p
+          class="text-gray-600 font-sans text-sm md:text-base leading-relaxed max-w-xl animate-fade-up"
+          style="animation-delay: 0.3s"
+        >
           Soutenez l'avenir de nos jeunes créateurs ! Propulsez le talent et l'artisanat du Mono
           vers la victoire.
         </p>
 
         <!-- SCHÉMA DE PRIX AVEC REBOND -->
-        <div class="flex flex-col items-center space-y-6 py-2 w-full animate-scale-up" style="animation-delay: 0.4s">
+        <div
+          class="flex flex-col items-center space-y-6 py-2 w-full animate-scale-up"
+          style="animation-delay: 0.4s"
+        >
           <div
             class="flex items-center justify-center gap-4 md:gap-8 bg-awac-primary/10 border border-awac-primary/20 p-5 md:px-10 md:py-6 rounded-2xl shadow-[0_8px_24px_rgba(165,155,140,0.06)] relative overflow-hidden"
           >
             <!-- ANIMATION DE BRILLANCE SUR LE BORD -->
-            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-awac-primary/10 to-transparent -translate-x-full animate-shimmer"></div>
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-transparent via-awac-primary/10 to-transparent -translate-x-full animate-shimmer"
+            ></div>
 
             <div class="text-center">
-              <span class="text-2xl md:text-4xl font-heading font-black text-gray-800 tracking-tight">100</span>
-              <span class="block text-[9px] font-sans font-bold text-awac-primary tracking-widest uppercase mt-0.5">FCFA</span>
+              <span
+                class="text-2xl md:text-4xl font-heading font-black text-gray-800 tracking-tight"
+                >100</span
+              >
+              <span
+                class="block text-[9px] font-sans font-bold text-awac-primary tracking-widest uppercase mt-0.5"
+                >FCFA</span
+              >
             </div>
 
             <!-- FLÈCHE ANIMÉE (DESSIN CONTINU) -->
-            <div class="w-20 md:w-28 h-6 flex items-center justify-center text-awac-primary opacity-100">
+            <div
+              class="w-20 md:w-28 h-6 flex items-center justify-center text-awac-primary opacity-100"
+            >
               <svg
                 class="w-full h-full animate-draw-arrow"
                 fill="none"
@@ -76,14 +93,25 @@
             </div>
 
             <div class="text-center">
-              <span class="text-2xl md:text-4xl font-heading font-black text-transparent bg-clip-text bg-gradient-to-r from-awac-primary to-awac-accent tracking-tight">1</span>
-              <span class="block text-[9px] font-sans font-bold text-gray-500 tracking-widest uppercase mt-0.5">VOTE</span>
+              <span
+                class="text-2xl md:text-4xl font-heading font-black text-transparent bg-clip-text bg-gradient-to-r from-awac-primary to-awac-accent tracking-tight"
+                >1</span
+              >
+              <span
+                class="block text-[9px] font-sans font-bold text-gray-500 tracking-widest uppercase mt-0.5"
+                >VOTE</span
+              >
             </div>
           </div>
 
           <!-- LOGOS OPÉRATEURS -->
-          <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 animate-fade-up" style="animation-delay: 0.5s">
-            <span class="text-[10px] text-gray-400 font-sans uppercase tracking-widest font-semibold">
+          <div
+            class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 animate-fade-up"
+            style="animation-delay: 0.5s"
+          >
+            <span
+              class="text-[10px] text-gray-400 font-sans uppercase tracking-widest font-semibold"
+            >
               Disponible sur :
             </span>
 
@@ -125,7 +153,10 @@
         </div>
 
         <!-- BOUTON D'ACTION -->
-        <div class="pt-2 w-full sm:w-auto flex justify-center animate-fade-up" style="animation-delay: 0.6s">
+        <div
+          class="pt-2 w-full sm:w-auto flex justify-center animate-fade-up"
+          style="animation-delay: 0.6s"
+        >
           <a
             href="#candidats"
             class="relative inline-flex overflow-hidden bg-awac-dark text-white font-heading font-bold text-xs tracking-widest uppercase py-3.5 px-10 rounded-md transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl items-center gap-3 isolation-auto z-10 before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-awac-primary before:to-awac-accent before:transition-opacity before:duration-300 hover:before:opacity-0 w-full sm:w-auto justify-center hover:scale-[1.02] active:scale-[0.98]"
@@ -134,7 +165,6 @@
             <span class="material-icons text-sm animate-bounce-x">arrow_forward</span>
           </a>
         </div>
-
       </div>
     </div>
   </header>
@@ -147,8 +177,8 @@ import logoCeltis from '../assets/img/icons/celtis.svg'
 </script>
 
 <style scoped>
-*{
-    overflow: hidden;
+* {
+  overflow: hidden;
 }
 @keyframes fadeDown {
   0% {
@@ -187,7 +217,8 @@ import logoCeltis from '../assets/img/icons/celtis.svg'
 }
 
 @keyframes pulse-slow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.7;
     transform: scale(1);
   }
@@ -218,7 +249,8 @@ import logoCeltis from '../assets/img/icons/celtis.svg'
 }
 
 @keyframes bounce-x {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
   50% {
@@ -260,7 +292,13 @@ import logoCeltis from '../assets/img/icons/celtis.svg'
 /* ============================================
    DELAIS PERSONNALISÉS
    ============================================ */
-.animate-fade-up:nth-child(1) { animation-delay: 0.1s; }
-.animate-fade-up:nth-child(2) { animation-delay: 0.2s; }
-.animate-fade-up:nth-child(3) { animation-delay: 0.3s; }
+.animate-fade-up:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.animate-fade-up:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.animate-fade-up:nth-child(3) {
+  animation-delay: 0.3s;
+}
 </style>

@@ -38,112 +38,147 @@
         </div>
 
         <div class="lg:col-span-7 flex flex-col w-full max-w-xl mx-auto lg:mx-0">
-  
-  <!-- ÉTAPE 01 -->
-  <div
-    class="flex items-stretch gap-6 md:gap-10 group step-item"
-    :class="isVisible ? 'step-visible' : ''"
-    style="transition-delay: 0.1s"
-  >
-    <div class="flex flex-col items-center flex-shrink-0 relative w-12">
-      <div
-        class="w-11 h-11 rounded-full bg-white border border-gray-300 flex items-center justify-center font-heading font-black text-xs text-gray-900 shadow-xs z-10 transition-all duration-300 group-hover:border-awac-primary group-hover:text-awac-primary relative overflow-hidden step-circle"
-      >
-        <span class="step-number group-hover:opacity-0 transition-opacity duration-300">01</span>
-        <span class="material-icons text-sm absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-awac-primary">visibility</span>
-      </div>
-      
-      <div class="w-full h-24 md:h-28 text-awac-primary/30 -mt-1 -mb-2 z-0 step-line">
-        <svg
-          class="w-full h-full"
-          fill="none"
-          viewBox="0 0 40 100"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-        >
-          <!-- FORÇAGE ULTIME : Le style inline avec !important détruit le bug de DeepSeek -->
-          <path d="M20,0 Q35,25 20,50 T20,100" stroke-dasharray="4,4" style="stroke-dasharray: 4px, 4px !important;" />
-        </svg>
-      </div>
-    </div>
+          <!-- ÉTAPE 01 -->
+          <div
+            class="flex items-stretch gap-6 md:gap-10 group step-item"
+            :class="isVisible ? 'step-visible' : ''"
+            style="transition-delay: 0.1s"
+          >
+            <div class="flex flex-col items-center flex-shrink-0 relative w-12">
+              <div
+                class="w-11 h-11 rounded-full bg-white border border-gray-300 flex items-center justify-center font-heading font-black text-xs text-gray-900 shadow-xs z-10 transition-all duration-300 group-hover:border-awac-primary group-hover:text-awac-primary relative overflow-hidden step-circle"
+              >
+                <span class="step-number group-hover:opacity-0 transition-opacity duration-300"
+                  >01</span
+                >
+                <span
+                  class="material-icons text-sm absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-awac-primary"
+                  >visibility</span
+                >
+              </div>
 
-    <div class="pt-2 pb-8 max-w-md transform transition-transform duration-300 group-hover:translate-x-1 step-content">
-      <h3 class="text-gray-900 font-heading font-black text-base md:text-lg uppercase tracking-wider mb-1.5 group-hover:text-awac-primary transition-colors">
-        Choisissez
-      </h3>
-      <p class="text-gray-600 font-sans text-xs md:text-sm leading-relaxed font-medium">
-        Explorez le défilé des candidats en bas de page pour découvrir les vêtements créés par nos apprentis.
-      </p>
-    </div>
-  </div>
+              <div class="w-full h-24 md:h-28 text-awac-primary/30 -mt-1 -mb-2 z-0 step-line">
+                <svg
+                  class="w-full h-full"
+                  fill="none"
+                  viewBox="0 0 40 100"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                >
+                  <!-- FORÇAGE ULTIME : Le style inline avec !important détruit le bug de DeepSeek -->
+                  <path
+                    d="M20,0 Q35,25 20,50 T20,100"
+                    stroke-dasharray="4,4"
+                    style="stroke-dasharray: 4px, 4px !important"
+                  />
+                </svg>
+              </div>
+            </div>
 
-  <!-- ÉTAPE 02 -->
-  <div
-    class="flex items-stretch gap-6 md:gap-10 group step-item"
-    :class="isVisible ? 'step-visible' : ''"
-    style="transition-delay: 0.3s"
-  >
-    <div class="flex flex-col items-center flex-shrink-0 relative w-12">
-      <div
-        class="w-11 h-11 rounded-full bg-white border border-gray-300 flex items-center justify-center font-heading font-black text-xs text-gray-900 shadow-xs z-10 transition-all duration-300 group-hover:border-awac-accent group-hover:text-awac-accent relative overflow-hidden step-circle"
-      >
-        <span class="step-number group-hover:opacity-0 transition-opacity duration-300">02</span>
-        <span class="material-icons text-sm absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-awac-accent">tune</span>
-      </div>
-      
-      <div class="w-full h-24 md:h-28 text-awac-primary/30 -mt-1 -mb-2 z-0 step-line">
-        <svg
-          class="w-full h-full"
-          fill="none"
-          viewBox="0 0 40 100"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-        >
-          <!-- FORÇAGE ULTIME : Le style inline avec !important détruit le bug de DeepSeek -->
-          <path d="M20,0 Q5,25 20,50 T20,100" stroke-dasharray="4,4" style="stroke-dasharray: 4px, 4px !important;" />
-        </svg>
-      </div>
-    </div>
+            <div
+              class="pt-2 pb-8 max-w-md transform transition-transform duration-300 group-hover:translate-x-1 step-content"
+            >
+              <h3
+                class="text-gray-900 font-heading font-black text-base md:text-lg uppercase tracking-wider mb-1.5 group-hover:text-awac-primary transition-colors"
+              >
+                Choisissez
+              </h3>
+              <p class="text-gray-600 font-sans text-xs md:text-sm leading-relaxed font-medium">
+                Explorez le défilé des candidats en bas de page pour découvrir les vêtements créés
+                par nos apprentis.
+              </p>
+            </div>
+          </div>
 
-    <div class="pt-2 pb-8 max-w-md transform transition-transform duration-300 group-hover:translate-x-1 step-content">
-      <h3 class="text-gray-900 font-heading font-black text-base md:text-lg uppercase tracking-wider mb-1.5 group-hover:text-awac-accent transition-colors">
-        Ajustez
-      </h3>
-      <p class="text-gray-600 font-sans text-xs md:text-sm leading-relaxed font-medium">
-        Définissez la quantité de vote. Chaque clic supplémentaire augmente son rang dans la compétition.
-      </p>
-    </div>
-  </div>
+          <!-- ÉTAPE 02 -->
+          <div
+            class="flex items-stretch gap-6 md:gap-10 group step-item"
+            :class="isVisible ? 'step-visible' : ''"
+            style="transition-delay: 0.3s"
+          >
+            <div class="flex flex-col items-center flex-shrink-0 relative w-12">
+              <div
+                class="w-11 h-11 rounded-full bg-white border border-gray-300 flex items-center justify-center font-heading font-black text-xs text-gray-900 shadow-xs z-10 transition-all duration-300 group-hover:border-awac-accent group-hover:text-awac-accent relative overflow-hidden step-circle"
+              >
+                <span class="step-number group-hover:opacity-0 transition-opacity duration-300"
+                  >02</span
+                >
+                <span
+                  class="material-icons text-sm absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-awac-accent"
+                  >tune</span
+                >
+              </div>
 
-  <!-- ÉTAPE 03 -->
-  <div
-    class="flex items-stretch gap-6 md:gap-10 group step-item"
-    :class="isVisible ? 'step-visible' : ''"
-    style="transition-delay: 0.5s"
-  >
-    <div class="flex flex-col items-center flex-shrink-0 relative w-12">
-      <div
-        class="w-11 h-11 rounded-full bg-white border border-gray-300 flex items-center justify-center font-heading font-black text-xs text-gray-900 shadow-xs z-10 transition-all duration-300 group-hover:border-gray-900 group-hover:bg-gray-900 group-hover:text-white relative overflow-hidden step-circle"
-      >
-        <span class="step-number group-hover:opacity-0 transition-opacity duration-300">03</span>
-        <span class="material-icons text-sm absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white">payments</span>
-      </div>
-    </div>
+              <div class="w-full h-24 md:h-28 text-awac-primary/30 -mt-1 -mb-2 z-0 step-line">
+                <svg
+                  class="w-full h-full"
+                  fill="none"
+                  viewBox="0 0 40 100"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                >
+                  <!-- FORÇAGE ULTIME : Le style inline avec !important détruit le bug de DeepSeek -->
+                  <path
+                    d="M20,0 Q5,25 20,50 T20,100"
+                    stroke-dasharray="4,4"
+                    style="stroke-dasharray: 4px, 4px !important"
+                  />
+                </svg>
+              </div>
+            </div>
 
-    <div class="pt-2 max-w-md transform transition-transform duration-300 group-hover:translate-x-1 step-content">
-      <h3 class="text-gray-900 font-heading font-black text-base md:text-lg uppercase tracking-wider mb-1.5 group-hover:text-gray-900 transition-colors">
-        Validez
-      </h3>
-      <p class="text-gray-600 font-sans text-xs md:text-sm leading-relaxed font-medium">
-        Déclenchez le compteur en direct après validation de la transaction avec MTN, Moov ou Celtis.
-      </p>
-    </div>
-  </div>
+            <div
+              class="pt-2 pb-8 max-w-md transform transition-transform duration-300 group-hover:translate-x-1 step-content"
+            >
+              <h3
+                class="text-gray-900 font-heading font-black text-base md:text-lg uppercase tracking-wider mb-1.5 group-hover:text-awac-accent transition-colors"
+              >
+                Ajustez
+              </h3>
+              <p class="text-gray-600 font-sans text-xs md:text-sm leading-relaxed font-medium">
+                Définissez la quantité de vote. Chaque clic supplémentaire augmente son rang dans la
+                compétition.
+              </p>
+            </div>
+          </div>
 
-</div>
+          <!-- ÉTAPE 03 -->
+          <div
+            class="flex items-stretch gap-6 md:gap-10 group step-item"
+            :class="isVisible ? 'step-visible' : ''"
+            style="transition-delay: 0.5s"
+          >
+            <div class="flex flex-col items-center flex-shrink-0 relative w-12">
+              <div
+                class="w-11 h-11 rounded-full bg-white border border-gray-300 flex items-center justify-center font-heading font-black text-xs text-gray-900 shadow-xs z-10 transition-all duration-300 group-hover:border-gray-900 group-hover:bg-gray-900 group-hover:text-white relative overflow-hidden step-circle"
+              >
+                <span class="step-number group-hover:opacity-0 transition-opacity duration-300"
+                  >03</span
+                >
+                <span
+                  class="material-icons text-sm absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white"
+                  >payments</span
+                >
+              </div>
+            </div>
 
+            <div
+              class="pt-2 max-w-md transform transition-transform duration-300 group-hover:translate-x-1 step-content"
+            >
+              <h3
+                class="text-gray-900 font-heading font-black text-base md:text-lg uppercase tracking-wider mb-1.5 group-hover:text-gray-900 transition-colors"
+              >
+                Validez
+              </h3>
+              <p class="text-gray-600 font-sans text-xs md:text-sm leading-relaxed font-medium">
+                Déclenchez le compteur en direct après validation de la transaction avec MTN, Moov
+                ou Celtis.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
