@@ -2,9 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { listAdminVotes } from '../../server/services/admin/votes'
 import { recordingDb, asDb } from './helpers'
 import type { Db } from '../../server/types'
-
 const CANDIDATE_ID = '6a3c0e1f-2b4d-4f5a-9c8e-1d2f3a4b5c6d'
-
 function makeDb() {
   return recordingDb((sql) => {
     if (sql.includes('GROUP BY payment_status')) {
@@ -34,7 +32,6 @@ function makeDb() {
     return []
   })
 }
-
 describe('listAdminVotes', () => {
   it('renvoie votes paginés, total et agrégats par statut', async () => {
     const db = makeDb()
@@ -50,7 +47,6 @@ describe('listAdminVotes', () => {
       rejected: { count: 0, amount: 0 },
     })
   })
-
   it('applique le filtre de statut en paramètre lié', async () => {
     const db = makeDb()
     await listAdminVotes({ db: asDb(db) as unknown as Db }, { status: 'confirmed' })
@@ -59,7 +55,6 @@ describe('listAdminVotes', () => {
     )
     expect(listCall?.params).toContain('confirmed')
   })
-
   it('ignore un statut invalide (pas de filtre injecté)', async () => {
     const db = makeDb()
     await listAdminVotes(
@@ -71,7 +66,6 @@ describe('listAdminVotes', () => {
     )
     expect(listCall?.params).not.toContain("confirmed'; DROP TABLE votes;--")
   })
-
   it('applique le filtre candidat et la recherche par code reçu en paramètres liés', async () => {
     const db = makeDb()
     await listAdminVotes(
@@ -84,7 +78,6 @@ describe('listAdminVotes', () => {
     expect(listCall?.params).toContain(CANDIDATE_ID)
     expect(listCall?.params.some((p) => String(p).includes('AWAC-17'))).toBe(true)
   })
-
   it('borne la pagination (page ≥ 1, limite plafonnée)', async () => {
     const db = makeDb()
     const res = await listAdminVotes({ db: asDb(db) as unknown as Db }, { page: -5, limit: 9999 })

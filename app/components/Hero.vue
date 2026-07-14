@@ -3,7 +3,6 @@
     id="accueil"
     class="relative h-[85vh] max-h-[85vh] bg-[#FBFBFA] overflow-hidden flex items-center justify-center isolation-auto"
   >
-    <!-- HALO ARRIÈRE-PLAN AVEC SCINTILLEMENT -->
     <div class="absolute inset-0 w-full h-full opacity-20 pointer-events-none z-0">
       <div
         class="absolute top-[10%] left-[15%] w-[70%] h-[80%] rounded-[50%] bg-gradient-to-tr from-awac-primary/40 to-awac-accent/30 filter blur-3xl opacity-70 animate-pulse-slow"
@@ -14,7 +13,6 @@
       class="container mx-auto px-6 relative z-10 h-full flex flex-col items-center justify-center overflow-y-auto"
     >
       <div class="text-center space-y-6 max-w-2xl mx-auto flex flex-col items-center py-4">
-        <!-- BADGE AVEC ANIMATION D'ENTRÉE -->
         <div
           class="animate-fade-down relative inline-flex items-center justify-center px-4 py-1.5 bg-[#FAF9F5] border border-dashed border-gray-400 shadow-[2px_2px_0px_rgba(0,0,0,0.08)] transform -rotate-1 select-none"
         >
@@ -25,7 +23,6 @@
           </span>
         </div>
 
-        <!-- TITRE AVEC CASCADE -->
         <div class="space-y-1.5 animate-fade-up" style="animation-delay: 0.1s">
           <h1
             class="text-gray-900 font-heading font-black text-4xl md:text-6xl tracking-tight leading-none"
@@ -41,7 +38,6 @@
           </p>
         </div>
 
-        <!-- PHRASE D'ACTION -->
         <p
           class="text-gray-600 font-sans text-sm md:text-base leading-relaxed max-w-xl animate-fade-up"
           style="animation-delay: 0.3s"
@@ -50,7 +46,6 @@
           vers la victoire.
         </p>
 
-        <!-- SCHÉMA DE PRIX AVEC REBOND -->
         <div
           class="flex flex-col items-center space-y-6 py-2 w-full animate-scale-up"
           style="animation-delay: 0.4s"
@@ -58,7 +53,6 @@
           <div
             class="flex items-center justify-center gap-4 md:gap-8 bg-awac-primary/10 border border-awac-primary/20 p-5 md:px-10 md:py-6 rounded-2xl shadow-[0_8px_24px_rgba(165,155,140,0.06)] relative overflow-hidden"
           >
-            <!-- ANIMATION DE BRILLANCE SUR LE BORD -->
             <div
               class="absolute inset-0 bg-gradient-to-r from-transparent via-awac-primary/10 to-transparent -translate-x-full animate-shimmer"
             ></div>
@@ -74,7 +68,6 @@
               >
             </div>
 
-            <!-- FLÈCHE ANIMÉE (DESSIN CONTINU) -->
             <div
               class="w-20 md:w-28 h-6 flex items-center justify-center text-awac-primary opacity-100"
             >
@@ -104,7 +97,6 @@
             </div>
           </div>
 
-          <!-- LOGOS OPÉRATEURS -->
           <div
             class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 animate-fade-up"
             style="animation-delay: 0.5s"
@@ -152,7 +144,6 @@
           </div>
         </div>
 
-        <!-- BOUTON D'ACTION -->
         <div
           class="pt-2 w-full sm:w-auto flex justify-center animate-fade-up"
           style="animation-delay: 0.6s"
@@ -258,9 +249,6 @@ import logoCeltis from '../assets/img/icons/celtis.svg'
   }
 }
 
-/* ============================================
-   CLASSES D'ANIMATION
-   ============================================ */
 .animate-fade-down {
   animation: fadeDown 0.7s ease-out both;
 }
@@ -289,9 +277,6 @@ import logoCeltis from '../assets/img/icons/celtis.svg'
   animation: bounce-x 1.5s ease-in-out infinite;
 }
 
-/* ============================================
-   DELAIS PERSONNALISÉS
-   ============================================ */
 .animate-fade-up:nth-child(1) {
   animation-delay: 0.1s;
 }

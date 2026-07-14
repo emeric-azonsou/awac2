@@ -147,34 +147,27 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { voteService } from '~/utils/voteService'
 import { useVotePricing } from '~/composables/useVotePricing'
 import { MIN_VOTE_QUANTITY, clampVoteQuantity } from '~/utils/voteQuantity'
-
 const sectionRef = ref(null)
 const isVisible = ref(false)
 const loading = ref(true)
 const error = ref('')
 const selectedCandidate = ref(null)
-
 const defaultPhoto = new URL('../assets/img/candidat/candidat.jpg', import.meta.url).href
 const candidats = ref([])
 const voteQuantities = ref({})
 const { unitPrice, currency, loadVotePricing } = useVotePricing()
-
 const getQuantity = (candidateId) => voteQuantities.value[candidateId] ?? MIN_VOTE_QUANTITY
-
 const setQuantity = (candidateId, value) => {
   voteQuantities.value[candidateId] = clampVoteQuantity(value)
 }
-
 const formatBadgeNumber = (index) => String(index + 1).padStart(2, '0')
 
-// Compte de votes compact pour tenir dans le médaillon (ex. 1250 -> 1,2k)
 const formatVotes = (count) => {
   const value = Number(count) || 0
   if (value >= 10000) return `${Math.round(value / 1000)}k`
   if (value >= 1000) return `${(value / 1000).toFixed(1).replace('.', ',').replace(',0', '')}k`
   return String(value)
 }
-
 const loadCandidates = async () => {
   loading.value = true
   error.value = ''
@@ -187,12 +180,10 @@ const loadCandidates = async () => {
     loading.value = false
   }
 }
-
 const openVoteModal = (candidat) => {
   if (!candidat) return
   selectedCandidate.value = candidat
 }
-
 const onVoted = (result) => {
   const updatedCandidate = candidats.value.find((c) => c.id === selectedCandidate.value?.id)
   if (updatedCandidate) {
@@ -200,9 +191,7 @@ const onVoted = (result) => {
     candidats.value.sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0))
   }
 }
-
 let observer = null
-
 onMounted(() => {
   loadCandidates()
   loadVotePricing()
@@ -217,14 +206,12 @@ onMounted(() => {
   )
   if (sectionRef.value) observer.observe(sectionRef.value)
 })
-
 onBeforeUnmount(() => {
   if (observer) observer.disconnect()
 })
 </script>
 
 <style scoped>
-/* ... (mêmes styles que précédemment) ... */
 .card-visible {
   animation: cardEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
@@ -314,7 +301,6 @@ onBeforeUnmount(() => {
   color: white !important;
 }
 
-/* Médaillon du compteur de votes — même couleur or sur toutes les cartes */
 .rank-medallion {
   background: linear-gradient(135deg, #ffd700, #ffa500);
   color: #1a1a1a;

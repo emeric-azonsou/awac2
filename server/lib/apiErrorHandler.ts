@@ -10,14 +10,6 @@ interface NitroThrownError {
   status?: number
 }
 
-/**
- * Handler d'erreur Nitro (référencé via `nitro:config` dans nuxt.config.ts).
- * Ne traite QUE les requêtes `/api/*` : restaure l'enveloppe historique
- * `{ error: { code, message } }` pour les throws inattendus et les 404 de
- * route API inconnue. Pour tout le reste (pages Nuxt), ne fait rien : le
- * handler suivant dans la chaîne (le rendu d'erreur Nuxt par défaut) prend
- * la main normalement.
- */
 export default async function apiErrorEnvelopeHandler(
   error: NitroThrownError,
   event: H3Event,

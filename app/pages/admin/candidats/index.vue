@@ -78,7 +78,6 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: 'admin' })
-
 interface AdminCandidate {
   id: string
   full_name: string
@@ -88,7 +87,6 @@ interface AdminCandidate {
   vote_count: number
   photos_count: number
 }
-
 const { data: candidates, pending } = await useFetch<AdminCandidate[]>('/api/admin/candidates', {
   headers: import.meta.server ? useRequestHeaders(['cookie']) : undefined,
 })

@@ -21,7 +21,6 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: 'admin' })
-
 interface AdminCandidate {
   id: string
   full_name: string
@@ -29,7 +28,6 @@ interface AdminCandidate {
   commune: string | null
   profile_photo_url: string | null
 }
-
 const route = useRoute()
 const { data: candidate, pending } = await useFetch<AdminCandidate>(
   `/api/candidates/${route.params.id}`,

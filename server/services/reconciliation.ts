@@ -1,24 +1,17 @@
-// Filet de sécurité serveur : régularise les votes restés `pending` alors que le
-// votant est parti (onglet fermé, webhook jamais reçu). Appelé par le cron.
-// L'argent encaissé et le compteur de votes ne doivent jamais diverger durablement.
 import type { Db, SebpayClient } from '../types'
 import type { LateConfirmationNotifier } from '../lib/notifier'
 import { reconcilePendingVote } from './votes'
-
 const DEFAULT_OLDER_THAN_MINUTES = 5
 const DEFAULT_BATCH_LIMIT = 50
-
 export interface ReconciliationDeps {
   db: Db
   sebpay: SebpayClient | null
   notifier: LateConfirmationNotifier | null
 }
-
 export interface ReconciliationOptions {
   olderThanMinutes?: number
   limit?: number
 }
-
 export interface ReconciliationSummary {
   checked: number
   confirmed: number
@@ -26,7 +19,6 @@ export interface ReconciliationSummary {
   stillPending: number
   errors: number
 }
-
 export async function reconcilePendingVotes(
   deps: ReconciliationDeps,
   {
@@ -43,7 +35,6 @@ export async function reconcilePendingVotes(
     errors: 0,
   }
   if (!sebpay) return summary
-
   const staleVotes = await db`
     SELECT v.receipt_code, v.quantity, v.total_amount, v.currency, v.voter_phone,
            c.full_name AS candidate_name
@@ -53,7 +44,6 @@ export async function reconcilePendingVotes(
       AND v.created_at < now() - (${olderThanMinutes} * interval '1 minute')
     ORDER BY v.created_at
     LIMIT ${limit}`
-
   for (const vote of staleVotes) {
     summary.checked += 1
     try {
@@ -70,9 +60,7 @@ export async function reconcilePendingVotes(
               amount: Number(vote.total_amount),
               currency: vote.currency,
             })
-          } catch {
-            // La notification ne doit jamais empêcher la régularisation du vote.
-          }
+          } catch {}
         }
       } else if (reconciled.paymentStatus === 'rejected') {
         summary.rejected += 1
@@ -83,6 +71,5 @@ export async function reconcilePendingVotes(
       summary.errors += 1
     }
   }
-
   return summary
 }

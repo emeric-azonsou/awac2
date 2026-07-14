@@ -1,9 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { confirmVote, rejectVote } from '../../server/services/voteConfirmation'
 import type { Db } from '../../server/types'
-
 const REF = 'AWAC-1'
-
 interface VoteState {
   receipt_code: string
   candidate_id: string
@@ -12,13 +10,11 @@ interface VoteState {
   votes_before: number
   votes_after: number
 }
-
 interface DbState {
   vote: VoteState
   candidateVoteCount: number
   updates: { table: string; voteCount?: unknown; params?: unknown[] }[]
 }
-
 interface MockDb {
   (strings: TemplateStringsArray, ...params: unknown[]): Promise<unknown[]>
   begin: (
@@ -29,7 +25,6 @@ interface MockDb {
   _state: DbState
 }
 
-// Fake transactionnel : garde l'état d'un vote + du compteur candidat en mémoire.
 function makeDb(initial: { vote?: Partial<VoteState>; candidateVoteCount?: number }): MockDb {
   const state: DbState = {
     vote: {
@@ -72,9 +67,7 @@ function makeDb(initial: { vote?: Partial<VoteState>; candidateVoteCount?: numbe
   db._state = state
   return db
 }
-
 const asDb = (db: MockDb): Db => db as unknown as Db
-
 describe('confirmVote', () => {
   it('incrémente le compteur candidat et passe le vote à confirmed', async () => {
     const db = makeDb({ candidateVoteCount: 10 })
@@ -83,7 +76,6 @@ describe('confirmVote', () => {
     expect(db._state.candidateVoteCount).toBe(13)
     expect(db._state.vote.payment_status).toBe('confirmed')
   })
-
   it('est idempotent : un second appel ne réincrémente pas', async () => {
     const db = makeDb({
       vote: { payment_status: 'confirmed', votes_after: 13 },
@@ -96,7 +88,6 @@ describe('confirmVote', () => {
     const candidateUpdates = db._state.updates.filter((u) => u.table === 'candidates')
     expect(candidateUpdates).toHaveLength(0)
   })
-
   it('renvoie not_found si la référence est inconnue', async () => {
     const db = makeDb({})
     db.begin = async (fn) => fn(() => Promise.resolve([]))
@@ -104,7 +95,6 @@ describe('confirmVote', () => {
     expect(result.status).toBe('not_found')
   })
 })
-
 describe('rejectVote', () => {
   it('passe le vote à rejected sans toucher au compteur', async () => {
     const db = makeDb({ candidateVoteCount: 10 })
@@ -112,7 +102,6 @@ describe('rejectVote', () => {
     expect(result.status).toBe('rejected')
     expect(db._state.candidateVoteCount).toBe(10)
   })
-
   it('ne rejette pas un vote déjà confirmé', async () => {
     const db = makeDb({ vote: { payment_status: 'confirmed' }, candidateVoteCount: 13 })
     const result = await rejectVote(asDb(db), REF)

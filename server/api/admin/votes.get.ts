@@ -1,7 +1,6 @@
 import { getDb } from '../../lib/db'
 import { requireAdminSession } from '../../lib/adminSession'
 import { listAdminVotes } from '../../services/admin/votes'
-
 export default defineEventHandler(async (event) => {
   await requireAdminSession(event)
   const query = getQuery(event)

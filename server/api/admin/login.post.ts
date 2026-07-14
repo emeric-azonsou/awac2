@@ -1,11 +1,9 @@
 import { getDb } from '../../lib/db'
 import { getAdminSession } from '../../lib/adminSession'
 import { verifyAdminLogin, type AdminProfile } from '../../services/admin/auth'
-
 export default defineEventHandler(async (event) => {
   const body = (await readBody(event).catch(() => ({}))) as Record<string, unknown>
   const clientIp = getRequestIP(event, { xForwardedFor: true }) ?? 'ip-inconnue'
-
   const result = await verifyAdminLogin(
     { db: getDb() },
     {
@@ -14,7 +12,6 @@ export default defineEventHandler(async (event) => {
       clientIp,
     },
   )
-
   if (result.status === 200) {
     const admin = result.body as AdminProfile
     const session = await getAdminSession(event)
@@ -25,7 +22,6 @@ export default defineEventHandler(async (event) => {
       tokenVersion: admin.token_version,
     })
   }
-
   setResponseStatus(event, result.status)
   return result.body
 })

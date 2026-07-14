@@ -3,7 +3,6 @@ export interface ErrorEntry {
   code: string
   message: string
 }
-
 export const ERRORS = Object.freeze({
   UNAUTHORIZED: { status: 401, code: 'unauthorized', message: 'Authentification requise' },
   INVALID_CREDENTIALS: {
@@ -17,16 +16,13 @@ export const ERRORS = Object.freeze({
   CONFLICT: { status: 409, code: 'conflict', message: 'Conflit' },
   LOCKED: { status: 409, code: 'locked', message: 'Ressource verrouillée' },
 }) satisfies Record<string, ErrorEntry>
-
 export interface HttpResult {
   status: number
   body: unknown
 }
-
 export function ok(body: unknown, status = 200): HttpResult {
   return { status, body }
 }
-
 export function fail(entry: ErrorEntry, message?: string): HttpResult {
   return {
     status: entry.status,

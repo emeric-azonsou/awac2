@@ -1,7 +1,6 @@
 import type { SebpayClient } from '../types'
 import { ok, type HttpResult } from '../lib/errors'
 
-// Zone UEMOA : toutes ces devises sont le Franc CFA (XOF), prix de vote identique.
 const XOF = { code: 'XOF', name: 'Franc CFA (UEMOA)' }
 export const FALLBACK_COUNTRIES = [
   { country_code: 'BJ', country_name: 'Bénin', prefix: '+229', currency: XOF },
@@ -14,17 +13,13 @@ export const FALLBACK_COUNTRIES = [
   { country_code: 'GW', country_name: 'Guinée-Bissau', prefix: '+245', currency: XOF },
 ]
 export const FALLBACK_OPERATORS = [{ slug: 'demo', name: 'Démo (simulation)', otp_required: false }]
-
 const CACHE_TTL_MS = 60 * 60 * 1000
 interface CacheEntry {
   value: unknown
   at: number
 }
-// Cache scopé par instance SebpayClient (WeakMap) plutôt que par clé globale :
-// getSebpay() renvoie un singleton en production (même comportement de cache),
-// mais chaque appelant/test avec sa propre instance obtient un cache isolé.
-const cacheByClient = new WeakMap<SebpayClient, Map<string, CacheEntry>>()
 
+const cacheByClient = new WeakMap<SebpayClient, Map<string, CacheEntry>>()
 async function cached<T>(sebpay: SebpayClient, key: string, loader: () => Promise<T>): Promise<T> {
   let clientCache = cacheByClient.get(sebpay)
   if (!clientCache) {
@@ -37,7 +32,6 @@ async function cached<T>(sebpay: SebpayClient, key: string, loader: () => Promis
   clientCache.set(key, { value, at: Date.now() })
   return value
 }
-
 export async function getCountriesList(sebpay: SebpayClient | null): Promise<HttpResult> {
   if (!sebpay) return ok({ countries: FALLBACK_COUNTRIES })
   try {
@@ -47,7 +41,6 @@ export async function getCountriesList(sebpay: SebpayClient | null): Promise<Htt
     return ok({ countries: FALLBACK_COUNTRIES })
   }
 }
-
 export async function getOperatorsList(
   sebpay: SebpayClient | null,
   country: string,

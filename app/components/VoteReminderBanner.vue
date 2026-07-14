@@ -36,15 +36,11 @@
 import { ref, onMounted } from 'vue'
 import { voteService } from '~/utils/voteService'
 import { listPendingVotes, forgetPendingVote } from '~/utils/pendingVotes'
-
 const confirmedVotes = ref([])
-
 const dismiss = (code) => {
   confirmedVotes.value = confirmedVotes.value.filter((vote) => vote.receipt_code !== code)
 }
 
-// Au retour sur le site : re-vérifie les votes laissés en attente lors d'une
-// visite précédente et prouve au votant que son paiement a bien été compté.
 onMounted(async () => {
   for (const pending of listPendingVotes()) {
     try {
@@ -58,10 +54,7 @@ onMounted(async () => {
       } else if (receipt.payment_status === 'rejected') {
         forgetPendingVote(pending.receipt_code)
       }
-      // pending : on garde la trace, revérifiée à la prochaine visite.
-    } catch {
-      // Reçu introuvable ou réseau : on réessaiera à la prochaine visite.
-    }
+    } catch {}
   }
 })
 </script>

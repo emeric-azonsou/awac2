@@ -46,3 +46,12 @@ __screenshots__/
 .nuxt
 .output
 .data
+
+# Outils / Claude Code (non trackés, gardés en local)
+.claude/
+.impeccable/
+.superpowers/
+.gstack/
+CLAUDE.md
+docs/
+.txt

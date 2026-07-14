@@ -51,19 +51,16 @@ import {
   clampVoteQuantity,
   formatVoteTotal,
 } from '~/utils/voteQuantity'
-
 defineProps({
   modelValue: { type: Number, required: true },
   unitPrice: { type: Number, required: true },
   currency: { type: String, default: 'FCFA' },
   candidateName: { type: String, default: '' },
 })
-
 const emit = defineEmits(['update:modelValue'])
 </script>
 
 <style scoped>
-/* Sélecteur de voix — pastille chaude aux couleurs AWAC */
 .vote-stepper {
   background: linear-gradient(135deg, rgba(239, 121, 82, 0.1), rgba(223, 65, 58, 0.08));
   box-shadow: inset 0 0 0 1px rgba(239, 121, 82, 0.25);

@@ -81,17 +81,13 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import awacLogo from '../assets/img/awac.png'
-
 const isScrolled = ref(false)
-
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 50
 }
-
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
 })
-
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
 })
@@ -101,7 +97,6 @@ onBeforeUnmount(() => {
 nav {
   animation: slideDown 0.6s ease-out;
 }
-
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -112,18 +107,15 @@ nav {
     transform: translateY(0);
   }
 }
-
 nav {
   transition:
     background-color 0.3s ease,
     box-shadow 0.3s ease;
 }
-
 nav img {
   filter: drop-shadow(0 2px 8px rgba(239, 121, 82, 0.1));
   transition: filter 0.3s ease;
 }
-
 nav img:hover {
   filter: drop-shadow(0 4px 16px rgba(239, 121, 82, 0.2));
 }

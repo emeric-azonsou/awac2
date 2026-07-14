@@ -16,7 +16,6 @@
     </div>
 
     <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 space-y-8">
-      <!-- Photo de profil -->
       <div class="flex items-center gap-5">
         <div
           class="w-24 h-24 rounded-2xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200"
@@ -47,7 +46,6 @@
         </div>
       </div>
 
-      <!-- Infos -->
       <div class="space-y-4">
         <div class="space-y-1">
           <label for="cand-name" class="admin-label">
@@ -82,7 +80,6 @@
       </button>
     </div>
 
-    <!-- Réalisations (édition seulement) -->
     <section v-if="isEdit" class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 space-y-4">
       <div class="flex items-center justify-between">
         <h2 class="font-heading font-black text-sm text-gray-900 uppercase tracking-widest">
@@ -126,7 +123,6 @@
       </div>
     </section>
 
-    <!-- Zone dangereuse (édition seulement) -->
     <section v-if="isEdit" class="bg-white border border-red-100 rounded-2xl p-6 md:p-8 space-y-3">
       <h2 class="font-heading font-black text-sm text-red-600 uppercase tracking-widest">
         Supprimer ce candidat
@@ -161,7 +157,6 @@
 
 <script setup lang="ts">
 import { uploadCandidatePhoto } from '~/utils/imageCompress'
-
 interface CandidatePhoto {
   id: string
   photo_url: string
@@ -174,12 +169,9 @@ interface AdminCandidate {
   commune: string | null
   profile_photo_url: string | null
 }
-
 const props = defineProps<{ candidate: AdminCandidate | null }>()
 const router = useRouter()
-
 const isEdit = computed(() => Boolean(props.candidate))
-
 const form = ref({
   full_name: props.candidate?.full_name ?? '',
   atelier: props.candidate?.atelier ?? '',
@@ -193,11 +185,9 @@ const uploadingProfile = ref(false)
 const uploadingWork = ref(false)
 const errorMessage = ref('')
 const deleteConfirmName = ref('')
-
 const canDelete = computed(
   () => deleteConfirmName.value.trim() === props.candidate?.full_name.trim(),
 )
-
 const loadPhotos = async () => {
   if (!props.candidate) return
   try {
@@ -207,7 +197,6 @@ const loadPhotos = async () => {
     photos.value = []
   }
 }
-
 const onProfileSelected = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (!file) return
@@ -222,7 +211,6 @@ const onProfileSelected = async (event: Event) => {
     uploadingProfile.value = false
   }
 }
-
 const onWorkSelected = async (event: Event) => {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
@@ -243,7 +231,6 @@ const onWorkSelected = async (event: Event) => {
     input.value = ''
   }
 }
-
 const removePhoto = async (photoId: string) => {
   try {
     await $fetch(`/api/admin/photos/${photoId}`, { method: 'DELETE' })
@@ -252,7 +239,6 @@ const removePhoto = async (photoId: string) => {
     errorMessage.value = 'Impossible de supprimer la photo.'
   }
 }
-
 const save = async () => {
   if (!form.value.full_name.trim()) {
     errorMessage.value = 'Le nom du candidat est requis.'
@@ -276,7 +262,6 @@ const save = async () => {
     saving.value = false
   }
 }
-
 const removeCandidate = async () => {
   if (!props.candidate || !canDelete.value) return
   deleting.value = true
@@ -289,6 +274,5 @@ const removeCandidate = async () => {
     deleting.value = false
   }
 }
-
 onMounted(loadPhotos)
 </script>

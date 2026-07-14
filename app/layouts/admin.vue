@@ -70,16 +70,13 @@
 
 <script setup lang="ts">
 import type { AdminProfileState } from '~/middleware/admin'
-
 const adminProfile = useState<AdminProfileState | null>('admin-profile', () => null)
 const router = useRouter()
-
 const menuItems = [
   { to: '/admin', label: 'Dashboard', icon: 'dashboard' },
   { to: '/admin/candidats', label: 'Candidats', icon: 'groups' },
   { to: '/admin/votes', label: 'Votes', icon: 'how_to_vote' },
 ]
-
 const logout = async () => {
   try {
     await $fetch('/api/admin/logout', { method: 'POST' })

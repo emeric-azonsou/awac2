@@ -3,13 +3,10 @@ import crypto from 'node:crypto'
 import { submitVote, getVoteStatus, processWebhook } from '../../server/services/votes'
 import { asDb } from './helpers'
 import type { Db, SebpayClient } from '../../server/types'
-
 const CANDIDATE_ID = '6a3c0e1f-2b4d-4f5a-9c8e-1d2f3a4b5c6d'
 const VOTE_ID = '11111111-2222-3333-4444-555555555555'
 const SECRET = 'sk_test_xyz'
-
 const asSebpay = (o: unknown): SebpayClient => o as unknown as SebpayClient
-
 interface VoteRow {
   id: string
   receipt_code: string | null
@@ -24,7 +21,6 @@ interface DbState {
   vote: VoteRow
   calls: string[]
 }
-
 function makeDb({ candidateExists = true, voteCount = 10, voteStatus = 'pending' } = {}) {
   const state: DbState = {
     voteCount,
@@ -90,7 +86,6 @@ function makeDb({ candidateExists = true, voteCount = 10, voteStatus = 'pending'
   db._state = state
   return db
 }
-
 const validBody = {
   candidate_id: CANDIDATE_ID,
   quantity: 3,
@@ -99,7 +94,6 @@ const validBody = {
   country: 'BJ',
 }
 const config = { callbackUrl: 'https://awac.test/votes/webhook' }
-
 describe('submitVote — mode simulé', () => {
   it('crée un vote et le confirme immédiatement (201)', async () => {
     const db = makeDb()
@@ -114,17 +108,14 @@ describe('submitVote — mode simulé', () => {
     expect(db._state.voteCount).toBe(13)
   })
 })
-
 describe('submitVote — mode réel', () => {
   it('crée un vote pending, appelle SebPay, renvoie provider_link (201)', async () => {
     const db = makeDb()
-    const createCollection = vi
-      .fn()
-      .mockResolvedValue({
-        transaction_id: 'sp_1',
-        status: 'pending',
-        provider_link: 'https://pay/x',
-      })
+    const createCollection = vi.fn().mockResolvedValue({
+      transaction_id: 'sp_1',
+      status: 'pending',
+      provider_link: 'https://pay/x',
+    })
     const res = await submitVote(
       { db: asDb(db) as unknown as Db, sebpay: asSebpay({ createCollection }), config },
       validBody,
@@ -136,7 +127,6 @@ describe('submitVote — mode réel', () => {
     expect(args.phone).toBe('22997000000')
     expect(args.amount).toBe(300)
   })
-
   it('renvoie 502 si SebPay refuse', async () => {
     const db = makeDb()
     const createCollection = vi.fn().mockRejectedValue(new Error('Numéro invalide'))
@@ -146,7 +136,6 @@ describe('submitVote — mode réel', () => {
     )
     expect(res.status).toBe(502)
   })
-
   it('force la devise des réglages même si le client en envoie une autre', async () => {
     const db = makeDb()
     const createCollection = vi
@@ -161,7 +150,6 @@ describe('submitVote — mode réel', () => {
     const [args] = createCollection.mock.calls[0]!
     expect(args.currency).toBe('XOF')
   })
-
   it("persiste le vote avant l'appel SebPay (aucun paiement orphelin)", async () => {
     const db = makeDb()
     let insertedBeforeCall = false
@@ -176,7 +164,6 @@ describe('submitVote — mode réel', () => {
     expect(res.status).toBe(201)
     expect(insertedBeforeCall).toBe(true)
   })
-
   it('rejette le vote persisté si SebPay échoue (502)', async () => {
     const db = makeDb()
     const createCollection = vi.fn().mockRejectedValue(new Error('Numéro invalide'))
@@ -189,7 +176,6 @@ describe('submitVote — mode réel', () => {
     expect(db._state.vote.payment_status).toBe('rejected')
     expect(db._state.voteCount).toBe(10)
   })
-
   it('rejette les entrées invalides avant tout appel SebPay (400)', async () => {
     const createCollection = vi.fn()
     for (const body of [
@@ -207,7 +193,6 @@ describe('submitVote — mode réel', () => {
     expect(createCollection).not.toHaveBeenCalled()
   })
 })
-
 describe('getVoteStatus — polling', () => {
   it('réconcilie via SebPay et confirme quand approved', async () => {
     const db = makeDb({ voteStatus: 'pending' })
@@ -220,7 +205,6 @@ describe('getVoteStatus — polling', () => {
     expect((res.body as { payment_status: string }).payment_status).toBe('confirmed')
     expect(getCollection).toHaveBeenCalledWith('AWAC-known')
   })
-
   it('ne rappelle pas SebPay si déjà confirmé', async () => {
     const db = makeDb({ voteStatus: 'confirmed' })
     const getCollection = vi.fn()
@@ -231,7 +215,6 @@ describe('getVoteStatus — polling', () => {
     expect((res.body as { payment_status: string }).payment_status).toBe('confirmed')
     expect(getCollection).not.toHaveBeenCalled()
   })
-
   it('reste pending si SebPay injoignable', async () => {
     const db = makeDb({ voteStatus: 'pending' })
     const getCollection = vi.fn().mockRejectedValue(new Error('timeout'))
@@ -241,17 +224,14 @@ describe('getVoteStatus — polling', () => {
     )
     expect((res.body as { payment_status: string }).payment_status).toBe('pending')
   })
-
   it('renvoie 404 si id non-uuid', async () => {
     const db = makeDb()
     const res = await getVoteStatus({ db: asDb(db) as unknown as Db, sebpay: null }, 'inconnu')
     expect(res.status).toBe(404)
   })
 })
-
 describe('processWebhook — signature', () => {
   const sign = (raw: string) => crypto.createHmac('sha256', SECRET).update(raw).digest('hex')
-
   it('confirme le vote sur webhook approved signé (200)', async () => {
     const db = makeDb({ voteStatus: 'pending' })
     const raw = JSON.stringify({
@@ -267,7 +247,6 @@ describe('processWebhook — signature', () => {
     expect(res.status).toBe(200)
     expect(db._state.voteCount).toBe(13)
   })
-
   it('rejette une signature invalide (401), sans muter', async () => {
     const db = makeDb({ voteStatus: 'pending' })
     const raw = JSON.stringify({ external_reference: 'AWAC-known', status: 'approved' })

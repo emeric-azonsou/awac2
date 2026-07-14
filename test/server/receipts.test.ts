@@ -2,10 +2,8 @@ import { describe, it, expect, vi } from 'vitest'
 import { getReceipt } from '../../server/services/receipts'
 import { asDb } from './helpers'
 import type { Db, SebpayClient } from '../../server/types'
-
 const RECEIPT_CODE = 'AWAC-1784013139890-AB12CD34'
 const asSebpay = (o: unknown): SebpayClient => o as unknown as SebpayClient
-
 function makeDb({ found = true, paymentStatus = 'confirmed', voteCount = 10 } = {}) {
   const state = { paymentStatus, voteCount, calls: [] as string[] }
   const run = (strings: TemplateStringsArray, params: unknown[]): unknown[] => {
@@ -68,7 +66,6 @@ function makeDb({ found = true, paymentStatus = 'confirmed', voteCount = 10 } = 
   db._state = state
   return db
 }
-
 describe('getReceipt', () => {
   it('renvoie le reçu public sans données personnelles (200)', async () => {
     const db = makeDb({ paymentStatus: 'confirmed' })
@@ -85,7 +82,6 @@ describe('getReceipt', () => {
     expect(JSON.stringify(body)).not.toContain('2290197')
     expect(body.voter_phone).toBeUndefined()
   })
-
   it("ne montre pas d'avant/après tant que le vote n'est pas confirmé", async () => {
     const db = makeDb({ paymentStatus: 'pending' })
     const res = await getReceipt({ db: asDb(db) as unknown as Db, sebpay: null }, RECEIPT_CODE)
@@ -93,13 +89,11 @@ describe('getReceipt', () => {
     expect(body.votes_before).toBeNull()
     expect(body.votes_after).toBeNull()
   })
-
   it('renvoie 404 pour un code inconnu', async () => {
     const db = makeDb({ found: false })
     const res = await getReceipt({ db: asDb(db) as unknown as Db, sebpay: null }, RECEIPT_CODE)
     expect(res.status).toBe(404)
   })
-
   it('renvoie 404 pour un code au format invalide, sans requête en base', async () => {
     const db = makeDb()
     for (const code of ['', 'abc', "AWAC-1'; DROP TABLE votes;--", 'AWAC-<script>']) {
@@ -108,7 +102,6 @@ describe('getReceipt', () => {
     }
     expect(db._state.calls.length).toBe(0)
   })
-
   it('réconcilie un reçu pending auprès de SebPay et le confirme (vote tardif)', async () => {
     const db = makeDb({ paymentStatus: 'pending' })
     const getCollection = vi.fn().mockResolvedValue({ transaction_id: 'sp_9', status: 'approved' })
@@ -124,7 +117,6 @@ describe('getReceipt', () => {
     expect(db._state.voteCount).toBe(13)
     expect(getCollection).toHaveBeenCalledWith(RECEIPT_CODE)
   })
-
   it('reste pending si SebPay est injoignable (200)', async () => {
     const db = makeDb({ paymentStatus: 'pending' })
     const getCollection = vi.fn().mockRejectedValue(new Error('timeout'))

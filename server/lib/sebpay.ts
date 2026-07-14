@@ -6,10 +6,8 @@ import type {
   SebpayCountry,
   SebpayOperator,
 } from '../types'
-
 const DEFAULT_COUNTRY_CODE = 'BJ'
 const DEFAULT_BASE_URL = 'https://newapi.sebpay.bj/api/v1'
-
 export function verifyWebhookSignature(
   rawBody: string,
   signature: string | null | undefined,
@@ -21,8 +19,6 @@ export function verifyWebhookSignature(
   return crypto.timingSafeEqual(Buffer.from(signature, 'utf8'), Buffer.from(expected, 'utf8'))
 }
 
-// Construit un client depuis les variables d'environnement.
-// Renvoie null si la clé secrète manque → l'API bascule en mode « paiement simulé ».
 export function createSebpayFromEnv(env: NodeJS.ProcessEnv = process.env): SebpayClient | null {
   const secretKey = env.SEBPAY_SECRET_KEY
   const publicKey = env.SEBPAY_PUBLIC_KEY
@@ -33,20 +29,17 @@ export function createSebpayFromEnv(env: NodeJS.ProcessEnv = process.env): Sebpa
     secretKey,
   })
 }
-
 interface SebpayClientConfig {
   baseUrl: string
   publicKey: string
   secretKey: string
   fetch?: typeof globalThis.fetch
 }
-
 interface SebpayEnvelope<T> {
   success?: boolean
   message?: string
   data?: T
 }
-
 export function createSebpayClient({
   baseUrl,
   publicKey,
@@ -58,7 +51,6 @@ export function createSebpayClient({
     'X-Secret-Key': secretKey,
     'Content-Type': 'application/json',
   }
-
   async function readData<T>(response: Response, context: string): Promise<T> {
     const payload = (await response.json().catch(() => null)) as SebpayEnvelope<T> | null
     if (!response.ok || !payload?.success) {
@@ -67,7 +59,6 @@ export function createSebpayClient({
     }
     return payload.data as T
   }
-
   return {
     async createCollection(input: SebpayCollectionInput): Promise<SebpayCollection> {
       const response = await fetch(`${baseUrl}/collections`, {
@@ -85,7 +76,6 @@ export function createSebpayClient({
       })
       return readData<SebpayCollection>(response, 'collections')
     },
-
     async getCollection(reference: string): Promise<SebpayCollection> {
       const response = await fetch(`${baseUrl}/collections/${encodeURIComponent(reference)}`, {
         method: 'GET',
@@ -93,7 +83,6 @@ export function createSebpayClient({
       })
       return readData<SebpayCollection>(response, 'status')
     },
-
     async getCountries(): Promise<SebpayCountry[]> {
       const response = await fetch(`${baseUrl}/countries`, { method: 'GET', headers })
       const data = await readData<SebpayCountry[] | { countries?: SebpayCountry[] }>(
@@ -102,7 +91,6 @@ export function createSebpayClient({
       )
       return Array.isArray(data) ? data : (data?.countries ?? [])
     },
-
     async getOperators(country?: string): Promise<SebpayOperator[]> {
       const query = country ? `?country=${encodeURIComponent(country)}` : ''
       const response = await fetch(`${baseUrl}/operators${query}`, { method: 'GET', headers })

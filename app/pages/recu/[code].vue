@@ -155,15 +155,12 @@ import { ref, computed, onMounted } from 'vue'
 import { voteService } from '~/utils/voteService'
 import { forgetPendingVote } from '~/utils/pendingVotes'
 import { useCopyToClipboard } from '~/composables/useCopyToClipboard'
-
 const route = useRoute()
 const receipt = ref(null)
 const loading = ref(true)
 const notFound = ref(false)
 const { copied, copy } = useCopyToClipboard()
-
 const copyReceiptCode = () => copy(receipt.value?.receipt_code ?? '')
-
 const STATUS_CONTENT = {
   confirmed: {
     label: 'Vote comptabilisé',
@@ -187,7 +184,6 @@ const STATUS_CONTENT = {
       "Le paiement a été refusé ou annulé : aucune voix n'a été comptée et aucun montant n'est dû.",
   },
 }
-
 const statusContent = computed(
   () => STATUS_CONTENT[receipt.value?.payment_status] ?? STATUS_CONTENT.pending,
 )
@@ -195,7 +191,6 @@ const statusLabel = computed(() => statusContent.value.label)
 const statusIcon = computed(() => statusContent.value.icon)
 const statusBadgeClass = computed(() => statusContent.value.badge)
 const statusExplanation = computed(() => statusContent.value.explanation)
-
 const formattedAmount = computed(() =>
   new Intl.NumberFormat('fr-FR').format(receipt.value?.amount ?? 0),
 )
@@ -205,7 +200,6 @@ const formattedDate = computed(() => {
     new Date(receipt.value.created_at),
   )
 })
-
 const loadReceipt = async () => {
   loading.value = true
   notFound.value = false
@@ -220,12 +214,10 @@ const loadReceipt = async () => {
     loading.value = false
   }
 }
-
 onMounted(loadReceipt)
 </script>
 
 <style scoped>
-/* Bande avant/après — même teinte chaude AWAC que le sélecteur de voix */
 .votes-impact {
   background: linear-gradient(135deg, rgba(239, 121, 82, 0.1), rgba(223, 65, 58, 0.08));
   box-shadow: inset 0 0 0 1px rgba(239, 121, 82, 0.25);

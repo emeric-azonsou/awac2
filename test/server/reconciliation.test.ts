@@ -3,9 +3,7 @@ import { reconcilePendingVotes } from '../../server/services/reconciliation'
 import { asDb } from './helpers'
 import type { Db, SebpayClient } from '../../server/types'
 import type { LateConfirmationNotifier } from '../../server/lib/notifier'
-
 const asSebpay = (o: unknown): SebpayClient => o as unknown as SebpayClient
-
 interface StaleVote {
   receipt_code: string
   candidate_id: string
@@ -16,7 +14,6 @@ interface StaleVote {
   currency: string
   candidate_name: string
 }
-
 function makeDb(staleVotes: Partial<StaleVote>[]) {
   const votes = staleVotes.map((vote, index) => ({
     receipt_code: `AWAC-170000000000${index}-CODE000${index}`,
@@ -72,9 +69,7 @@ function makeDb(staleVotes: Partial<StaleVote>[]) {
   db._state = state
   return db
 }
-
 const makeNotifier = () => ({ voteConfirmedLate: vi.fn().mockResolvedValue(undefined) })
-
 describe('reconcilePendingVotes', () => {
   it('confirme les votes payés, rejette les refusés, garde les pending', async () => {
     const db = makeDb([
@@ -99,7 +94,6 @@ describe('reconcilePendingVotes', () => {
     expect(summary).toMatchObject({ checked: 3, confirmed: 1, rejected: 1, stillPending: 1 })
     expect(db._state.voteCount).toBe(12)
   })
-
   it('notifie le votant uniquement pour une confirmation tardive', async () => {
     const db = makeDb([
       { receipt_code: 'AWAC-1700000000001-APPROVED' },
@@ -125,7 +119,6 @@ describe('reconcilePendingVotes', () => {
     expect(info.candidateName).toBe('Awa Bocovo')
     expect(info.quantity).toBe(2)
   })
-
   it("une erreur SebPay sur un vote n'empêche pas les suivants (et il reste pending)", async () => {
     const db = makeDb([
       { receipt_code: 'AWAC-1700000000001-BROKEN00' },
@@ -141,7 +134,6 @@ describe('reconcilePendingVotes', () => {
     )
     expect(summary).toMatchObject({ checked: 2, confirmed: 1, errors: 1 })
   })
-
   it('sans client SebPay, ne touche à rien', async () => {
     const db = makeDb([{ receipt_code: 'AWAC-1700000000001-WAITING0' }])
     const summary = await reconcilePendingVotes(

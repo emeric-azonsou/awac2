@@ -101,7 +101,6 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: 'admin' })
-
 interface AdminStats {
   revenue_fcfa: number
   voices_confirmed: number
@@ -109,7 +108,6 @@ interface AdminStats {
   votes_by_status: Record<'confirmed' | 'pending' | 'rejected', { count: number; amount: number }>
   top_candidates: { id: string; full_name: string; vote_count: number }[]
 }
-
 const {
   data: stats,
   pending,
@@ -118,7 +116,6 @@ const {
 } = await useFetch<AdminStats>('/api/admin/stats', {
   headers: import.meta.server ? useRequestHeaders(['cookie']) : undefined,
 })
-
 const formatNumber = (value: number) => new Intl.NumberFormat('fr-FR').format(value ?? 0)
 </script>
 
@@ -133,8 +130,6 @@ const formatNumber = (value: number) => new Intl.NumberFormat('fr-FR').format(va
   gap: 0.375rem;
 }
 .stat-revenue {
-  /* Rouge de marque assombri : le texte blanc atteint ≥4.9:1 (AA), là où le
-     dégradé orange d'origine tombait à 2.79:1 (illisible). */
   background: linear-gradient(135deg, #df413a, #b3302a);
   border-color: transparent;
 }

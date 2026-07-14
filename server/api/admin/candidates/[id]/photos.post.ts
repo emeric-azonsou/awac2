@@ -1,7 +1,6 @@
 import { getDb } from '../../../../lib/db'
 import { requireAdminSession } from '../../../../lib/adminSession'
 import { addCandidatePhoto } from '../../../../services/admin/candidates'
-
 export default defineEventHandler(async (event) => {
   await requireAdminSession(event)
   const candidateId = getRouterParam(event, 'id') ?? ''

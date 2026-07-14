@@ -73,14 +73,11 @@
 
 <script setup lang="ts">
 import type { AdminProfileState } from '~/middleware/admin'
-
 const router = useRouter()
 const adminProfile = useState<AdminProfileState | null>('admin-profile', () => null)
-
 const form = ref({ email: '', password: '' })
 const submitting = ref(false)
 const errorMessage = ref('')
-
 const submitLogin = async () => {
   submitting.value = true
   errorMessage.value = ''

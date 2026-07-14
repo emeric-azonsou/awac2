@@ -1,7 +1,5 @@
 import type { Sql } from 'postgres'
-
 export type Db = Sql
-
 export interface SebpayCollection {
   transaction_id: string
   status: string
@@ -11,7 +9,6 @@ export interface SebpayCollection {
   provider_link?: string | null
   message?: string
 }
-
 export interface SebpayCollectionInput {
   amount: number
   currency: string
@@ -21,7 +18,6 @@ export interface SebpayCollectionInput {
   externalReference: string
   callbackUrl: string
 }
-
 export interface SebpayCountry {
   country_code: string
   country_name?: string
@@ -29,7 +25,6 @@ export interface SebpayCountry {
   currency?: { code: string; name?: string; symbol?: string }
   [key: string]: unknown
 }
-
 export interface SebpayOperator {
   slug: string
   name?: string
@@ -37,14 +32,12 @@ export interface SebpayOperator {
   otp_required?: boolean
   [key: string]: unknown
 }
-
 export interface SebpayClient {
   createCollection(input: SebpayCollectionInput): Promise<SebpayCollection>
   getCollection(reference: string): Promise<SebpayCollection>
   getCountries(): Promise<SebpayCountry[]>
   getOperators(country?: string): Promise<SebpayOperator[]>
 }
-
 export interface PaymentConfig {
   callbackUrl: string
 }

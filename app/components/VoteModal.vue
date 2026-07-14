@@ -1,5 +1,4 @@
 <template>
-  <!-- ===== MODAL DE VOTE ===== -->
   <div
     v-if="candidate && phase !== 'thanks'"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
@@ -22,7 +21,6 @@
         </button>
       </div>
 
-      <!-- ÉTAPE 1 : FORMULAIRE -->
       <form v-if="phase === 'form'" @submit.prevent="submitVote" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1"
@@ -135,7 +133,6 @@
         </div>
       </form>
 
-      <!-- ÉTAPE 2 : ATTENTE DE VALIDATION -->
       <div v-else-if="phase === 'awaiting'" class="text-center py-6 space-y-5">
         <div
           class="animate-spin rounded-full h-12 w-12 border-2 border-awac-primary border-t-transparent mx-auto"
@@ -183,7 +180,6 @@
         </button>
       </div>
 
-      <!-- ÉTAPE 3 : ÉCHEC / EXPIRATION -->
       <div v-else-if="phase === 'failed'" class="text-center py-6 space-y-5">
         <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto">
           <span class="material-icons text-3xl text-red-500">error_outline</span>
@@ -217,7 +213,6 @@
     </div>
   </div>
 
-  <!-- ===== MODAL DE REMERCIEMENT ===== -->
   <div
     v-if="phase === 'thanks'"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
@@ -260,45 +255,37 @@ import { pollPaymentStatus } from '~/composables/usePaymentPolling'
 import { clampVoteQuantity } from '~/utils/voteQuantity'
 import { rememberPendingVote, forgetPendingVote } from '~/utils/pendingVotes'
 import { useCopyToClipboard } from '~/composables/useCopyToClipboard'
-
 const props = defineProps({
   candidate: { type: Object, default: null },
   initialQuantity: { type: Number, default: 1 },
   unitPrice: { type: Number, required: true },
   currency: { type: String, default: 'FCFA' },
 })
-
 const emit = defineEmits(['close', 'voted'])
-
 const emptyForm = () => ({
   country: 'BJ',
   operator: '',
   phone_number: '',
   quantity: clampVoteQuantity(props.initialQuantity),
 })
-
 const form = ref(emptyForm())
-const phase = ref('form') // form | awaiting | failed | thanks
+const phase = ref('form')
 const submitting = ref(false)
 const errorMessage = ref('')
 const receiptCode = ref('')
 const { copied, copy } = useCopyToClipboard()
-
 const countries = ref([])
 const operators = ref([])
 const metaLoading = ref(false)
 let poller = null
-
 const formattedTotal = computed(() => {
   const total = (parseInt(form.value.quantity) || 0) * props.unitPrice
   return new Intl.NumberFormat('fr-FR').format(total)
 })
-
 const selectedCountry = computed(() =>
   countries.value.find((entry) => entry.country_code === form.value.country),
 )
 const selectedPrefix = computed(() => selectedCountry.value?.prefix || '')
-
 const loadCountries = async () => {
   metaLoading.value = true
   try {
@@ -314,7 +301,6 @@ const loadCountries = async () => {
     metaLoading.value = false
   }
 }
-
 const loadOperators = async () => {
   metaLoading.value = true
   form.value.operator = ''
@@ -329,7 +315,6 @@ const loadOperators = async () => {
     metaLoading.value = false
   }
 }
-
 watch(
   () => props.candidate,
   (candidate) => {
@@ -342,7 +327,6 @@ watch(
     }
   },
 )
-
 const startPolling = (voteId) => {
   poller = pollPaymentStatus(voteId)
   poller.promise.then((result) => {
@@ -362,13 +346,11 @@ const startPolling = (voteId) => {
     poller = null
   })
 }
-
 const cancelPolling = () => {
   if (poller) poller.cancel()
   poller = null
   close()
 }
-
 const submitVote = async () => {
   if (!form.value.operator || !form.value.phone_number?.trim()) {
     errorMessage.value = 'Veuillez remplir tous les champs obligatoires.'
@@ -385,17 +367,12 @@ const submitVote = async () => {
       country: form.value.country,
       currency: selectedCountry.value?.currency?.code,
     })
-
     receiptCode.value = result.receipt_code
-
     if (result.provider_link) window.open(result.provider_link, '_blank', 'noopener')
-
     if (result.payment_status === 'confirmed') {
       emit('voted', { votes_after: result.votes_after })
       phase.value = 'thanks'
     } else {
-      // Trace locale : si le votant ferme l'onglet avant la confirmation, la
-      // prochaine visite lui prouvera que son vote a bien été comptabilisé.
       rememberPendingVote({
         receipt_code: result.receipt_code,
         candidate_name: props.candidate.full_name,
@@ -410,18 +387,15 @@ const submitVote = async () => {
     submitting.value = false
   }
 }
-
 const close = () => {
   if (poller) poller.cancel()
   poller = null
   emit('close')
 }
-
 const closeThanks = () => {
   phase.value = 'form'
   emit('close')
 }
-
 onBeforeUnmount(() => {
   if (poller) poller.cancel()
 })

@@ -1,12 +1,9 @@
 import { ref } from 'vue'
 import { voteService } from '~/utils/voteService'
-
 const DEFAULT_UNIT_PRICE = 100
-
 export function useVotePricing() {
   const unitPrice = ref(DEFAULT_UNIT_PRICE)
   const currency = ref('FCFA')
-
   const loadVotePricing = async () => {
     try {
       const pricing = await voteService.getVotePricing()
@@ -16,6 +13,5 @@ export function useVotePricing() {
       console.error('Erreur chargement prix du vote:', err)
     }
   }
-
   return { unitPrice, currency, loadVotePricing }
 }

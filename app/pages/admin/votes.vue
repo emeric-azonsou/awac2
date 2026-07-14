@@ -28,7 +28,6 @@
       {{ reconcileMessage }}
     </p>
 
-    <!-- Totaux par statut -->
     <section v-if="data" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <button
         v-for="key in statusOrder"
@@ -55,7 +54,6 @@
       </button>
     </section>
 
-    <!-- Recherche -->
     <div class="flex items-center gap-3">
       <div class="relative flex-1 max-w-sm">
         <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
@@ -78,7 +76,6 @@
       </button>
     </div>
 
-    <!-- Table -->
     <div v-if="pending" class="flex justify-center py-16">
       <div
         class="animate-spin rounded-full h-8 w-8 border-2 border-awac-primary border-t-transparent"
@@ -144,7 +141,6 @@
         </table>
       </div>
 
-      <!-- Pagination -->
       <div
         v-if="totalPages > 1"
         class="flex items-center justify-between px-5 py-3 border-t border-gray-100 text-sm"
@@ -177,9 +173,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: 'admin' })
-
 type PaymentStatus = 'confirmed' | 'pending' | 'rejected'
-
 interface AdminVote {
   id: string
   receipt_code: string
@@ -198,7 +192,6 @@ interface VotesResponse {
   per_page: number
   totals_by_status: Record<PaymentStatus, { count: number; amount: number }>
 }
-
 const statusOrder: PaymentStatus[] = ['confirmed', 'pending', 'rejected']
 interface StatusMeta {
   text: string
@@ -217,31 +210,25 @@ const FALLBACK_META: StatusMeta = {
 }
 const metaFor = (status: string): StatusMeta =>
   statusMeta[status as PaymentStatus] ?? { ...FALLBACK_META, text: status }
-
 const filters = ref({ status: '' as '' | PaymentStatus, search: '', page: 1 })
 const searchInput = ref('')
 const reconciling = ref(false)
 const reconcileMessage = ref('')
-
 const requestQuery = computed(() => ({
   status: filters.value.status || undefined,
   search: filters.value.search || undefined,
   page: filters.value.page,
 }))
-
 const { data, pending, refresh } = await useFetch<VotesResponse>('/api/admin/votes', {
   query: requestQuery,
   headers: import.meta.server ? useRequestHeaders(['cookie']) : undefined,
 })
-
 const totalPages = computed(() =>
   data.value ? Math.max(1, Math.ceil(data.value.total / data.value.per_page)) : 1,
 )
-
 const formatNumber = (value: number) => new Intl.NumberFormat('fr-FR').format(value ?? 0)
 const formatDate = (iso: string) =>
   new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(iso))
-
 const toggleStatus = (status: PaymentStatus) => {
   filters.value.status = filters.value.status === status ? '' : status
   filters.value.page = 1
@@ -257,7 +244,6 @@ const resetFilters = () => {
 const goToPage = (page: number) => {
   filters.value.page = page
 }
-
 const reconcile = async () => {
   reconciling.value = true
   reconcileMessage.value = ''

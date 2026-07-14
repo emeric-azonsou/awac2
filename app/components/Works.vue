@@ -38,7 +38,6 @@
         </div>
 
         <div class="lg:col-span-7 flex flex-col w-full max-w-xl mx-auto lg:mx-0">
-          <!-- ÉTAPE 01 -->
           <div
             class="flex items-stretch gap-6 md:gap-10 group step-item"
             :class="isVisible ? 'step-visible' : ''"
@@ -66,7 +65,6 @@
                   stroke-width="2.5"
                   stroke-linecap="round"
                 >
-                  <!-- FORÇAGE ULTIME : Le style inline avec !important détruit le bug de DeepSeek -->
                   <path
                     d="M20,0 Q35,25 20,50 T20,100"
                     stroke-dasharray="4,4"
@@ -91,7 +89,6 @@
             </div>
           </div>
 
-          <!-- ÉTAPE 02 -->
           <div
             class="flex items-stretch gap-6 md:gap-10 group step-item"
             :class="isVisible ? 'step-visible' : ''"
@@ -119,7 +116,6 @@
                   stroke-width="2.5"
                   stroke-linecap="round"
                 >
-                  <!-- FORÇAGE ULTIME : Le style inline avec !important détruit le bug de DeepSeek -->
                   <path
                     d="M20,0 Q5,25 20,50 T20,100"
                     stroke-dasharray="4,4"
@@ -144,7 +140,6 @@
             </div>
           </div>
 
-          <!-- ÉTAPE 03 -->
           <div
             class="flex items-stretch gap-6 md:gap-10 group step-item"
             :class="isVisible ? 'step-visible' : ''"
@@ -186,12 +181,9 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-
 const sectionRef = ref(null)
 const isVisible = ref(false)
-
 let observer = null
-
 onMounted(() => {
   observer = new IntersectionObserver(
     ([entry]) => {
@@ -205,12 +197,10 @@ onMounted(() => {
       rootMargin: '0px 0px -50px 0px',
     },
   )
-
   if (sectionRef.value) {
     observer.observe(sectionRef.value)
   }
 })
-
 onBeforeUnmount(() => {
   if (observer) {
     observer.disconnect()
@@ -224,20 +214,16 @@ onBeforeUnmount(() => {
   transform: translateX(-30px);
   transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
 .step-visible {
   opacity: 1;
   transform: translateX(0);
 }
-
 .step-circle {
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
 .step-item.step-visible .step-circle {
   animation: popCircle 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
-
 @keyframes popCircle {
   0% {
     transform: scale(0.5);
@@ -248,15 +234,12 @@ onBeforeUnmount(() => {
     opacity: 1;
   }
 }
-
 .step-content {
   transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
 .step-item.step-visible .step-content {
   animation: slideContent 0.6s ease-out both;
 }
-
 @keyframes slideContent {
   0% {
     opacity: 0;
@@ -267,21 +250,17 @@ onBeforeUnmount(() => {
     transform: translateX(0);
   }
 }
-
 .step-line svg path {
   stroke-dasharray: 200;
   stroke-dashoffset: 200;
   transition: stroke-dashoffset 1.2s ease-out;
 }
-
 .step-item.step-visible .step-line svg path {
   stroke-dashoffset: 0;
 }
-
 .step-item:last-child .step-line {
   opacity: 0;
 }
-
 @keyframes pulse-slow {
   0%,
   100% {
@@ -293,11 +272,9 @@ onBeforeUnmount(() => {
     transform: scale(1.1);
   }
 }
-
 .animate-pulse-slow {
   animation: pulse-slow 6s ease-in-out infinite;
 }
-
 .step-item:nth-child(1) {
   transition-delay: 0.1s;
 }

@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest'
 import { getAdminStats } from '../../server/services/admin/stats'
 import { asDb } from './helpers'
 import type { Db } from '../../server/types'
-
 function makeDb({ empty = false } = {}) {
   const db = ((strings: TemplateStringsArray) => {
     const sql = strings.join('?')
@@ -34,7 +33,6 @@ function makeDb({ empty = false } = {}) {
   }) as unknown as Db
   return db
 }
-
 describe('getAdminStats', () => {
   it('agrège revenus confirmés, voix, statuts et top candidats', async () => {
     const res = await getAdminStats({ db: asDb(makeDb()) as unknown as Db })
@@ -53,7 +51,6 @@ describe('getAdminStats', () => {
       { id: 'c2', full_name: 'Kofi Dossou', vote_count: 7 },
     ])
   })
-
   it('renvoie des zéros propres sur une base vide (pas de null)', async () => {
     const res = await getAdminStats({ db: asDb(makeDb({ empty: true })) as unknown as Db })
     expect(res.status).toBe(200)

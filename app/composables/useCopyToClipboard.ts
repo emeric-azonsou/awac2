@@ -1,12 +1,8 @@
 import { ref } from 'vue'
 
-// Copie de texte dans le presse-papier avec retour visuel « copié » temporaire.
-// Repli execCommand pour les contextes où l'API clipboard est indisponible
-// (http, permissions refusées) — fréquent sur mobiles bas de gamme.
 export function useCopyToClipboard(resetMs = 2000) {
   const copied = ref(false)
   let timer: ReturnType<typeof setTimeout> | null = null
-
   const copy = async (text: string) => {
     if (!text) return
     try {
@@ -26,6 +22,5 @@ export function useCopyToClipboard(resetMs = 2000) {
     if (timer) clearTimeout(timer)
     timer = setTimeout(() => (copied.value = false), resetMs)
   }
-
   return { copied, copy }
 }

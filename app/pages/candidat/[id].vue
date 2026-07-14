@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-[#F9F8F6] selection:bg-awac-primary/10">
-    <!-- ===== HEADER LÉGER (hors vitrine, ancres inutilisables ici) ===== -->
     <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100">
       <div class="container mx-auto px-6 max-w-6xl h-16 flex items-center justify-between gap-4">
         <router-link
@@ -34,14 +33,12 @@
       </div>
     </header>
 
-    <!-- ===== CHARGEMENT ===== -->
     <div v-if="loading" class="flex justify-center py-40">
       <div
         class="animate-spin rounded-full h-8 w-8 border-2 border-awac-primary border-t-transparent"
       ></div>
     </div>
 
-    <!-- ===== CANDIDAT INTROUVABLE ===== -->
     <div v-else-if="notFound" class="container mx-auto px-6 max-w-xl text-center py-32 space-y-6">
       <span class="material-icons text-6xl text-gray-300">person_search</span>
       <h1 class="text-gray-900 font-heading font-black text-3xl uppercase tracking-tight">
@@ -59,7 +56,6 @@
       </router-link>
     </div>
 
-    <!-- ===== ERREUR RÉSEAU ===== -->
     <div v-else-if="error" class="container mx-auto px-6 max-w-xl text-center py-32 space-y-6">
       <span class="material-icons text-6xl text-gray-300">wifi_off</span>
       <p class="text-gray-500 font-sans text-sm">{{ error }}</p>
@@ -72,7 +68,6 @@
       </button>
     </div>
 
-    <!-- ===== PROFIL ===== -->
     <main v-else-if="candidate">
       <section class="container mx-auto px-6 max-w-6xl pt-12 md:pt-20 pb-16">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-end">
@@ -150,7 +145,6 @@
         </div>
       </section>
 
-      <!-- ===== RÉALISATIONS ===== -->
       <section class="border-t border-gray-100 bg-white">
         <div class="container mx-auto px-6 max-w-6xl py-16 md:py-24">
           <h2
@@ -159,7 +153,6 @@
             Ses réalisations
           </h2>
 
-          <!-- Galerie vide -->
           <div v-if="candidate.photos.length === 0" class="text-center py-16 space-y-4">
             <span class="material-icons text-5xl text-gray-200">checkroom</span>
             <p class="text-gray-500 font-sans text-sm">
@@ -168,7 +161,6 @@
             </p>
           </div>
 
-          <!-- Galerie -->
           <div v-else class="space-y-10">
             <figure class="gallery-item">
               <div
@@ -216,7 +208,6 @@
         </div>
       </section>
 
-      <!-- ===== CTA FINAL ===== -->
       <section class="bg-awac-dark py-16 md:py-20">
         <div class="container mx-auto px-6 max-w-3xl text-center space-y-6">
           <h2
@@ -235,7 +226,6 @@
         </div>
       </section>
 
-      <!-- ===== CTA STICKY MOBILE ===== -->
       <div
         class="sm:hidden fixed bottom-0 inset-x-0 z-30 p-4 bg-gradient-to-t from-white via-white/95 to-transparent pointer-events-none"
       >
@@ -268,10 +258,8 @@ import { voteService } from '~/utils/voteService'
 import { useVotePricing } from '@/composables/useVotePricing'
 import { ApiError } from '~/utils/api'
 import { MIN_VOTE_QUANTITY } from '~/utils/voteQuantity'
-
 const route = useRoute()
 const defaultPhoto = new URL('../../assets/img/candidat/candidat.jpg', import.meta.url).href
-
 const candidate = ref(null)
 const loading = ref(true)
 const notFound = ref(false)
@@ -279,9 +267,7 @@ const error = ref('')
 const showVote = ref(false)
 const voteQuantity = ref(MIN_VOTE_QUANTITY)
 const { unitPrice, currency, loadVotePricing } = useVotePricing()
-
 const firstName = computed(() => candidate.value?.full_name.split(' ')[0] || '')
-
 const loadCandidate = async () => {
   loading.value = true
   error.value = ''
@@ -299,11 +285,9 @@ const loadCandidate = async () => {
     loading.value = false
   }
 }
-
 const onVoted = (result) => {
   if (candidate.value) candidate.value.vote_count = result.votes_after
 }
-
 onMounted(() => {
   loadCandidate()
   loadVotePricing()

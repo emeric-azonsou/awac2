@@ -97,12 +97,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { listPendingVotes } from '~/utils/pendingVotes'
-
 const router = useRouter()
 const code = ref('')
 const errorMessage = ref('')
 const recentVotes = ref([])
-
 const openReceipt = () => {
   const normalized = code.value.trim().toUpperCase()
   if (!normalized.startsWith('AWAC-') || normalized.length < 15) {
@@ -112,7 +110,6 @@ const openReceipt = () => {
   errorMessage.value = ''
   router.push(`/recu/${normalized}`)
 }
-
 onMounted(() => {
   recentVotes.value = listPendingVotes()
 })
