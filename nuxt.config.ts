@@ -21,7 +21,7 @@ export default defineNuxtConfig({
       ],
     },
   },
-  modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxtjs/supabase'],
+  modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt'],
   css: ['~/assets/css/tailwind.css'],
   hooks: {
     // Restaure l'enveloppe d'erreur historique { error: { code, message } }
@@ -42,10 +42,6 @@ export default defineNuxtConfig({
     },
   },
   tailwindcss: { configPath: '~~/tailwind.config.ts' },
-  supabase: {
-    // pas de redirection auto pour l'instant (auth traitée en phase 3)
-    redirect: false,
-  },
   typescript: {
     strict: true,
     tsConfig: {
@@ -61,11 +57,6 @@ export default defineNuxtConfig({
     sebpaySecretKey: process.env.SEBPAY_SECRET_KEY ?? '',
     sebpayBaseUrl: process.env.SEBPAY_BASE_URL ?? '',
     sebpayCallbackUrl: process.env.SEBPAY_CALLBACK_URL ?? '',
-    supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
-    public: {
-      // exposé au client
-      supabaseUrl: process.env.SUPABASE_URL ?? '',
-      supabaseAnonKey: process.env.SUPABASE_KEY ?? '',
-    },
+    sessionSecret: process.env.SESSION_SECRET ?? '',
   },
 })
