@@ -115,8 +115,21 @@
           </div>
           <div class="flex justify-between gap-4 items-baseline">
             <dt class="text-gray-500 shrink-0">Code reçu</dt>
-            <dd class="font-mono text-xs font-bold text-gray-900 break-all text-right">
-              {{ receipt.receipt_code }}
+            <dd class="flex items-baseline gap-2 min-w-0">
+              <span class="font-mono text-xs font-bold text-gray-900 break-all text-right">
+                {{ receipt.receipt_code }}
+              </span>
+              <button
+                type="button"
+                class="shrink-0 inline-flex items-center gap-1 rounded-lg border border-gray-200 px-2 py-1 text-[11px] font-semibold text-gray-600 hover:border-awac-primary hover:text-awac-primary transition-colors active:scale-95"
+                :aria-label="copied ? 'Code copié' : 'Copier le code reçu'"
+                @click="copyReceiptCode"
+              >
+                <span class="material-icons text-sm" aria-hidden="true">
+                  {{ copied ? 'check' : 'content_copy' }}
+                </span>
+                {{ copied ? 'Copié' : 'Copier' }}
+              </button>
             </dd>
           </div>
         </dl>
@@ -146,6 +159,30 @@ const route = useRoute()
 const receipt = ref(null)
 const loading = ref(true)
 const notFound = ref(false)
+const copied = ref(false)
+let copiedTimer = null
+
+const copyReceiptCode = async () => {
+  const code = receipt.value?.receipt_code
+  if (!code) return
+  try {
+    await navigator.clipboard.writeText(code)
+  } catch {
+    // Repli si l'API clipboard est indisponible (http, permissions).
+    const field = document.createElement('textarea')
+    field.value = code
+    field.setAttribute('readonly', '')
+    field.style.position = 'absolute'
+    field.style.left = '-9999px'
+    document.body.appendChild(field)
+    field.select()
+    document.execCommand('copy')
+    document.body.removeChild(field)
+  }
+  copied.value = true
+  if (copiedTimer) clearTimeout(copiedTimer)
+  copiedTimer = setTimeout(() => (copied.value = false), 2000)
+}
 
 const STATUS_CONTENT = {
   confirmed: {
