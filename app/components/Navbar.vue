@@ -66,7 +66,7 @@
           </NuxtLink>
           <a
             href="#candidats"
-            class="relative overflow-hidden bg-awac-dark text-white font-heading font-bold text-[10px] lg:text-xs tracking-widest uppercase py-3 px-4 lg:px-6 rounded-md transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg flex items-center gap-2 lg:gap-3 isolation-auto z-10 before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-awac-primary before:to-awac-accent before:transition-opacity before:duration-300 hover:before:opacity-0"
+            class="btn-awac text-[10px] lg:text-xs py-3 px-4 lg:px-6 gap-2 lg:gap-3 rounded-md"
           >
             <span class="material-icons text-sm lg:text-base">how_to_vote</span>
             <span class="hidden xl:inline">VOTER RAPIDEMENT</span>

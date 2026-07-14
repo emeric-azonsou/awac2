@@ -22,11 +22,7 @@
           Tous les candidats
         </router-link>
 
-        <button
-          v-if="candidate"
-          @click="showVote = true"
-          class="relative overflow-hidden bg-awac-dark text-white font-heading font-black text-[11px] tracking-widest uppercase py-2.5 px-5 rounded-xl shadow-sm transition-all duration-300 hover:-translate-y-0.5 isolation-auto z-10 before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-awac-primary before:to-awac-accent before:transition-opacity before:duration-300 hover:before:opacity-0 flex items-center gap-2 hover:shadow-lg active:scale-[0.98]"
-        >
+        <button v-if="candidate" @click="showVote = true" class="btn-awac text-[11px] py-2.5 px-5">
           <span class="material-icons text-base">how_to_vote</span>
           Voter
         </button>
@@ -49,7 +45,7 @@
       </p>
       <router-link
         to="/#candidats"
-        class="inline-flex items-center gap-2 px-6 py-3 bg-awac-primary text-white font-heading font-black text-[11px] tracking-widest uppercase rounded-xl hover:bg-awac-primary/90 transition-colors"
+        class="inline-flex items-center gap-2 px-6 py-3 bg-awac-primary text-white font-heading font-black text-[11px] tracking-widest uppercase rounded-xl hover:bg-awac-primaryDark transition-colors"
       >
         <span class="material-icons text-base">arrow_back</span>
         Voir tous les candidats
@@ -61,7 +57,7 @@
       <p class="text-gray-500 font-sans text-sm">{{ error }}</p>
       <button
         @click="loadCandidate"
-        class="inline-flex items-center gap-2 px-6 py-3 bg-awac-primary text-white font-heading font-black text-[11px] tracking-widest uppercase rounded-xl hover:bg-awac-primary/90 transition-colors"
+        class="inline-flex items-center gap-2 px-6 py-3 bg-awac-primary text-white font-heading font-black text-[11px] tracking-widest uppercase rounded-xl hover:bg-awac-primaryDark transition-colors"
       >
         <span class="material-icons text-base">refresh</span>
         Réessayer
@@ -134,10 +130,7 @@
               class="max-w-xs mx-auto md:mx-0"
             />
 
-            <button
-              @click="showVote = true"
-              class="relative overflow-hidden bg-gradient-to-r from-awac-primary to-awac-accent text-white font-heading font-black text-xs tracking-widest uppercase py-4 px-8 rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98] inline-flex items-center gap-2"
-            >
+            <button @click="showVote = true" class="btn-awac text-xs py-4 px-8">
               <span class="material-icons text-lg">how_to_vote</span>
               Voter pour {{ firstName }}
             </button>
@@ -216,10 +209,7 @@
           >
             Propulsez {{ firstName }} vers la victoire
           </h2>
-          <button
-            @click="showVote = true"
-            class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-awac-primary to-awac-accent text-white font-heading font-black text-xs tracking-widest uppercase rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98]"
-          >
+          <button @click="showVote = true" class="btn-awac text-xs px-8 py-4">
             <span class="material-icons text-lg">how_to_vote</span>
             Voter pour {{ firstName }}
           </button>
@@ -231,7 +221,7 @@
       >
         <button
           @click="showVote = true"
-          class="pointer-events-auto w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-awac-primary to-awac-accent text-white font-heading font-black text-[11px] tracking-widest uppercase rounded-xl shadow-lg active:scale-[0.98] transition-transform"
+          class="btn-awac w-full py-3.5 text-[11px] pointer-events-auto"
         >
           <span class="material-icons text-base">how_to_vote</span>
           Voter pour {{ firstName }} — {{ candidate.vote_count }} votes

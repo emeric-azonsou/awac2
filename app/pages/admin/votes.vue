@@ -8,7 +8,7 @@
         <p class="text-gray-500 font-sans text-sm">Suivi des paiements et réconciliation SebPay.</p>
       </div>
       <button
-        class="flex items-center gap-2 bg-awac-dark text-white font-heading font-black text-[11px] tracking-widest uppercase py-3 px-5 rounded-xl shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] disabled:opacity-60"
+        class="btn-awac-dark text-[11px] py-3 px-5"
         :disabled="reconciling"
         @click="reconcile"
       >

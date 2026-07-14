@@ -6,8 +6,9 @@ Système visuel du site public AWAC MONO, capturé depuis le code existant (Tail
 
 | Token | Valeur | Usage |
 |---|---|---|
-| `awac-primary` | `#EF7952` | Orange signature — CTA, accents, hover, sélection (`selection:bg-awac-primary/10`) |
-| `awac-secondary` | `#F49537` | Orange doré — dégradés de CTA (`from-awac-primary to-awac-accent`) |
+| `awac-primary` | `#EF7952` | Orange signature — fond plein des CTA, accents, sélection (`selection:bg-awac-primary/10`) |
+| `awac-primaryDark` | `#D2603A` | Orange foncé — état hover des CTA pleins (`hover:bg-awac-primaryDark`) |
+| `awac-secondary` | `#F49537` | Orange doré — accents secondaires |
 | `awac-accent` | `#DF413A` | Rouge brique — fin de dégradés, fonds teintés (`bg-awac-accent/10`) |
 | `awac-dark` | `#0B0B0B` | Quasi-noir — boutons sombres, footer |
 | Fond page | `#F9F8F6` | Sections claires |
@@ -24,8 +25,9 @@ Stratégie : restrained — neutres clairs + un accent orange qui porte l'identi
 ## Components
 
 - **Carte candidat** : fond blanc, coins asymétriques `rounded-[2.5rem_0_2.5rem_0]`, photo 380px `object-cover object-top`, badge N° en pastille `rounded-full` noir/blur en haut à gauche, hover `-translate-y-1` + zoom image 1.05.
-- **Boutons CTA** : dégradé `from-awac-primary to-awac-accent` (via `before:`), texte 11px black tracking-widest uppercase, `rounded-xl`, icône Material Icons, `active:scale-[0.98]`.
-- **Boutons secondaires** : bordure `border-gray-200`, texte gris, `rounded-xl`, hover `bg-gray-50`.
+- **Boutons CTA** (`.btn-awac`) : fond plein `bg-awac-primary`, hover `bg-awac-primaryDark` (assombrit, pas de dégradé ni de lift), texte 11px black tracking-widest uppercase, `rounded-xl`, icône Material Icons, `active:scale-[0.98]`. Pas de `hover:-translate-y` ni d'escalade `shadow-lg` — motion sobre.
+- **Boutons sombres** (`.btn-awac-dark`) : fond `bg-awac-dark`, hover `bg-neutral-800` — actions utilitaires admin (toolbar), hiérarchie plus discrète que le CTA orange.
+- **Boutons secondaires** (`.btn-awac-outline`) : bordure `border-gray-200`, texte gris, `rounded-xl`, hover `bg-gray-50`.
 - **Modals** : overlay `bg-black/50 backdrop-blur-sm`, panneau `bg-white/95 backdrop-blur-xl rounded-3xl`, entrée `animate-slide-up` (0.25s ease-out).
 - **Inputs** : `rounded-xl border-gray-200`, focus `border-awac-primary` + ring `awac-primary/20`.
 

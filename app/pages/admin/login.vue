@@ -55,11 +55,7 @@
 
         <p v-if="errorMessage" class="text-sm text-red-500" role="alert">{{ errorMessage }}</p>
 
-        <button
-          type="submit"
-          :disabled="submitting"
-          class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-awac-primary to-awac-accent text-white font-heading font-black text-[11px] tracking-widest uppercase py-3.5 rounded-xl shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] disabled:opacity-70 disabled:hover:translate-y-0"
-        >
+        <button type="submit" :disabled="submitting" class="btn-awac w-full text-[11px] py-3.5">
           <span
             v-if="submitting"
             class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"

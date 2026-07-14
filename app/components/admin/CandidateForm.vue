@@ -68,7 +68,7 @@
       <p v-if="errorMessage" class="text-sm text-red-500">{{ errorMessage }}</p>
 
       <button
-        class="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-awac-primary to-awac-accent text-white font-heading font-black text-[11px] tracking-widest uppercase py-3.5 px-8 rounded-xl shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] disabled:opacity-60"
+        class="btn-awac w-full sm:w-auto text-[11px] py-3.5 px-8"
         :disabled="saving"
         @click="save"
       >

@@ -148,10 +148,7 @@
           class="pt-2 w-full sm:w-auto flex justify-center animate-fade-up"
           style="animation-delay: 0.6s"
         >
-          <a
-            href="#candidats"
-            class="relative inline-flex overflow-hidden bg-awac-dark text-white font-heading font-bold text-xs tracking-widest uppercase py-3.5 px-10 rounded-md transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl items-center gap-3 isolation-auto z-10 before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-awac-primary before:to-awac-accent before:transition-opacity before:duration-300 hover:before:opacity-0 w-full sm:w-auto justify-center hover:scale-[1.02] active:scale-[0.98]"
-          >
+          <a href="#candidats" class="btn-awac text-xs py-3.5 px-10 gap-3 w-full sm:w-auto">
             <span>VOIR LES CANDIDATS & VOTER</span>
             <span class="material-icons text-sm animate-bounce-x">arrow_forward</span>
           </a>

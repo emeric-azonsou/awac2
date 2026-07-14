@@ -7,6 +7,7 @@ export default {
       colors: {
         awac: {
           primary: '#EF7952',
+          primaryDark: '#D2603A',
           secondary: '#F49537',
           accent: '#DF413A',
           dark: '#0B0B0B',

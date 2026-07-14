@@ -19,8 +19,20 @@
 }
 
 @layer components {
+  .btn-awac {
+    @apply inline-flex items-center justify-center gap-2 bg-awac-primary text-white font-heading font-black tracking-widest uppercase rounded-xl transition-colors duration-200 hover:bg-awac-primaryDark active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
+  .btn-awac-dark {
+    @apply inline-flex items-center justify-center gap-2 bg-awac-dark text-white font-heading font-black tracking-widest uppercase rounded-xl transition-colors duration-200 hover:bg-neutral-800 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
+  .btn-awac-outline {
+    @apply inline-flex items-center justify-center gap-2 border border-gray-200 text-gray-600 font-semibold rounded-xl transition-colors duration-200 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
   .btn-primary {
-    @apply bg-awac-primary hover:bg-awac-secondary text-white font-semibold py-2 px-4 rounded-lg transition duration-200;
+    @apply bg-awac-primary hover:bg-awac-primaryDark text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200;
   }
 
   .input-field {

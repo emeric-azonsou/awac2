@@ -57,10 +57,7 @@
           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all font-mono text-sm"
         />
         <p v-if="errorMessage" class="text-sm text-red-500">{{ errorMessage }}</p>
-        <button
-          type="submit"
-          class="w-full flex items-center justify-center gap-2 bg-awac-dark text-white font-heading font-black text-[11px] tracking-widest uppercase py-3.5 rounded-xl shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] relative overflow-hidden isolation-auto z-10 before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-awac-primary before:to-awac-accent before:transition-opacity before:duration-300 hover:before:opacity-0"
-        >
+        <button type="submit" class="btn-awac w-full text-[11px] py-3.5">
           <span class="material-icons text-base">receipt_long</span>
           Voir mon reçu
         </button>

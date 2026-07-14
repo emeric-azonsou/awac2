@@ -24,7 +24,7 @@
           <a
             href="https://wa.me"
             target="_blank"
-            class="inline-flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#20BA5A] text-white font-sans font-bold text-xs tracking-widest uppercase py-4 px-8 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
+            class="inline-flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#20BA5A] text-white font-sans font-bold text-xs tracking-widest uppercase py-4 px-8 rounded-xl shadow-sm transition-colors duration-200 active:scale-[0.98]"
           >
             <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
               <path
@@ -45,7 +45,7 @@
           <a
             href="https://tiktok.com"
             target="_blank"
-            class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 transition-all duration-300 hover:text-white hover:border-awac-primary hover:bg-gradient-to-br hover:from-awac-primary/20 hover:to-transparent hover:-translate-y-1 shadow-xs"
+            class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 transition-colors duration-200 hover:text-white hover:border-awac-primary hover:bg-white/10"
           >
             <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
               <path
@@ -57,7 +57,7 @@
           <a
             href="https://instagram.com"
             target="_blank"
-            class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 transition-all duration-300 hover:text-white hover:border-awac-primary hover:bg-gradient-to-br hover:from-awac-primary/20 hover:to-transparent hover:-translate-y-1 shadow-xs"
+            class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 transition-colors duration-200 hover:text-white hover:border-awac-primary hover:bg-white/10"
           >
             <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
               <path
@@ -69,7 +69,7 @@
           <a
             href="https://facebook.com"
             target="_blank"
-            class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 transition-all duration-300 hover:text-white hover:border-awac-accent hover:bg-gradient-to-br hover:from-awac-accent/20 hover:to-transparent hover:-translate-y-1 shadow-xs"
+            class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 transition-colors duration-200 hover:text-white hover:border-awac-accent hover:bg-white/10"
           >
             <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
               <path

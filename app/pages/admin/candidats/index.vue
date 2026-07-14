@@ -9,10 +9,7 @@
           {{ candidates?.length ?? 0 }} candidat(s) en compétition.
         </p>
       </div>
-      <NuxtLink
-        to="/admin/candidats/nouveau"
-        class="flex items-center gap-2 bg-awac-dark text-white font-heading font-black text-[11px] tracking-widest uppercase py-3 px-5 rounded-xl shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98]"
-      >
+      <NuxtLink to="/admin/candidats/nouveau" class="btn-awac-dark text-[11px] py-3 px-5">
         <span class="material-icons text-base">add</span>
         Ajouter
       </NuxtLink>

@@ -120,7 +120,7 @@
 
               <button
                 @click="openVoteModal(candidat)"
-                class="relative w-full overflow-hidden bg-awac-dark text-white font-heading font-bold text-[11px] tracking-widest uppercase py-3.5 rounded-xl shadow-sm transition-all duration-300 transform hover:-translate-y-0.5 isolation-auto z-10 before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-awac-primary before:to-awac-accent before:transition-opacity before:duration-300 hover:before:opacity-0 flex items-center justify-center gap-2 px-4 hover:shadow-lg active:scale-[0.98]"
+                class="btn-awac w-full text-[11px] py-3.5 px-4"
               >
                 <span class="material-icons text-base shrink-0">how_to_vote</span>
                 <span class="font-heading font-black tracking-wider">VOTER</span>

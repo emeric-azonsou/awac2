@@ -121,7 +121,7 @@
           </button>
           <button
             type="submit"
-            class="w-full sm:w-auto flex-1 px-5 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primary/90 transition-colors shadow-sm text-sm flex items-center justify-center gap-2 disabled:opacity-70"
+            class="w-full sm:w-auto flex-1 px-5 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primaryDark transition-colors shadow-sm text-sm flex items-center justify-center gap-2 disabled:opacity-70"
             :disabled="submitting"
           >
             <span
@@ -133,17 +133,47 @@
         </div>
       </form>
 
-      <div v-else-if="phase === 'awaiting'" class="text-center py-6 space-y-5">
-        <div
-          class="animate-spin rounded-full h-12 w-12 border-2 border-awac-primary border-t-transparent mx-auto"
-        ></div>
-        <div class="space-y-2">
-          <h4 class="font-heading font-black text-gray-900">Validez le paiement</h4>
-          <p class="text-sm text-gray-600">
-            Une demande de paiement a été envoyée à votre téléphone
-            <span class="font-semibold">{{ selectedPrefix }} {{ form.phone_number }}</span
-            >. Confirmez-la pour valider votre vote.
+      <div v-else-if="phase === 'awaiting'" class="text-center py-2 space-y-6">
+        <div class="relative mx-auto grid h-24 w-24 place-items-center">
+          <span
+            class="absolute inline-flex h-16 w-16 motion-safe:animate-ping rounded-full bg-awac-primary/30"
+            aria-hidden="true"
+          ></span>
+          <span
+            class="absolute inline-flex h-20 w-20 motion-safe:animate-ping rounded-full bg-awac-primary/20"
+            style="animation-delay: 0.6s"
+            aria-hidden="true"
+          ></span>
+          <div
+            class="relative grid h-16 w-16 place-items-center rounded-full bg-awac-primary text-white shadow-lg shadow-awac-primary/30"
+          >
+            <span class="material-icons text-3xl" aria-hidden="true">smartphone</span>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="font-heading font-black text-lg text-gray-900">Presque terminé !</h4>
+          <p class="text-sm leading-relaxed text-gray-600 text-justify sm:text-center">
+            Une demande de paiement de
+            <span class="font-heading font-black text-awac-accent">{{ formattedTotal }} F</span>
+            vient d'arriver sur votre téléphone. Validez-la pour confirmer votre vote pour
+            <span class="font-semibold text-gray-900">{{ candidate.full_name }}</span
+            >.
           </p>
+          <p
+            class="inline-flex items-center gap-1.5 rounded-full bg-awac-primary/10 px-3 py-1.5 text-sm font-semibold text-awac-primary"
+          >
+            <span class="material-icons text-base" aria-hidden="true">call</span>
+            {{ selectedPrefix }} {{ form.phone_number }}
+          </p>
+        </div>
+
+        <div class="flex items-center justify-center gap-2 text-xs font-semibold text-gray-400">
+          <span
+            class="h-3.5 w-3.5 motion-safe:animate-spin rounded-full border-2 border-awac-primary/40 border-t-awac-primary"
+            aria-hidden="true"
+          ></span>
+          En attente de votre confirmation…
         </div>
         <div
           v-if="receiptCode"
@@ -186,7 +216,7 @@
         </div>
         <div class="space-y-2">
           <h4 class="font-heading font-black text-gray-900">Paiement non confirmé</h4>
-          <p class="text-sm text-gray-600">{{ errorMessage }}</p>
+          <p class="text-sm text-gray-600 text-justify sm:text-center">{{ errorMessage }}</p>
           <NuxtLink
             v-if="receiptCode"
             :to="`/recu/${receiptCode}`"
@@ -204,7 +234,7 @@
           </button>
           <button
             @click="phase = 'form'"
-            class="flex-1 px-5 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primary/90 transition-colors text-sm"
+            class="flex-1 px-5 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primaryDark transition-colors text-sm"
           >
             Réessayer
           </button>
@@ -227,7 +257,7 @@
         <span class="material-icons text-4xl text-green-500">check_circle</span>
       </div>
       <h3 class="text-2xl font-heading font-black text-gray-900 mb-2">Merci pour votre vote !</h3>
-      <p class="text-sm text-gray-600 mb-4">
+      <p class="text-sm text-gray-600 mb-4 text-justify sm:text-center">
         Votre paiement est confirmé. Chaque voix compte pour pousser votre candidat favori vers la
         victoire !
       </p>
@@ -240,7 +270,7 @@
       </NuxtLink>
       <button
         @click="closeThanks"
-        class="px-6 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primary/90 transition-colors"
+        class="px-6 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primaryDark transition-colors"
       >
         Continuer
       </button>
