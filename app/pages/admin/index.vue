@@ -31,11 +31,11 @@
         aria-label="Chiffres clés"
       >
         <div class="stat-card stat-revenue">
-          <p class="stat-label text-white/70">Montant généré</p>
+          <p class="stat-label text-white/85">Montant généré</p>
           <p class="stat-value font-heading text-white">
             {{ formatNumber(stats.revenue_fcfa) }} <span class="text-base font-bold">FCFA</span>
           </p>
-          <p class="text-white/60 text-xs">votes confirmés uniquement</p>
+          <p class="text-white/85 text-xs">votes confirmés uniquement</p>
         </div>
         <div class="stat-card">
           <p class="stat-label">Voix confirmées</p>
@@ -133,7 +133,9 @@ const formatNumber = (value: number) => new Intl.NumberFormat('fr-FR').format(va
   gap: 0.375rem;
 }
 .stat-revenue {
-  background: linear-gradient(135deg, #ef7952, #df413a);
+  /* Rouge de marque assombri : le texte blanc atteint ≥4.9:1 (AA), là où le
+     dégradé orange d'origine tombait à 2.79:1 (illisible). */
+  background: linear-gradient(135deg, #df413a, #b3302a);
   border-color: transparent;
 }
 .stat-label {

@@ -133,7 +133,8 @@
                 <NuxtLink
                   :to="`/recu/${vote.receipt_code}`"
                   target="_blank"
-                  class="font-mono text-xs text-awac-primary hover:underline"
+                  rel="noopener"
+                  class="font-mono text-xs text-awac-accent hover:underline"
                 >
                   {{ vote.receipt_code }}
                 </NuxtLink>

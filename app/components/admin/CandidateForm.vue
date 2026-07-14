@@ -116,7 +116,7 @@
             class="w-full h-32 object-cover"
           />
           <button
-            class="absolute top-2 right-2 grid place-items-center w-8 h-8 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            class="absolute top-2 right-2 grid place-items-center w-9 h-9 rounded-full bg-black/60 text-white transition-colors hover:bg-red-600 focus-visible:opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
             aria-label="Supprimer la photo"
             @click="removePhoto(photo.id)"
           >

@@ -88,7 +88,7 @@
             <p class="text-[10px] font-heading font-black tracking-widest uppercase text-gray-500">
               Après
             </p>
-            <p class="font-heading font-black text-2xl text-awac-primary tabular-nums">
+            <p class="font-heading font-black text-2xl text-awac-accent tabular-nums">
               {{ receipt.votes_after }}
             </p>
           </div>
@@ -154,35 +154,15 @@
 import { ref, computed, onMounted } from 'vue'
 import { voteService } from '~/utils/voteService'
 import { forgetPendingVote } from '~/utils/pendingVotes'
+import { useCopyToClipboard } from '~/composables/useCopyToClipboard'
 
 const route = useRoute()
 const receipt = ref(null)
 const loading = ref(true)
 const notFound = ref(false)
-const copied = ref(false)
-let copiedTimer = null
+const { copied, copy } = useCopyToClipboard()
 
-const copyReceiptCode = async () => {
-  const code = receipt.value?.receipt_code
-  if (!code) return
-  try {
-    await navigator.clipboard.writeText(code)
-  } catch {
-    // Repli si l'API clipboard est indisponible (http, permissions).
-    const field = document.createElement('textarea')
-    field.value = code
-    field.setAttribute('readonly', '')
-    field.style.position = 'absolute'
-    field.style.left = '-9999px'
-    document.body.appendChild(field)
-    field.select()
-    document.execCommand('copy')
-    document.body.removeChild(field)
-  }
-  copied.value = true
-  if (copiedTimer) clearTimeout(copiedTimer)
-  copiedTimer = setTimeout(() => (copied.value = false), 2000)
-}
+const copyReceiptCode = () => copy(receipt.value?.receipt_code ?? '')
 
 const STATUS_CONTENT = {
   confirmed: {

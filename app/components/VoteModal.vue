@@ -15,7 +15,7 @@
         <button
           v-if="phase === 'form'"
           @click="close"
-          class="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+          class="grid place-items-center w-10 h-10 -mr-2 rounded-lg hover:bg-gray-100 transition-colors"
           aria-label="Fermer"
         >
           <span class="material-icons">close</span>
@@ -28,42 +28,57 @@
           <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1"
             >Pays <span class="text-red-500">*</span></label
           >
-          <select
-            v-model="form.country"
-            required
-            :disabled="metaLoading"
-            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm disabled:opacity-60"
-            @change="loadOperators"
-          >
-            <option
-              v-for="country in countries"
-              :key="country.country_code"
-              :value="country.country_code"
+          <div class="relative">
+            <select
+              v-model="form.country"
+              required
+              :disabled="metaLoading"
+              class="awac-select"
+              @change="loadOperators"
             >
-              {{ country.country_name }}
-            </option>
-          </select>
+              <option
+                v-for="country in countries"
+                :key="country.country_code"
+                :value="country.country_code"
+              >
+                {{ country.country_name }}
+              </option>
+            </select>
+            <span
+              class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+              aria-hidden="true"
+              >expand_more</span
+            >
+          </div>
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1"
             >Moyen de paiement <span class="text-red-500">*</span></label
           >
-          <select
-            v-model="form.operator"
-            required
-            :disabled="metaLoading || operators.length === 0"
-            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm disabled:opacity-60"
-          >
-            <option value="">{{ metaLoading ? 'Chargement…' : 'Sélectionner' }}</option>
-            <option
-              v-for="operator in operators"
-              :key="operator.slug"
-              :value="operator.code || operator.slug"
+          <div class="relative">
+            <select
+              v-model="form.operator"
+              required
+              :disabled="metaLoading || operators.length === 0"
+              class="awac-select"
             >
-              {{ operator.name }}
-            </option>
-          </select>
+              <option value="">{{ metaLoading ? 'Chargement…' : 'Sélectionner' }}</option>
+              <option
+                v-for="operator in operators"
+                :key="operator.slug"
+                :value="operator.code || operator.slug"
+              >
+                {{ operator.name }}
+              </option>
+            </select>
+            <span
+              class="material-icons absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              :class="metaLoading || operators.length === 0 ? 'text-gray-300' : 'text-gray-400'"
+              aria-hidden="true"
+              >expand_more</span
+            >
+          </div>
         </div>
 
         <div>
@@ -91,7 +106,7 @@
           <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
             {{ form.quantity }} voix × {{ unitPrice }} {{ currency }}
           </span>
-          <span class="font-heading font-black text-awac-primary tabular-nums"
+          <span class="font-heading font-black text-awac-accent tabular-nums"
             >{{ formattedTotal }} F</span
           >
         </div>
@@ -135,15 +150,30 @@
         </div>
         <div
           v-if="receiptCode"
-          class="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 text-left space-y-1"
+          class="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 text-left space-y-2"
         >
           <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
             Votre code reçu — gardez-le
           </p>
-          <p class="font-mono text-xs font-bold text-gray-900 break-all">{{ receiptCode }}</p>
+          <div class="flex items-center gap-2">
+            <span class="min-w-0 flex-1 font-mono text-xs font-bold text-gray-900 break-all">
+              {{ receiptCode }}
+            </span>
+            <button
+              type="button"
+              class="shrink-0 inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-gray-600 transition-colors hover:border-awac-primary hover:text-awac-primary active:scale-95"
+              :aria-label="copied ? 'Code copié' : 'Copier le code reçu'"
+              @click="copy(receiptCode)"
+            >
+              <span class="material-icons text-sm" aria-hidden="true">
+                {{ copied ? 'check' : 'content_copy' }}
+              </span>
+              {{ copied ? 'Copié' : 'Copier' }}
+            </button>
+          </div>
           <NuxtLink
             :to="`/recu/${receiptCode}`"
-            class="inline-block text-xs text-awac-primary font-semibold hover:underline"
+            class="inline-block text-xs text-awac-accent font-semibold hover:underline"
           >
             Vérifier mon vote à tout moment →
           </NuxtLink>
@@ -164,7 +194,7 @@
           <NuxtLink
             v-if="receiptCode"
             :to="`/recu/${receiptCode}`"
-            class="inline-block text-xs text-awac-primary font-semibold hover:underline"
+            class="inline-block text-xs text-awac-accent font-semibold hover:underline"
           >
             Vérifier mon reçu ({{ receiptCode }})
           </NuxtLink>
@@ -209,7 +239,7 @@
       <NuxtLink
         v-if="receiptCode"
         :to="`/recu/${receiptCode}`"
-        class="inline-block text-xs text-awac-primary font-semibold hover:underline mb-6"
+        class="inline-block text-xs text-awac-accent font-semibold hover:underline mb-6"
       >
         Voir mon reçu →
       </NuxtLink>
@@ -229,6 +259,7 @@ import { voteService } from '~/utils/voteService'
 import { pollPaymentStatus } from '~/composables/usePaymentPolling'
 import { clampVoteQuantity } from '~/utils/voteQuantity'
 import { rememberPendingVote, forgetPendingVote } from '~/utils/pendingVotes'
+import { useCopyToClipboard } from '~/composables/useCopyToClipboard'
 
 const props = defineProps({
   candidate: { type: Object, default: null },
@@ -251,6 +282,7 @@ const phase = ref('form') // form | awaiting | failed | thanks
 const submitting = ref(false)
 const errorMessage = ref('')
 const receiptCode = ref('')
+const { copied, copy } = useCopyToClipboard()
 
 const countries = ref([])
 const operators = ref([])

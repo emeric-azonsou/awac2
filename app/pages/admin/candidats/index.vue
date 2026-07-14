@@ -55,7 +55,7 @@
             <span v-if="candidate.atelier">{{ candidate.atelier }}</span>
             <span v-if="candidate.atelier && candidate.commune"> · </span>
             <span v-if="candidate.commune">{{ candidate.commune }}</span>
-            <span v-if="!candidate.atelier && !candidate.commune" class="text-gray-300"
+            <span v-if="!candidate.atelier && !candidate.commune" class="text-gray-400 italic"
               >Aucune info</span
             >
           </p>

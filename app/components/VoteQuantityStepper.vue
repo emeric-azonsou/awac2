@@ -2,7 +2,7 @@
   <div class="flex items-center justify-between gap-3">
     <div class="min-w-0 space-y-0.5">
       <p class="text-gray-500 font-sans font-medium text-xs tracking-wider uppercase">Mes voix</p>
-      <p class="font-heading font-black text-sm text-awac-primary tabular-nums">
+      <p class="font-heading font-black text-sm text-awac-accent tabular-nums">
         {{ formatVoteTotal(modelValue, unitPrice) }} {{ currency }}
       </p>
     </div>
