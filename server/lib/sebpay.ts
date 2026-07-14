@@ -96,14 +96,20 @@ export function createSebpayClient({
 
     async getCountries(): Promise<SebpayCountry[]> {
       const response = await fetch(`${baseUrl}/countries`, { method: 'GET', headers })
-      const data = await readData<SebpayCountry[] | { countries?: SebpayCountry[] }>(response, 'countries')
+      const data = await readData<SebpayCountry[] | { countries?: SebpayCountry[] }>(
+        response,
+        'countries',
+      )
       return Array.isArray(data) ? data : (data?.countries ?? [])
     },
 
     async getOperators(country?: string): Promise<SebpayOperator[]> {
       const query = country ? `?country=${encodeURIComponent(country)}` : ''
       const response = await fetch(`${baseUrl}/operators${query}`, { method: 'GET', headers })
-      const data = await readData<SebpayOperator[] | { operators?: SebpayOperator[] }>(response, 'operators')
+      const data = await readData<SebpayOperator[] | { operators?: SebpayOperator[] }>(
+        response,
+        'operators',
+      )
       return Array.isArray(data) ? data : (data?.operators ?? [])
     },
   }

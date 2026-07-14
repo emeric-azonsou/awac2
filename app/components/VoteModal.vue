@@ -5,12 +5,19 @@
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
     @click.self="phase === 'form' && close()"
   >
-    <div class="bg-white/95 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6 animate-slide-up">
+    <div
+      class="bg-white/95 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6 animate-slide-up"
+    >
       <div class="flex items-center justify-between mb-5">
         <h3 class="text-lg font-heading font-black text-gray-900">
           Voter pour <span class="text-awac-primary">{{ candidate.full_name }}</span>
         </h3>
-        <button v-if="phase === 'form'" @click="close" class="p-1 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Fermer">
+        <button
+          v-if="phase === 'form'"
+          @click="close"
+          class="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+          aria-label="Fermer"
+        >
           <span class="material-icons">close</span>
         </button>
       </div>
@@ -18,7 +25,9 @@
       <!-- ÉTAPE 1 : FORMULAIRE -->
       <form v-if="phase === 'form'" @submit.prevent="submitVote" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Pays <span class="text-red-500">*</span></label>
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1"
+            >Pays <span class="text-red-500">*</span></label
+          >
           <select
             v-model="form.country"
             required
@@ -26,14 +35,20 @@
             class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm disabled:opacity-60"
             @change="loadOperators"
           >
-            <option v-for="country in countries" :key="country.country_code" :value="country.country_code">
+            <option
+              v-for="country in countries"
+              :key="country.country_code"
+              :value="country.country_code"
+            >
               {{ country.country_name }}
             </option>
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Moyen de paiement <span class="text-red-500">*</span></label>
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1"
+            >Moyen de paiement <span class="text-red-500">*</span></label
+          >
           <select
             v-model="form.operator"
             required
@@ -41,16 +56,25 @@
             class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm disabled:opacity-60"
           >
             <option value="">{{ metaLoading ? 'Chargement…' : 'Sélectionner' }}</option>
-            <option v-for="operator in operators" :key="operator.slug" :value="operator.code || operator.slug">
+            <option
+              v-for="operator in operators"
+              :key="operator.slug"
+              :value="operator.code || operator.slug"
+            >
               {{ operator.name }}
             </option>
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Numéro de téléphone <span class="text-red-500">*</span></label>
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1"
+            >Numéro de téléphone <span class="text-red-500">*</span></label
+          >
           <div class="flex items-center gap-2">
-            <span class="px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-500 font-medium shrink-0">{{ selectedPrefix }}</span>
+            <span
+              class="px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-500 font-medium shrink-0"
+              >{{ selectedPrefix }}</span
+            >
             <input
               v-model="form.phone_number"
               type="tel"
@@ -61,42 +85,68 @@
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Nombre de votes <span class="text-red-500">*</span></label>
-          <div class="flex items-center gap-3">
-            <button type="button" @click="form.quantity = Math.max(1, form.quantity - 1)" class="w-10 h-10 rounded-xl border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors" aria-label="Diminuer">
-              <span class="material-icons text-sm">remove</span>
-            </button>
-            <input v-model.number="form.quantity" type="number" min="1" required class="w-20 text-center px-3 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm font-bold" />
-            <button type="button" @click="form.quantity += 1" class="w-10 h-10 rounded-xl border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors" aria-label="Augmenter">
-              <span class="material-icons text-sm">add</span>
-            </button>
-            <span class="text-sm text-gray-500">× {{ unitPrice }} {{ currency }} = {{ formattedTotal }} F</span>
-          </div>
+        <div
+          class="flex items-center justify-between rounded-xl bg-gray-50 border border-gray-100 px-4 py-3"
+        >
+          <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            {{ form.quantity }} voix × {{ unitPrice }} {{ currency }}
+          </span>
+          <span class="font-heading font-black text-awac-primary tabular-nums"
+            >{{ formattedTotal }} F</span
+          >
         </div>
 
         <p v-if="errorMessage" class="text-sm text-red-500">{{ errorMessage }}</p>
 
         <div class="flex flex-col-reverse sm:flex-row items-center gap-3 pt-2">
-          <button type="button" @click="close" class="w-full sm:w-auto px-5 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm">
+          <button
+            type="button"
+            @click="close"
+            class="w-full sm:w-auto px-5 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm"
+          >
             Annuler
           </button>
-          <button type="submit" class="w-full sm:w-auto flex-1 px-5 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primary/90 transition-colors shadow-sm text-sm flex items-center justify-center gap-2 disabled:opacity-70" :disabled="submitting">
-            <span v-if="submitting" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
-            {{ submitting ? 'Envoi...' : 'Payer et voter' }}
+          <button
+            type="submit"
+            class="w-full sm:w-auto flex-1 px-5 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primary/90 transition-colors shadow-sm text-sm flex items-center justify-center gap-2 disabled:opacity-70"
+            :disabled="submitting"
+          >
+            <span
+              v-if="submitting"
+              class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+            ></span>
+            {{ submitting ? 'Envoi...' : 'Voter' }}
           </button>
         </div>
       </form>
 
       <!-- ÉTAPE 2 : ATTENTE DE VALIDATION -->
       <div v-else-if="phase === 'awaiting'" class="text-center py-6 space-y-5">
-        <div class="animate-spin rounded-full h-12 w-12 border-2 border-awac-primary border-t-transparent mx-auto"></div>
+        <div
+          class="animate-spin rounded-full h-12 w-12 border-2 border-awac-primary border-t-transparent mx-auto"
+        ></div>
         <div class="space-y-2">
           <h4 class="font-heading font-black text-gray-900">Validez le paiement</h4>
           <p class="text-sm text-gray-600">
-            Une demande de paiement a été envoyée à votre téléphone <span class="font-semibold">{{ selectedPrefix }} {{ form.phone_number }}</span>.
-            Confirmez-la pour valider votre vote.
+            Une demande de paiement a été envoyée à votre téléphone
+            <span class="font-semibold">{{ selectedPrefix }} {{ form.phone_number }}</span
+            >. Confirmez-la pour valider votre vote.
           </p>
+        </div>
+        <div
+          v-if="receiptCode"
+          class="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 text-left space-y-1"
+        >
+          <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+            Votre code reçu — gardez-le
+          </p>
+          <p class="font-mono text-xs font-bold text-gray-900 break-all">{{ receiptCode }}</p>
+          <NuxtLink
+            :to="`/recu/${receiptCode}`"
+            class="inline-block text-xs text-awac-primary font-semibold hover:underline"
+          >
+            Vérifier mon vote à tout moment →
+          </NuxtLink>
         </div>
         <button @click="cancelPolling" class="text-xs text-gray-400 hover:text-gray-600 underline">
           Annuler l'attente
@@ -111,26 +161,62 @@
         <div class="space-y-2">
           <h4 class="font-heading font-black text-gray-900">Paiement non confirmé</h4>
           <p class="text-sm text-gray-600">{{ errorMessage }}</p>
+          <NuxtLink
+            v-if="receiptCode"
+            :to="`/recu/${receiptCode}`"
+            class="inline-block text-xs text-awac-primary font-semibold hover:underline"
+          >
+            Vérifier mon reçu ({{ receiptCode }})
+          </NuxtLink>
         </div>
         <div class="flex gap-3">
-          <button @click="close" class="flex-1 px-5 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm">Fermer</button>
-          <button @click="phase = 'form'" class="flex-1 px-5 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primary/90 transition-colors text-sm">Réessayer</button>
+          <button
+            @click="close"
+            class="flex-1 px-5 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm"
+          >
+            Fermer
+          </button>
+          <button
+            @click="phase = 'form'"
+            class="flex-1 px-5 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primary/90 transition-colors text-sm"
+          >
+            Réessayer
+          </button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ===== MODAL DE REMERCIEMENT ===== -->
-  <div v-if="phase === 'thanks'" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" @click.self="closeThanks">
-    <div class="bg-white/95 backdrop-blur-xl rounded-3xl border border-green-500/30 shadow-2xl w-full max-w-sm p-8 text-center animate-slide-up">
-      <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5">
+  <div
+    v-if="phase === 'thanks'"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+    @click.self="closeThanks"
+  >
+    <div
+      class="bg-white/95 backdrop-blur-xl rounded-3xl border border-green-500/30 shadow-2xl w-full max-w-sm p-8 text-center animate-slide-up"
+    >
+      <div
+        class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5"
+      >
         <span class="material-icons text-4xl text-green-500">check_circle</span>
       </div>
       <h3 class="text-2xl font-heading font-black text-gray-900 mb-2">Merci pour votre vote !</h3>
-      <p class="text-sm text-gray-600 mb-6">
-        Votre paiement est confirmé. Chaque voix compte pour pousser votre candidat favori vers la victoire !
+      <p class="text-sm text-gray-600 mb-4">
+        Votre paiement est confirmé. Chaque voix compte pour pousser votre candidat favori vers la
+        victoire !
       </p>
-      <button @click="closeThanks" class="px-6 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primary/90 transition-colors">
+      <NuxtLink
+        v-if="receiptCode"
+        :to="`/recu/${receiptCode}`"
+        class="inline-block text-xs text-awac-primary font-semibold hover:underline mb-6"
+      >
+        Voir mon reçu →
+      </NuxtLink>
+      <button
+        @click="closeThanks"
+        class="px-6 py-2.5 bg-awac-primary text-white font-semibold rounded-xl hover:bg-awac-primary/90 transition-colors"
+      >
         Continuer
       </button>
     </div>
@@ -141,21 +227,30 @@
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { voteService } from '~/utils/voteService'
 import { pollPaymentStatus } from '~/composables/usePaymentPolling'
+import { clampVoteQuantity } from '~/utils/voteQuantity'
+import { rememberPendingVote, forgetPendingVote } from '~/utils/pendingVotes'
 
 const props = defineProps({
   candidate: { type: Object, default: null },
+  initialQuantity: { type: Number, default: 1 },
   unitPrice: { type: Number, required: true },
   currency: { type: String, default: 'FCFA' },
 })
 
 const emit = defineEmits(['close', 'voted'])
 
-const emptyForm = () => ({ country: 'BJ', operator: '', phone_number: '', quantity: 1 })
+const emptyForm = () => ({
+  country: 'BJ',
+  operator: '',
+  phone_number: '',
+  quantity: clampVoteQuantity(props.initialQuantity),
+})
 
 const form = ref(emptyForm())
 const phase = ref('form') // form | awaiting | failed | thanks
 const submitting = ref(false)
 const errorMessage = ref('')
+const receiptCode = ref('')
 
 const countries = ref([])
 const operators = ref([])
@@ -220,13 +315,16 @@ const startPolling = (voteId) => {
   poller = pollPaymentStatus(voteId)
   poller.promise.then((result) => {
     if (result.status === 'confirmed') {
+      forgetPendingVote(receiptCode.value)
       emit('voted', { votes_after: result.votesAfter })
       phase.value = 'thanks'
     } else if (result.status === 'rejected') {
+      forgetPendingVote(receiptCode.value)
       errorMessage.value = 'Le paiement a été refusé ou annulé.'
       phase.value = 'failed'
     } else {
-      errorMessage.value = "Nous n'avons pas reçu la confirmation à temps. Si vous avez payé, votre vote sera comptabilisé sous peu."
+      errorMessage.value =
+        "Nous n'avons pas reçu la confirmation à temps. Si vous avez payé, votre vote sera comptabilisé sous peu."
       phase.value = 'failed'
     }
     poller = null
@@ -249,12 +347,14 @@ const submitVote = async () => {
   try {
     const result = await voteService.submitVote({
       candidateId: props.candidate.id,
-      quantity: form.value.quantity,
+      quantity: clampVoteQuantity(form.value.quantity),
       operator: form.value.operator,
       voterPhone: `${selectedPrefix.value}${form.value.phone_number.trim()}`,
       country: form.value.country,
       currency: selectedCountry.value?.currency?.code,
     })
+
+    receiptCode.value = result.receipt_code
 
     if (result.provider_link) window.open(result.provider_link, '_blank', 'noopener')
 
@@ -262,6 +362,12 @@ const submitVote = async () => {
       emit('voted', { votes_after: result.votes_after })
       phase.value = 'thanks'
     } else {
+      // Trace locale : si le votant ferme l'onglet avant la confirmation, la
+      // prochaine visite lui prouvera que son vote a bien été comptabilisé.
+      rememberPendingVote({
+        receipt_code: result.receipt_code,
+        candidate_name: props.candidate.full_name,
+      })
       phase.value = 'awaiting'
       startPolling(result.id)
     }
@@ -290,9 +396,22 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-@keyframes slideUp { from { transform: translateY(20px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-.animate-slide-up { animation: slideUp 0.25s ease-out both; }
+@keyframes slideUp {
+  from {
+    transform: translateY(20px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+.animate-slide-up {
+  animation: slideUp 0.25s ease-out both;
+}
 @media (prefers-reduced-motion: reduce) {
-  .animate-slide-up { animation: none; }
+  .animate-slide-up {
+    animation: none;
+  }
 }
 </style>

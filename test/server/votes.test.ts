@@ -29,26 +29,45 @@ function makeDb({ candidateExists = true, voteCount = 10, voteStatus = 'pending'
   const state: DbState = {
     voteCount,
     vote: {
-      id: VOTE_ID, receipt_code: null, candidate_id: CANDIDATE_ID, quantity: 3,
-      payment_status: voteStatus, votes_before: voteCount, votes_after: voteCount,
+      id: VOTE_ID,
+      receipt_code: null,
+      candidate_id: CANDIDATE_ID,
+      quantity: 3,
+      payment_status: voteStatus,
+      votes_before: voteCount,
+      votes_after: voteCount,
     },
     calls: [],
   }
   const run = (strings: TemplateStringsArray, params: unknown[]): unknown[] => {
     const sql = strings.join('?')
     state.calls.push(sql)
-    if (sql.includes('FROM candidates') && sql.includes('FOR UPDATE')) return [{ vote_count: state.voteCount }]
-    if (sql.includes('FROM candidates')) return candidateExists ? [{ id: CANDIDATE_ID, vote_count: state.voteCount }] : []
+    if (sql.includes('FROM candidates') && sql.includes('FOR UPDATE'))
+      return [{ vote_count: state.voteCount }]
+    if (sql.includes('FROM candidates'))
+      return candidateExists ? [{ id: CANDIDATE_ID, vote_count: state.voteCount }] : []
     if (sql.includes('FROM settings')) return [{ vote_unit_price: 100, currency: 'XOF' }]
     if (sql.includes('INSERT INTO votes')) {
-      state.vote.receipt_code = (params.find((p) => typeof p === 'string' && p.startsWith('AWAC-')) as string) ?? null
+      state.vote.receipt_code =
+        (params.find((p) => typeof p === 'string' && p.startsWith('AWAC-')) as string) ?? null
       return [{ id: VOTE_ID, receipt_code: state.vote.receipt_code }]
     }
     if (sql.includes('FROM votes') && sql.includes('FOR UPDATE')) return [{ ...state.vote }]
     if (sql.includes('SELECT') && sql.includes('FROM votes')) {
-      return [{ id: VOTE_ID, receipt_code: state.vote.receipt_code ?? 'AWAC-known', payment_status: state.vote.payment_status, votes_after: state.vote.votes_after }]
+      return [
+        {
+          id: VOTE_ID,
+          receipt_code: state.vote.receipt_code ?? 'AWAC-known',
+          payment_status: state.vote.payment_status,
+          votes_after: state.vote.votes_after,
+        },
+      ]
     }
-    if (sql.includes('UPDATE candidates')) { state.voteCount = params[0] as number; state.vote.votes_after = params[0] as number; return [] }
+    if (sql.includes('UPDATE candidates')) {
+      state.voteCount = params[0] as number
+      state.vote.votes_after = params[0] as number
+      return []
+    }
     if (sql.includes('UPDATE votes')) {
       const terminal = params.find((p) => p === 'confirmed' || p === 'rejected')
       if (terminal) state.vote.payment_status = terminal as string
@@ -56,23 +75,38 @@ function makeDb({ candidateExists = true, voteCount = 10, voteStatus = 'pending'
     }
     return []
   }
-  const db = ((strings: TemplateStringsArray, ...params: unknown[]) => Promise.resolve(run(strings, params))) as {
+  const db = ((strings: TemplateStringsArray, ...params: unknown[]) =>
+    Promise.resolve(run(strings, params))) as {
     (strings: TemplateStringsArray, ...params: unknown[]): Promise<unknown[]>
-    begin: (fn: (tx: (s: TemplateStringsArray, ...p: unknown[]) => Promise<unknown[]>) => unknown) => Promise<unknown>
+    begin: (
+      fn: (tx: (s: TemplateStringsArray, ...p: unknown[]) => Promise<unknown[]>) => unknown,
+    ) => Promise<unknown>
     _state: DbState
   }
-  db.begin = async (fn) => fn((strings: TemplateStringsArray, ...params: unknown[]) => Promise.resolve(run(strings, params)))
+  db.begin = async (fn) =>
+    fn((strings: TemplateStringsArray, ...params: unknown[]) =>
+      Promise.resolve(run(strings, params)),
+    )
   db._state = state
   return db
 }
 
-const validBody = { candidate_id: CANDIDATE_ID, quantity: 3, operator: 'mtn', voter_phone: '+22997000000', country: 'BJ' }
+const validBody = {
+  candidate_id: CANDIDATE_ID,
+  quantity: 3,
+  operator: 'mtn',
+  voter_phone: '+22997000000',
+  country: 'BJ',
+}
 const config = { callbackUrl: 'https://awac.test/votes/webhook' }
 
 describe('submitVote — mode simulé', () => {
   it('crée un vote et le confirme immédiatement (201)', async () => {
     const db = makeDb()
-    const res = await submitVote({ db: asDb(db) as unknown as Db, sebpay: null, config }, { ...validBody, operator: 'demo' })
+    const res = await submitVote(
+      { db: asDb(db) as unknown as Db, sebpay: null, config },
+      { ...validBody, operator: 'demo' },
+    )
     expect(res.status).toBe(201)
     expect((res.body as { payment_status: string }).payment_status).toBe('confirmed')
     expect((res.body as { receipt_code: string }).receipt_code).toMatch(/^AWAC-/)
@@ -84,8 +118,17 @@ describe('submitVote — mode simulé', () => {
 describe('submitVote — mode réel', () => {
   it('crée un vote pending, appelle SebPay, renvoie provider_link (201)', async () => {
     const db = makeDb()
-    const createCollection = vi.fn().mockResolvedValue({ transaction_id: 'sp_1', status: 'pending', provider_link: 'https://pay/x' })
-    const res = await submitVote({ db: asDb(db) as unknown as Db, sebpay: asSebpay({ createCollection }), config }, validBody)
+    const createCollection = vi
+      .fn()
+      .mockResolvedValue({
+        transaction_id: 'sp_1',
+        status: 'pending',
+        provider_link: 'https://pay/x',
+      })
+    const res = await submitVote(
+      { db: asDb(db) as unknown as Db, sebpay: asSebpay({ createCollection }), config },
+      validBody,
+    )
     expect(res.status).toBe(201)
     expect((res.body as { provider_link: string }).provider_link).toBe('https://pay/x')
     expect(db._state.voteCount).toBe(10)
@@ -97,8 +140,54 @@ describe('submitVote — mode réel', () => {
   it('renvoie 502 si SebPay refuse', async () => {
     const db = makeDb()
     const createCollection = vi.fn().mockRejectedValue(new Error('Numéro invalide'))
-    const res = await submitVote({ db: asDb(db) as unknown as Db, sebpay: asSebpay({ createCollection }), config }, validBody)
+    const res = await submitVote(
+      { db: asDb(db) as unknown as Db, sebpay: asSebpay({ createCollection }), config },
+      validBody,
+    )
     expect(res.status).toBe(502)
+  })
+
+  it('force la devise des réglages même si le client en envoie une autre', async () => {
+    const db = makeDb()
+    const createCollection = vi
+      .fn()
+      .mockResolvedValue({ transaction_id: 'sp_1', status: 'pending', provider_link: null })
+    const res = await submitVote(
+      { db: asDb(db) as unknown as Db, sebpay: asSebpay({ createCollection }), config },
+      { ...validBody, currency: 'USD' },
+    )
+    expect(res.status).toBe(201)
+    expect((res.body as { currency: string }).currency).toBe('XOF')
+    const [args] = createCollection.mock.calls[0]!
+    expect(args.currency).toBe('XOF')
+  })
+
+  it("persiste le vote avant l'appel SebPay (aucun paiement orphelin)", async () => {
+    const db = makeDb()
+    let insertedBeforeCall = false
+    const createCollection = vi.fn().mockImplementation(async () => {
+      insertedBeforeCall = db._state.calls.some((call) => call.includes('INSERT INTO votes'))
+      return { transaction_id: 'sp_1', status: 'pending', provider_link: null }
+    })
+    const res = await submitVote(
+      { db: asDb(db) as unknown as Db, sebpay: asSebpay({ createCollection }), config },
+      validBody,
+    )
+    expect(res.status).toBe(201)
+    expect(insertedBeforeCall).toBe(true)
+  })
+
+  it('rejette le vote persisté si SebPay échoue (502)', async () => {
+    const db = makeDb()
+    const createCollection = vi.fn().mockRejectedValue(new Error('Numéro invalide'))
+    const res = await submitVote(
+      { db: asDb(db) as unknown as Db, sebpay: asSebpay({ createCollection }), config },
+      validBody,
+    )
+    expect(res.status).toBe(502)
+    expect(db._state.calls.some((call) => call.includes('INSERT INTO votes'))).toBe(true)
+    expect(db._state.vote.payment_status).toBe('rejected')
+    expect(db._state.voteCount).toBe(10)
   })
 
   it('rejette les entrées invalides avant tout appel SebPay (400)', async () => {
@@ -109,7 +198,10 @@ describe('submitVote — mode réel', () => {
       { ...validBody, operator: '' },
       { ...validBody, voter_phone: '' },
     ]) {
-      const res = await submitVote({ db: asDb(makeDb()) as unknown as Db, sebpay: asSebpay({ createCollection }), config }, body)
+      const res = await submitVote(
+        { db: asDb(makeDb()) as unknown as Db, sebpay: asSebpay({ createCollection }), config },
+        body,
+      )
       expect(res.status).toBe(400)
     }
     expect(createCollection).not.toHaveBeenCalled()
@@ -120,7 +212,10 @@ describe('getVoteStatus — polling', () => {
   it('réconcilie via SebPay et confirme quand approved', async () => {
     const db = makeDb({ voteStatus: 'pending' })
     const getCollection = vi.fn().mockResolvedValue({ transaction_id: 'sp_1', status: 'approved' })
-    const res = await getVoteStatus({ db: asDb(db) as unknown as Db, sebpay: asSebpay({ getCollection }) }, VOTE_ID)
+    const res = await getVoteStatus(
+      { db: asDb(db) as unknown as Db, sebpay: asSebpay({ getCollection }) },
+      VOTE_ID,
+    )
     expect(res.status).toBe(200)
     expect((res.body as { payment_status: string }).payment_status).toBe('confirmed')
     expect(getCollection).toHaveBeenCalledWith('AWAC-known')
@@ -129,7 +224,10 @@ describe('getVoteStatus — polling', () => {
   it('ne rappelle pas SebPay si déjà confirmé', async () => {
     const db = makeDb({ voteStatus: 'confirmed' })
     const getCollection = vi.fn()
-    const res = await getVoteStatus({ db: asDb(db) as unknown as Db, sebpay: asSebpay({ getCollection }) }, VOTE_ID)
+    const res = await getVoteStatus(
+      { db: asDb(db) as unknown as Db, sebpay: asSebpay({ getCollection }) },
+      VOTE_ID,
+    )
     expect((res.body as { payment_status: string }).payment_status).toBe('confirmed')
     expect(getCollection).not.toHaveBeenCalled()
   })
@@ -137,7 +235,10 @@ describe('getVoteStatus — polling', () => {
   it('reste pending si SebPay injoignable', async () => {
     const db = makeDb({ voteStatus: 'pending' })
     const getCollection = vi.fn().mockRejectedValue(new Error('timeout'))
-    const res = await getVoteStatus({ db: asDb(db) as unknown as Db, sebpay: asSebpay({ getCollection }) }, VOTE_ID)
+    const res = await getVoteStatus(
+      { db: asDb(db) as unknown as Db, sebpay: asSebpay({ getCollection }) },
+      VOTE_ID,
+    )
     expect((res.body as { payment_status: string }).payment_status).toBe('pending')
   })
 
@@ -153,8 +254,16 @@ describe('processWebhook — signature', () => {
 
   it('confirme le vote sur webhook approved signé (200)', async () => {
     const db = makeDb({ voteStatus: 'pending' })
-    const raw = JSON.stringify({ external_reference: 'AWAC-known', transaction_id: 'sp_1', status: 'approved' })
-    const res = await processWebhook({ db: asDb(db) as unknown as Db, secret: SECRET }, raw, sign(raw))
+    const raw = JSON.stringify({
+      external_reference: 'AWAC-known',
+      transaction_id: 'sp_1',
+      status: 'approved',
+    })
+    const res = await processWebhook(
+      { db: asDb(db) as unknown as Db, secret: SECRET },
+      raw,
+      sign(raw),
+    )
     expect(res.status).toBe(200)
     expect(db._state.voteCount).toBe(13)
   })

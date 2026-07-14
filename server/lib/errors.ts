@@ -6,7 +6,11 @@ export interface ErrorEntry {
 
 export const ERRORS = Object.freeze({
   UNAUTHORIZED: { status: 401, code: 'unauthorized', message: 'Authentification requise' },
-  INVALID_CREDENTIALS: { status: 401, code: 'invalid_credentials', message: 'Email ou mot de passe incorrect' },
+  INVALID_CREDENTIALS: {
+    status: 401,
+    code: 'invalid_credentials',
+    message: 'Email ou mot de passe incorrect',
+  },
   FORBIDDEN: { status: 403, code: 'forbidden', message: 'Accès refusé' },
   NOT_FOUND: { status: 404, code: 'not_found', message: 'Ressource introuvable' },
   VALIDATION: { status: 400, code: 'validation_error', message: 'Données invalides' },
@@ -24,5 +28,8 @@ export function ok(body: unknown, status = 200): HttpResult {
 }
 
 export function fail(entry: ErrorEntry, message?: string): HttpResult {
-  return { status: entry.status, body: { error: { code: entry.code, message: message ?? entry.message } } }
+  return {
+    status: entry.status,
+    body: { error: { code: entry.code, message: message ?? entry.message } },
+  }
 }

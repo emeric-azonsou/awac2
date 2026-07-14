@@ -48,10 +48,15 @@ export async function getCountriesList(sebpay: SebpayClient | null): Promise<Htt
   }
 }
 
-export async function getOperatorsList(sebpay: SebpayClient | null, country: string): Promise<HttpResult> {
+export async function getOperatorsList(
+  sebpay: SebpayClient | null,
+  country: string,
+): Promise<HttpResult> {
   if (!sebpay) return ok({ operators: FALLBACK_OPERATORS })
   try {
-    const operators = await cached(sebpay, `operators:${country}`, () => sebpay.getOperators(country))
+    const operators = await cached(sebpay, `operators:${country}`, () =>
+      sebpay.getOperators(country),
+    )
     return ok({ operators })
   } catch {
     return ok({ operators: FALLBACK_OPERATORS })

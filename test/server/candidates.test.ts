@@ -15,7 +15,14 @@ describe('isUuid', () => {
 describe('listCandidates', () => {
   it('renvoie la liste triée par votes (200)', async () => {
     const db = recordingDb([
-      { id: 'c1', full_name: 'Awa B', atelier: 'X', commune: 'Lokossa', profile_photo_url: null, vote_count: 12 },
+      {
+        id: 'c1',
+        full_name: 'Awa B',
+        atelier: 'X',
+        commune: 'Lokossa',
+        profile_photo_url: null,
+        vote_count: 12,
+      },
     ])
     const res = await listCandidates(asDb(db))
     expect(res.status).toBe(200)
@@ -29,7 +36,16 @@ describe('getCandidateWithPhotos', () => {
     const db = recordingDb((sql) =>
       sql.includes('FROM candidate_photos')
         ? [{ id: 'p1', photo_url: 'https://img/1.jpg', caption: null, photo_order: 1 }]
-        : [{ id: CANDIDATE_ID, full_name: 'Awa B', atelier: null, commune: null, profile_photo_url: null, vote_count: 0 }],
+        : [
+            {
+              id: CANDIDATE_ID,
+              full_name: 'Awa B',
+              atelier: null,
+              commune: null,
+              profile_photo_url: null,
+              vote_count: 0,
+            },
+          ],
     )
     const res = await getCandidateWithPhotos(asDb(db), CANDIDATE_ID)
     expect(res.status).toBe(200)

@@ -81,6 +81,18 @@ export interface VoteStatusResult {
   votes_after: number
 }
 
+export interface VoteReceipt {
+  receipt_code: string
+  payment_status: string
+  quantity: number
+  amount: number
+  currency: string
+  candidate_name: string
+  created_at: string
+  votes_before: number | null
+  votes_after: number | null
+}
+
 export const voteService = {
   getCandidates: () => api.get<Candidate[]>('/candidates'),
   getCandidate: (id: string) => api.get<CandidateWithPhotos>(`/candidates/${id}`),
@@ -88,7 +100,14 @@ export const voteService = {
   getCountries: () => api.get<CountriesResponse>('/payment/countries'),
   getOperators: (country: string) =>
     api.get<OperatorsResponse>(`/payment/operators?country=${encodeURIComponent(country)}`),
-  submitVote: ({ candidateId, quantity, operator, voterPhone, country, currency }: SubmitVotePayload) =>
+  submitVote: ({
+    candidateId,
+    quantity,
+    operator,
+    voterPhone,
+    country,
+    currency,
+  }: SubmitVotePayload) =>
     api.post<SubmitVoteResult>('/votes', {
       candidate_id: candidateId,
       quantity,
@@ -98,4 +117,5 @@ export const voteService = {
       currency,
     }),
   getVoteStatus: (voteId: string) => api.get<VoteStatusResult>(`/votes/${voteId}/status`),
+  getReceipt: (code: string) => api.get<VoteReceipt>(`/receipts/${encodeURIComponent(code)}`),
 }

@@ -22,7 +22,9 @@
       </div>
 
       <div v-if="loading" class="flex justify-center py-12">
-        <div class="animate-spin rounded-full h-8 w-8 border-2 border-awac-primary border-t-transparent"></div>
+        <div
+          class="animate-spin rounded-full h-8 w-8 border-2 border-awac-primary border-t-transparent"
+        ></div>
       </div>
 
       <div v-else-if="error" class="text-center py-12 text-red-500">
@@ -43,7 +45,7 @@
             index === 0 ? 'card-first' : '',
             index === 1 ? 'card-second' : '',
             index === 2 ? 'card-third' : '',
-            index > 2 ? 'card-other' : ''
+            index > 2 ? 'card-other' : '',
           ]"
           :style="{ transitionDelay: isVisible ? `${0.1 + index * 0.08}s` : '0s' }"
         >
@@ -56,7 +58,7 @@
               :src="candidat.profile_photo_url || defaultPhoto"
               :alt="candidat.full_name"
               class="w-full h-full object-cover object-top transition-transform duration-700"
-              @error="(e) => e.target.src = defaultPhoto"
+              @error="(e) => (e.target.src = defaultPhoto)"
             />
 
             <div
@@ -99,6 +101,14 @@
 
             <div class="h-[1px] w-full bg-gray-100"></div>
 
+            <VoteQuantityStepper
+              :model-value="getQuantity(candidat.id)"
+              :unit-price="unitPrice"
+              :currency="currency"
+              :candidate-name="candidat.full_name"
+              @update:model-value="(value) => setQuantity(candidat.id, value)"
+            />
+
             <div class="flex flex-col gap-3 w-full">
               <router-link
                 :to="`/candidat/${candidat.id}`"
@@ -123,6 +133,7 @@
 
     <VoteModal
       :candidate="selectedCandidate"
+      :initial-quantity="selectedCandidate ? getQuantity(selectedCandidate.id) : MIN_VOTE_QUANTITY"
       :unit-price="unitPrice"
       :currency="currency"
       @close="selectedCandidate = null"
@@ -135,6 +146,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { voteService } from '~/utils/voteService'
 import { useVotePricing } from '~/composables/useVotePricing'
+import { MIN_VOTE_QUANTITY, clampVoteQuantity } from '~/utils/voteQuantity'
 
 const sectionRef = ref(null)
 const isVisible = ref(false)
@@ -144,7 +156,14 @@ const selectedCandidate = ref(null)
 
 const defaultPhoto = new URL('../assets/img/candidat/candidat.jpg', import.meta.url).href
 const candidats = ref([])
+const voteQuantities = ref({})
 const { unitPrice, currency, loadVotePricing } = useVotePricing()
+
+const getQuantity = (candidateId) => voteQuantities.value[candidateId] ?? MIN_VOTE_QUANTITY
+
+const setQuantity = (candidateId, value) => {
+  voteQuantities.value[candidateId] = clampVoteQuantity(value)
+}
 
 const formatBadgeNumber = (index) => String(index + 1).padStart(2, '0')
 
@@ -175,7 +194,7 @@ const openVoteModal = (candidat) => {
 }
 
 const onVoted = (result) => {
-  const updatedCandidate = candidats.value.find(c => c.id === selectedCandidate.value?.id)
+  const updatedCandidate = candidats.value.find((c) => c.id === selectedCandidate.value?.id)
   if (updatedCandidate) {
     updatedCandidate.vote_count = result.votes_after
     candidats.value.sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0))
@@ -194,7 +213,7 @@ onMounted(() => {
         observer.unobserve(entry.target)
       }
     },
-    { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    { threshold: 0.1, rootMargin: '0px 0px -50px 0px' },
   )
   if (sectionRef.value) observer.observe(sectionRef.value)
 })
@@ -206,38 +225,161 @@ onBeforeUnmount(() => {
 
 <style scoped>
 /* ... (mêmes styles que précédemment) ... */
-.card-visible { animation: cardEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-@keyframes cardEntry { 0% { opacity:0; transform:translateY(50px) scale(0.95); } 100% { opacity:1; transform:translateY(0) scale(1); } }
-.rank-badge { opacity:0; transform:scale(0.5) rotate(-10deg); transition: all 0.5s cubic-bezier(0.34,1.56,0.64,1); }
-.rank-visible { opacity:1; transform:scale(1) rotate(0deg); }
-.card-visible::before { content:''; position:absolute; inset:0; z-index:1; pointer-events:none; border-radius:2.5rem 0 2.5rem 0; background:linear-gradient(135deg,transparent 40%,rgba(239,121,82,0.03) 50%,transparent 60%); animation:shimmerCard 1.2s ease-out both; animation-delay:inherit; }
-@keyframes shimmerCard { 0% { transform:translateX(-100%) rotate(25deg); } 100% { transform:translateX(200%) rotate(25deg); } }
+.card-visible {
+  animation: cardEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes cardEntry {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.rank-badge {
+  opacity: 0;
+  transform: scale(0.5) rotate(-10deg);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.rank-visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+.card-visible::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 2.5rem 0 2.5rem 0;
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    rgba(239, 121, 82, 0.03) 50%,
+    transparent 60%
+  );
+  animation: shimmerCard 1.2s ease-out both;
+  animation-delay: inherit;
+}
+@keyframes shimmerCard {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(200%) rotate(25deg);
+  }
+}
 
-.card-first { border-color: #FFD700 !important; box-shadow: 0 0 30px rgba(255,215,0,0.15), 0 15px 40px rgba(0,0,0,0.05) !important; }
-.card-first .rank-badge { background: linear-gradient(135deg, #FFD700, #FFA500) !important; border-color: #FFD700 !important; color: #1a1a1a !important; }
-.card-second { border-color: #C0C0C0 !important; box-shadow: 0 0 20px rgba(192,192,192,0.1), 0 15px 40px rgba(0,0,0,0.05) !important; }
-.card-second .rank-badge { background: linear-gradient(135deg, #C0C0C0, #A8A8A8) !important; border-color: #C0C0C0 !important; color: #1a1a1a !important; }
-.card-third { border-color: #CD7F32 !important; box-shadow: 0 0 15px rgba(205,127,50,0.08), 0 15px 40px rgba(0,0,0,0.05) !important; }
-.card-third .rank-badge { background: linear-gradient(135deg, #CD7F32, #B87333) !important; border-color: #CD7F32 !important; color: #1a1a1a !important; }
-.card-other { border-color: #e5e7eb !important; }
-.card-other .rank-badge { background: rgba(0,0,0,0.4) !important; border-color: rgba(255,255,255,0.2) !important; color: white !important; }
+.card-first {
+  border-color: #ffd700 !important;
+  box-shadow:
+    0 0 30px rgba(255, 215, 0, 0.15),
+    0 15px 40px rgba(0, 0, 0, 0.05) !important;
+}
+.card-first .rank-badge {
+  background: linear-gradient(135deg, #ffd700, #ffa500) !important;
+  border-color: #ffd700 !important;
+  color: #1a1a1a !important;
+}
+.card-second {
+  border-color: #c0c0c0 !important;
+  box-shadow:
+    0 0 20px rgba(192, 192, 192, 0.1),
+    0 15px 40px rgba(0, 0, 0, 0.05) !important;
+}
+.card-second .rank-badge {
+  background: linear-gradient(135deg, #c0c0c0, #a8a8a8) !important;
+  border-color: #c0c0c0 !important;
+  color: #1a1a1a !important;
+}
+.card-third {
+  border-color: #cd7f32 !important;
+  box-shadow:
+    0 0 15px rgba(205, 127, 50, 0.08),
+    0 15px 40px rgba(0, 0, 0, 0.05) !important;
+}
+.card-third .rank-badge {
+  background: linear-gradient(135deg, #cd7f32, #b87333) !important;
+  border-color: #cd7f32 !important;
+  color: #1a1a1a !important;
+}
+.card-other {
+  border-color: #e5e7eb !important;
+}
+.card-other .rank-badge {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
 
 /* Médaillon de classement — hérite des couleurs podium (or/argent/bronze) */
-.rank-medallion { background:#f3f4f6; color:#6b7280; transition: transform 0.3s cubic-bezier(0.22,1,0.36,1); }
-.card-first .rank-medallion { background:linear-gradient(135deg,#FFD700,#FFA500); color:#1a1a1a; box-shadow:0 6px 16px rgba(255,183,0,0.4); }
-.card-second .rank-medallion { background:linear-gradient(135deg,#DADADA,#B4B4B4); color:#1a1a1a; box-shadow:0 6px 16px rgba(160,160,160,0.32); }
-.card-third .rank-medallion { background:linear-gradient(135deg,#CD7F32,#B87333); color:#fff; box-shadow:0 6px 16px rgba(205,127,50,0.32); }
-.group:hover .rank-medallion { transform: scale(1.06) rotate(-3deg); }
+.rank-medallion {
+  background: #f3f4f6;
+  color: #6b7280;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-first .rank-medallion {
+  background: linear-gradient(135deg, #ffd700, #ffa500);
+  color: #1a1a1a;
+  box-shadow: 0 6px 16px rgba(255, 183, 0, 0.4);
+}
+.card-second .rank-medallion {
+  background: linear-gradient(135deg, #dadada, #b4b4b4);
+  color: #1a1a1a;
+  box-shadow: 0 6px 16px rgba(160, 160, 160, 0.32);
+}
+.card-third .rank-medallion {
+  background: linear-gradient(135deg, #cd7f32, #b87333);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(205, 127, 50, 0.32);
+}
+.group:hover .rank-medallion {
+  transform: scale(1.06) rotate(-3deg);
+}
 
-.card-first:hover { box-shadow: 0 0 50px rgba(255,215,0,0.25), 0 30px 60px rgba(0,0,0,0.08) !important; border-color: #FFD700 !important; }
-.card-second:hover { box-shadow: 0 0 35px rgba(192,192,192,0.2), 0 30px 60px rgba(0,0,0,0.08) !important; border-color: #C0C0C0 !important; }
-.card-third:hover { box-shadow: 0 0 25px rgba(205,127,50,0.15), 0 30px 60px rgba(0,0,0,0.08) !important; border-color: #CD7F32 !important; }
+.card-first:hover {
+  box-shadow:
+    0 0 50px rgba(255, 215, 0, 0.25),
+    0 30px 60px rgba(0, 0, 0, 0.08) !important;
+  border-color: #ffd700 !important;
+}
+.card-second:hover {
+  box-shadow:
+    0 0 35px rgba(192, 192, 192, 0.2),
+    0 30px 60px rgba(0, 0, 0, 0.08) !important;
+  border-color: #c0c0c0 !important;
+}
+.card-third:hover {
+  box-shadow:
+    0 0 25px rgba(205, 127, 50, 0.15),
+    0 30px 60px rgba(0, 0, 0, 0.08) !important;
+  border-color: #cd7f32 !important;
+}
 
-button { cursor:pointer; }
-button:active { transform:scale(0.95); }
-input[type='number'] { transition:all 0.2s ease; }
-input[type='number']:focus { color:#ef7952; }
-.group:hover .rank-badge { background:rgba(239,121,82,0.9) !important; border-color:rgba(239,121,82,0.3) !important; }
-.group:hover img { transform:scale(1.05); }
-@media (max-width:768px) { .card-visible { animation-duration:0.6s; } }
+button {
+  cursor: pointer;
+}
+button:active {
+  transform: scale(0.95);
+}
+input[type='number'] {
+  transition: all 0.2s ease;
+}
+input[type='number']:focus {
+  color: #ef7952;
+}
+.group:hover .rank-badge {
+  background: rgba(239, 121, 82, 0.9) !important;
+  border-color: rgba(239, 121, 82, 0.3) !important;
+}
+.group:hover img {
+  transform: scale(1.05);
+}
+@media (max-width: 768px) {
+  .card-visible {
+    animation-duration: 0.6s;
+  }
+}
 </style>

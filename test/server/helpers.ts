@@ -13,7 +13,9 @@ export function recordingDb(result: QueryResult | ResultFactory = []): Recording
   const calls: { sql: string; params: unknown[] }[] = []
   const db = ((strings: TemplateStringsArray, ...params: unknown[]) => {
     calls.push({ sql: strings.join('?'), params })
-    return Promise.resolve(typeof result === 'function' ? result(strings.join('?'), params) : result)
+    return Promise.resolve(
+      typeof result === 'function' ? result(strings.join('?'), params) : result,
+    )
   }) as RecordingDb
   db.calls = calls
   db.begin = (fn) => fn(db)

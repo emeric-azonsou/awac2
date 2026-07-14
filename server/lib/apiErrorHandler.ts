@@ -18,7 +18,10 @@ interface NitroThrownError {
  * handler suivant dans la chaîne (le rendu d'erreur Nuxt par défaut) prend
  * la main normalement.
  */
-export default async function apiErrorEnvelopeHandler(error: NitroThrownError, event: H3Event): Promise<void> {
+export default async function apiErrorEnvelopeHandler(
+  error: NitroThrownError,
+  event: H3Event,
+): Promise<void> {
   if (!event.path?.startsWith(API_PATH_PREFIX)) return
 
   const statusCode = error.statusCode ?? error.status ?? DEFAULT_ERROR_STATUS

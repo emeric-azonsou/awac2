@@ -9,6 +9,13 @@ describe('toApiErrorBody', () => {
     })
   })
 
+  it('401 → enveloppe unauthorized (session admin absente)', () => {
+    expect(toApiErrorBody(401)).toEqual({
+      status: 401,
+      body: { error: { code: 'unauthorized', message: 'Authentification requise' } },
+    })
+  })
+
   it('500 → enveloppe internal_error', () => {
     expect(toApiErrorBody(500)).toEqual({
       status: 500,

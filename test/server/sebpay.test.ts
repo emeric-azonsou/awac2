@@ -45,7 +45,12 @@ describe('createSebpayClient.createCollection', () => {
       ok: true,
       json: async () => ({
         success: true,
-        data: { transaction_id: 'sp_1', status: 'pending', external_reference: 'AWAC-1', provider_link: null },
+        data: {
+          transaction_id: 'sp_1',
+          status: 'pending',
+          external_reference: 'AWAC-1',
+          provider_link: null,
+        },
       }),
     })
     const client = createSebpayClient({ ...CONFIG, fetch: fetchMock as unknown as FetchLike })
@@ -87,7 +92,14 @@ describe('createSebpayClient.createCollection', () => {
     })
     const client = createSebpayClient({ ...CONFIG, fetch: fetchMock as unknown as FetchLike })
     await expect(
-      client.createCollection({ amount: 1, currency: 'XOF', phone: 'x', operator: 'mtn', externalReference: 'r', callbackUrl: 'u' }),
+      client.createCollection({
+        amount: 1,
+        currency: 'XOF',
+        phone: 'x',
+        operator: 'mtn',
+        externalReference: 'r',
+        callbackUrl: 'u',
+      }),
     ).rejects.toThrow(/SebPay/)
   })
 })
@@ -96,7 +108,10 @@ describe('createSebpayClient.getCollection', () => {
   it('interroge le statut par référence', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ success: true, data: { transaction_id: 'sp_1', status: 'approved', external_reference: 'AWAC-1' } }),
+      json: async () => ({
+        success: true,
+        data: { transaction_id: 'sp_1', status: 'approved', external_reference: 'AWAC-1' },
+      }),
     })
     const client = createSebpayClient({ ...CONFIG, fetch: fetchMock as unknown as FetchLike })
     const result = await client.getCollection('AWAC-1')
@@ -111,7 +126,10 @@ describe('createSebpayClient.getCountries / getOperators', () => {
   it('récupère la liste des pays (clé countries)', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ success: true, data: { countries: [{ country_code: 'BJ', prefix: '+229' }] } }),
+      json: async () => ({
+        success: true,
+        data: { countries: [{ country_code: 'BJ', prefix: '+229' }] },
+      }),
     })
     const client = createSebpayClient({ ...CONFIG, fetch: fetchMock as unknown as FetchLike })
     const countries = await client.getCountries()
@@ -122,11 +140,16 @@ describe('createSebpayClient.getCountries / getOperators', () => {
   it('récupère les opérateurs filtrés par pays', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ success: true, data: [{ slug: 'mtn', name: 'MTN', otp_required: false }] }),
+      json: async () => ({
+        success: true,
+        data: [{ slug: 'mtn', name: 'MTN', otp_required: false }],
+      }),
     })
     const client = createSebpayClient({ ...CONFIG, fetch: fetchMock as unknown as FetchLike })
     const operators = await client.getOperators('BJ')
-    expect(fetchMock.mock.calls[0]![0]).toBe('https://newapi.sebpay.test/api/v1/operators?country=BJ')
+    expect(fetchMock.mock.calls[0]![0]).toBe(
+      'https://newapi.sebpay.test/api/v1/operators?country=BJ',
+    )
     expect(operators[0]!.slug).toBe('mtn')
   })
 })

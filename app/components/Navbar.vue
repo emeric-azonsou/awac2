@@ -45,9 +45,25 @@
               class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-awac-primary to-awac-accent transition-all duration-300 group-hover:w-full"
             ></span>
           </a>
+          <NuxtLink
+            to="/recu"
+            class="text-gray-900 hover:text-awac-primary transition-colors duration-200 whitespace-nowrap relative group"
+          >
+            Vérifier mon vote
+            <span
+              class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-awac-primary to-awac-accent transition-all duration-300 group-hover:w-full"
+            ></span>
+          </NuxtLink>
         </div>
 
-        <div class="flex items-center">
+        <div class="flex items-center gap-2">
+          <NuxtLink
+            to="/recu"
+            class="md:hidden grid place-items-center w-11 h-11 rounded-md border border-gray-200 text-gray-700 hover:text-awac-primary hover:border-awac-primary transition-colors duration-200"
+            aria-label="Vérifier mon vote"
+          >
+            <span class="material-icons text-xl">receipt_long</span>
+          </NuxtLink>
           <a
             href="#candidats"
             class="relative overflow-hidden bg-awac-dark text-white font-heading font-bold text-[10px] lg:text-xs tracking-widest uppercase py-3 px-4 lg:px-6 rounded-md transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg flex items-center gap-2 lg:gap-3 isolation-auto z-10 before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-awac-primary before:to-awac-accent before:transition-opacity before:duration-300 hover:before:opacity-0"

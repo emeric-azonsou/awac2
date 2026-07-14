@@ -21,14 +21,26 @@ interface DbState {
 
 interface MockDb {
   (strings: TemplateStringsArray, ...params: unknown[]): Promise<unknown[]>
-  begin: (fn: (tx: (strings: TemplateStringsArray, ...params: unknown[]) => Promise<unknown[]>) => unknown) => Promise<unknown>
+  begin: (
+    fn: (
+      tx: (strings: TemplateStringsArray, ...params: unknown[]) => Promise<unknown[]>,
+    ) => unknown,
+  ) => Promise<unknown>
   _state: DbState
 }
 
 // Fake transactionnel : garde l'état d'un vote + du compteur candidat en mémoire.
 function makeDb(initial: { vote?: Partial<VoteState>; candidateVoteCount?: number }): MockDb {
   const state: DbState = {
-    vote: { receipt_code: REF, candidate_id: 'c1', quantity: 3, payment_status: 'pending', votes_before: 10, votes_after: 10, ...initial.vote },
+    vote: {
+      receipt_code: REF,
+      candidate_id: 'c1',
+      quantity: 3,
+      payment_status: 'pending',
+      votes_before: 10,
+      votes_after: 10,
+      ...initial.vote,
+    },
     candidateVoteCount: initial.candidateVoteCount ?? 10,
     updates: [],
   }
@@ -73,7 +85,10 @@ describe('confirmVote', () => {
   })
 
   it('est idempotent : un second appel ne réincrémente pas', async () => {
-    const db = makeDb({ vote: { payment_status: 'confirmed', votes_after: 13 }, candidateVoteCount: 13 })
+    const db = makeDb({
+      vote: { payment_status: 'confirmed', votes_after: 13 },
+      candidateVoteCount: 13,
+    })
     const result = await confirmVote(asDb(db), REF, 'sp_tx_1')
     expect(result.status).toBe('confirmed')
     expect(result.alreadyProcessed).toBe(true)

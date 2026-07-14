@@ -1,5 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
-import { getCountriesList, getOperatorsList, FALLBACK_COUNTRIES } from '../../server/services/payment'
+import {
+  getCountriesList,
+  getOperatorsList,
+  FALLBACK_COUNTRIES,
+} from '../../server/services/payment'
 import type { SebpayClient } from '../../server/types'
 
 const asSebpay = (o: unknown): SebpayClient => o as unknown as SebpayClient
@@ -14,7 +18,9 @@ describe('getCountriesList', () => {
   it('renvoie les pays SebPay quand dispo', async () => {
     const getCountries = vi.fn().mockResolvedValue([{ country_code: 'BJ', prefix: '+229' }])
     const res = await getCountriesList(asSebpay({ getCountries }))
-    expect((res.body as { countries: { country_code: string }[] }).countries[0]!.country_code).toBe('BJ')
+    expect((res.body as { countries: { country_code: string }[] }).countries[0]!.country_code).toBe(
+      'BJ',
+    )
   })
 
   it('retombe sur le fallback si SebPay lève', async () => {
