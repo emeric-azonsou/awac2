@@ -3,12 +3,24 @@ import { ok, fail, ERRORS, type HttpResult, type ErrorEntry } from '../lib/error
 import { isUuid } from './candidates'
 import { verifyWebhookSignature } from '../lib/sebpay'
 import { confirmVote, rejectVote } from './voteConfirmation'
-const MAX_QUANTITY_PER_VOTE = 1000000
+const MAX_QUANTITY_PER_VOTE = 999
 const DEFAULT_COUNTRY = 'BJ'
+const MAX_PENDING_PER_PHONE = 5
+const PENDING_PHONE_WINDOW_MINUTES = 30
 const PAYMENT_ERROR: ErrorEntry = {
   status: 502,
   code: 'payment_error',
   message: 'Le paiement a échoué',
+}
+const RATE_LIMITED: ErrorEntry = {
+  status: 429,
+  code: 'too_many_pending',
+  message: 'Trop de demandes de paiement en attente pour ce numéro, réessayez plus tard',
+}
+const SIMULATED_IN_PRODUCTION: ErrorEntry = {
+  status: 503,
+  code: 'payment_unavailable',
+  message: 'Le paiement est momentanément indisponible',
 }
 export interface VoteDeps {
   db: Db
@@ -48,7 +60,21 @@ export async function submitVote(deps: VoteDeps, body: unknown): Promise<HttpRes
   if (!operator) return fail(ERRORS.VALIDATION, 'Opérateur requis')
   if (!voterPhone) return fail(ERRORS.VALIDATION, 'Numéro de téléphone requis')
   const { db, sebpay, config } = deps
+  const simulated = !sebpay
+  if (simulated && process.env.NODE_ENV === 'production') {
+    return fail(SIMULATED_IN_PRODUCTION)
+  }
   const quantityNum = quantity as number
+  const normalizedPhone = normalizePhone(voterPhone)
+  const pendingRows = await db`
+    SELECT COUNT(*)::int AS pending
+    FROM votes
+    WHERE voter_phone = ${normalizedPhone}
+      AND payment_status = 'pending'
+      AND created_at > now() - (${PENDING_PHONE_WINDOW_MINUTES} * interval '1 minute')`
+  if (Number(pendingRows[0]?.pending) >= MAX_PENDING_PER_PHONE) {
+    return fail(RATE_LIMITED)
+  }
   const candidateRows =
     await db`SELECT id, vote_count FROM candidates WHERE id = ${candidateId} AND deleted_at IS NULL`
   const candidate = candidateRows[0]
@@ -61,14 +87,13 @@ export async function submitVote(deps: VoteDeps, body: unknown): Promise<HttpRes
   const { vote_unit_price: unitPrice, currency } = settings
   const totalAmount = Number(unitPrice) * quantityNum
   const receiptCode = generateReceiptCode()
-  const simulated = !sebpay
 
   const inserted = await db`
     INSERT INTO votes (candidate_id, quantity, unit_price, total_amount, currency,
                        voter_phone, receipt_code, votes_before, votes_after,
                        payment_provider, payment_status, payment_reference)
     VALUES (${candidateId}, ${quantityNum}, ${unitPrice}, ${totalAmount}, ${currency},
-            ${voterPhone}, ${receiptCode}, ${voteCount}, ${voteCount},
+            ${normalizedPhone}, ${receiptCode}, ${voteCount}, ${voteCount},
             ${operator}, 'pending', ${null})
     RETURNING id, receipt_code`
   let providerLink: string | null = null
@@ -77,7 +102,7 @@ export async function submitVote(deps: VoteDeps, body: unknown): Promise<HttpRes
       const collection = await sebpay.createCollection({
         amount: totalAmount,
         currency,
-        phone: normalizePhone(voterPhone),
+        phone: normalizedPhone,
         operator,
         country,
         externalReference: receiptCode,

@@ -21,8 +21,14 @@ interface DbState {
   vote: VoteRow
   calls: string[]
 }
-function makeDb({ candidateExists = true, voteCount = 10, voteStatus = 'pending' } = {}) {
-  const state: DbState = {
+function makeDb({
+  candidateExists = true,
+  voteCount = 10,
+  voteStatus = 'pending',
+  pendingCount = 0,
+} = {}) {
+  const state: DbState & { pendingCount: number } = {
+    pendingCount,
     voteCount,
     vote: {
       id: VOTE_ID,
@@ -38,6 +44,7 @@ function makeDb({ candidateExists = true, voteCount = 10, voteStatus = 'pending'
   const run = (strings: TemplateStringsArray, params: unknown[]): unknown[] => {
     const sql = strings.join('?')
     state.calls.push(sql)
+    if (sql.includes('AS pending')) return [{ pending: state.pendingCount }]
     if (sql.includes('FROM candidates') && sql.includes('FOR UPDATE'))
       return [{ vote_count: state.voteCount }]
     if (sql.includes('FROM candidates'))
@@ -191,6 +198,49 @@ describe('submitVote — mode réel', () => {
       expect(res.status).toBe(400)
     }
     expect(createCollection).not.toHaveBeenCalled()
+  })
+})
+describe('submitVote — garde-fous sécurité', () => {
+  it('refuse une quantité au-dessus du plafond serveur 999, avant tout appel SebPay (400)', async () => {
+    const createCollection = vi.fn()
+    const res = await submitVote(
+      { db: asDb(makeDb()) as unknown as Db, sebpay: asSebpay({ createCollection }), config },
+      { ...validBody, quantity: 1000 },
+    )
+    expect(res.status).toBe(400)
+    expect(createCollection).not.toHaveBeenCalled()
+  })
+  it('accepte la quantité limite 999 (201)', async () => {
+    const createCollection = vi
+      .fn()
+      .mockResolvedValue({ transaction_id: 'sp_1', status: 'pending', provider_link: null })
+    const res = await submitVote(
+      { db: asDb(makeDb()) as unknown as Db, sebpay: asSebpay({ createCollection }), config },
+      { ...validBody, quantity: 999 },
+    )
+    expect(res.status).toBe(201)
+  })
+  it('bloque quand trop de demandes en attente pour le numéro, sans appeler SebPay (429)', async () => {
+    const createCollection = vi.fn()
+    const res = await submitVote(
+      {
+        db: asDb(makeDb({ pendingCount: 5 })) as unknown as Db,
+        sebpay: asSebpay({ createCollection }),
+        config,
+      },
+      validBody,
+    )
+    expect(res.status).toBe(429)
+    expect(createCollection).not.toHaveBeenCalled()
+  })
+  it('refuse le mode simulé en production (503, aucun vote gratuit)', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    const db = makeDb()
+    const res = await submitVote({ db: asDb(db) as unknown as Db, sebpay: null, config }, validBody)
+    expect(res.status).toBe(503)
+    expect(db._state.voteCount).toBe(10)
+    expect(db._state.calls.some((call) => call.includes('INSERT INTO votes'))).toBe(false)
+    vi.unstubAllEnvs()
   })
 })
 describe('getVoteStatus — polling', () => {
