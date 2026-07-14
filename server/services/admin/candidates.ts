@@ -17,7 +17,6 @@ export interface CandidateInput {
   full_name?: unknown
   atelier?: unknown
   commune?: unknown
-  phone?: unknown
   profile_photo_url?: unknown
 }
 
@@ -37,7 +36,7 @@ function blobIdFromUrl(url: unknown): string | null {
 
 export async function listAdminCandidates(deps: CandidateAdminDeps): Promise<HttpResult> {
   const rows = await deps.db`
-    SELECT c.id, c.full_name, c.atelier, c.commune, c.phone, c.profile_photo_url, c.vote_count,
+    SELECT c.id, c.full_name, c.atelier, c.commune, c.profile_photo_url, c.vote_count,
            (SELECT COUNT(*)::int FROM candidate_photos p WHERE p.candidate_id = c.id) AS photos_count
     FROM candidates c
     WHERE c.deleted_at IS NULL
@@ -53,9 +52,9 @@ export async function createCandidate(
   if (!fullName) return fail(ERRORS.VALIDATION, 'Le nom du candidat est requis')
 
   const rows = await deps.db`
-    INSERT INTO candidates (full_name, atelier, commune, phone, profile_photo_url)
+    INSERT INTO candidates (full_name, atelier, commune, profile_photo_url)
     VALUES (${fullName}, ${cleanText(input.atelier, MAX_NAME_LENGTH)},
-            ${cleanText(input.commune, MAX_NAME_LENGTH)}, ${cleanText(input.phone, MAX_NAME_LENGTH)},
+            ${cleanText(input.commune, MAX_NAME_LENGTH)},
             ${cleanText(input.profile_photo_url, 300)})
     RETURNING id`
   return ok({ id: String(rows[0]?.id) }, 201)
@@ -75,7 +74,6 @@ export async function updateCandidate(
     SET full_name = ${fullName},
         atelier = ${cleanText(input.atelier, MAX_NAME_LENGTH)},
         commune = ${cleanText(input.commune, MAX_NAME_LENGTH)},
-        phone = ${cleanText(input.phone, MAX_NAME_LENGTH)},
         profile_photo_url = ${cleanText(input.profile_photo_url, 300)},
         updated_at = now()
     WHERE id = ${id} AND deleted_at IS NULL

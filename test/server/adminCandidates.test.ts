@@ -22,7 +22,6 @@ describe('listAdminCandidates', () => {
         full_name: 'Awa',
         atelier: 'A',
         commune: 'Lokossa',
-        phone: '+22990',
         profile_photo_url: '/api/photos/x',
         vote_count: 5,
         photos_count: 3,

@@ -9,13 +9,13 @@
           {{ candidates?.length ?? 0 }} candidat(s) en compétition.
         </p>
       </div>
-      <button
+      <NuxtLink
+        to="/admin/candidats/nouveau"
         class="flex items-center gap-2 bg-awac-dark text-white font-heading font-black text-[11px] tracking-widest uppercase py-3 px-5 rounded-xl shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98]"
-        @click="openCreate"
       >
         <span class="material-icons text-base">add</span>
         Ajouter
-      </button>
+      </NuxtLink>
     </div>
 
     <div v-if="pending" class="flex justify-center py-20">
@@ -30,11 +30,11 @@
     </div>
 
     <div v-else class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-      <button
+      <NuxtLink
         v-for="candidate in candidates"
         :key="candidate.id"
+        :to="`/admin/candidats/${candidate.id}`"
         class="w-full flex items-center gap-4 px-5 py-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors text-left"
-        @click="openEdit(candidate)"
       >
         <div class="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0">
           <img
@@ -71,15 +71,8 @@
           <span class="text-xs tabular-nums">{{ candidate.photos_count }}</span>
         </div>
         <span class="material-icons text-gray-300">chevron_right</span>
-      </button>
+      </NuxtLink>
     </div>
-
-    <AdminCandidateEditor
-      v-if="editorOpen"
-      :candidate="editing"
-      @close="editorOpen = false"
-      @saved="onSaved"
-    />
   </div>
 </template>
 
@@ -91,33 +84,12 @@ interface AdminCandidate {
   full_name: string
   atelier: string | null
   commune: string | null
-  phone: string | null
   profile_photo_url: string | null
   vote_count: number
   photos_count: number
 }
 
-const {
-  data: candidates,
-  pending,
-  refresh,
-} = await useFetch<AdminCandidate[]>('/api/admin/candidates', {
+const { data: candidates, pending } = await useFetch<AdminCandidate[]>('/api/admin/candidates', {
   headers: import.meta.server ? useRequestHeaders(['cookie']) : undefined,
 })
-
-const editorOpen = ref(false)
-const editing = ref<AdminCandidate | null>(null)
-
-const openCreate = () => {
-  editing.value = null
-  editorOpen.value = true
-}
-const openEdit = (candidate: AdminCandidate) => {
-  editing.value = candidate
-  editorOpen.value = true
-}
-const onSaved = async () => {
-  editorOpen.value = false
-  await refresh()
-}
 </script>
