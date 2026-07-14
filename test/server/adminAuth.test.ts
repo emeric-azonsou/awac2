@@ -18,7 +18,15 @@ function makeDb({ adminExists = true } = {}) {
     if (sql.includes('FROM admins')) {
       return Promise.resolve(
         adminExists
-          ? [{ id: ADMIN_ID, email: 'admin@awac.bj', password_hash: HASH, full_name: 'Emeric' }]
+          ? [
+              {
+                id: ADMIN_ID,
+                email: 'admin@awac.bj',
+                password_hash: HASH,
+                full_name: 'Emeric',
+                token_version: 3,
+              },
+            ]
           : [],
       )
     }
@@ -42,6 +50,7 @@ describe('verifyAdminLogin', () => {
     expect(body.id).toBe(ADMIN_ID)
     expect(body.email).toBe('admin@awac.bj')
     expect(body.full_name).toBe('Emeric')
+    expect(body.token_version).toBe(3)
     expect(JSON.stringify(body)).not.toContain(HASH)
   })
 

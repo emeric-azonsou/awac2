@@ -58,6 +58,7 @@ export interface AdminProfile {
   id: string
   email: string
   full_name: string
+  token_version: number
 }
 
 export async function verifyAdminLogin(
@@ -73,7 +74,7 @@ export async function verifyAdminLogin(
   if (isLocked(key)) return fail(LOCKED)
 
   const rows = await deps.db`
-    SELECT id, email, password_hash, full_name FROM admins WHERE email = ${normalizedEmail}`
+    SELECT id, email, password_hash, full_name, token_version FROM admins WHERE email = ${normalizedEmail}`
   const admin = rows[0]
 
   const passwordMatches = admin
@@ -90,6 +91,7 @@ export async function verifyAdminLogin(
     id: String(admin.id),
     email: String(admin.email),
     full_name: String(admin.full_name ?? ''),
+    token_version: Number(admin.token_version) || 0,
   }
   return ok(profile)
 }

@@ -1,6 +1,9 @@
 // Session admin : cookie scellé httpOnly (h3 useSession). Le cookie ne contient
-// que l'identité minimale (id, email, nom) chiffrée avec SESSION_SECRET.
+// que l'identité minimale (id, email, nom, tokenVersion) chiffrée avec
+// SESSION_SECRET. tokenVersion permet l'invalidation serveur : au logout on
+// incrémente admins.token_version, ce qui rend caduc tout token émis avant.
 import type { H3Event } from 'h3'
+import { getDb } from './db'
 
 const SESSION_NAME = 'awac_admin'
 const SESSION_MAX_AGE_SECONDS = 12 * 60 * 60
@@ -9,6 +12,7 @@ export interface AdminSessionData {
   adminId?: string
   email?: string
   fullName?: string
+  tokenVersion?: number
 }
 
 function sessionPassword(): string {
@@ -31,11 +35,23 @@ export function getAdminSession(event: H3Event) {
   })
 }
 
+const UNAUTHORIZED = () =>
+  createError({ statusCode: 401, statusMessage: 'Authentification requise' })
+
 export async function requireAdminSession(event: H3Event): Promise<Required<AdminSessionData>> {
   const session = await getAdminSession(event)
-  const { adminId, email, fullName } = session.data
-  if (!adminId) {
-    throw createError({ statusCode: 401, statusMessage: 'Authentification requise' })
+  const { adminId, email, fullName, tokenVersion } = session.data
+  if (!adminId) throw UNAUTHORIZED()
+
+  // Invalidation serveur : le token n'est valide que si sa version correspond
+  // toujours à celle de l'admin en base. Un logout (ou changement de mot de
+  // passe) incrémente token_version et révoque instantanément les tokens émis
+  // avant, y compris un token capturé qui n'est plus dans un navigateur.
+  const rows = await getDb()`SELECT token_version FROM admins WHERE id = ${adminId}`
+  const currentVersion = rows[0] ? Number(rows[0].token_version) : null
+  if (currentVersion === null || currentVersion !== (tokenVersion ?? 0)) {
+    throw UNAUTHORIZED()
   }
-  return { adminId, email: email ?? '', fullName: fullName ?? '' }
+
+  return { adminId, email: email ?? '', fullName: fullName ?? '', tokenVersion: tokenVersion ?? 0 }
 }

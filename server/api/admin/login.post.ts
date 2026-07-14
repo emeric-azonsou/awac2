@@ -18,7 +18,12 @@ export default defineEventHandler(async (event) => {
   if (result.status === 200) {
     const admin = result.body as AdminProfile
     const session = await getAdminSession(event)
-    await session.update({ adminId: admin.id, email: admin.email, fullName: admin.full_name })
+    await session.update({
+      adminId: admin.id,
+      email: admin.email,
+      fullName: admin.full_name,
+      tokenVersion: admin.token_version,
+    })
   }
 
   setResponseStatus(event, result.status)
