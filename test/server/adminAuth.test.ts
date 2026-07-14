@@ -4,6 +4,7 @@ import {
   verifyAdminLogin,
   resetLoginThrottle,
   LOGIN_MAX_ATTEMPTS,
+  EMAIL_MAX_ATTEMPTS,
 } from '../../server/services/admin/auth'
 import { asDb } from './helpers'
 import type { Db } from '../../server/types'
@@ -123,5 +124,19 @@ describe('verifyAdminLogin', () => {
       { email: 'admin@awac.bj', password: PASSWORD, clientIp: '198.51.100.9' },
     )
     expect(otherIp.status).toBe(200)
+  })
+  it('verrouille le compte après trop d’échecs même en changeant d’IP (anti-bypass X-Forwarded-For)', async () => {
+    const db = asDb(makeDb()) as unknown as Db
+    for (let attempt = 0; attempt < EMAIL_MAX_ATTEMPTS; attempt += 1) {
+      await verifyAdminLogin(
+        { db },
+        { email: 'admin@awac.bj', password: 'mauvais', clientIp: `198.51.100.${attempt}` },
+      )
+    }
+    const fromFreshIp = await verifyAdminLogin(
+      { db },
+      { email: 'admin@awac.bj', password: PASSWORD, clientIp: '203.0.113.250' },
+    )
+    expect(fromFreshIp.status).toBe(429)
   })
 })
