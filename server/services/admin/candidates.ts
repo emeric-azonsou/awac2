@@ -3,6 +3,7 @@ import { isUuid } from '../candidates'
 import { ok, fail, ERRORS, type HttpResult } from '../../lib/errors'
 const MAX_NAME_LENGTH = 120
 const MAX_CAPTION_LENGTH = 200
+const CANDIDATE_CATEGORIES = ['homme', 'femme'] as const
 export interface CandidateAdminDeps {
   db: Db
 }
@@ -11,12 +12,19 @@ export interface CandidateInput {
   atelier?: unknown
   commune?: unknown
   profile_photo_url?: unknown
+  category?: unknown
 }
 function cleanText(value: unknown, maxLength: number): string | null {
   if (typeof value !== 'string') return null
   const trimmed = value.trim()
   if (!trimmed) return null
   return trimmed.slice(0, maxLength)
+}
+
+function cleanCategory(value: unknown): string | null {
+  return typeof value === 'string' && (CANDIDATE_CATEGORIES as readonly string[]).includes(value)
+    ? value
+    : null
 }
 
 function blobIdFromUrl(url: unknown): string | null {
@@ -26,7 +34,7 @@ function blobIdFromUrl(url: unknown): string | null {
 }
 export async function listAdminCandidates(deps: CandidateAdminDeps): Promise<HttpResult> {
   const rows = await deps.db`
-    SELECT c.id, c.full_name, c.atelier, c.commune, c.profile_photo_url, c.vote_count,
+    SELECT c.id, c.full_name, c.atelier, c.commune, c.category, c.profile_photo_url, c.vote_count,
            (SELECT COUNT(*)::int FROM candidate_photos p WHERE p.candidate_id = c.id) AS photos_count
     FROM candidates c
     WHERE c.deleted_at IS NULL
@@ -39,11 +47,13 @@ export async function createCandidate(
 ): Promise<HttpResult> {
   const fullName = cleanText(input.full_name, MAX_NAME_LENGTH)
   if (!fullName) return fail(ERRORS.VALIDATION, 'Le nom du candidat est requis')
+  const category = cleanCategory(input.category)
+  if (!category) return fail(ERRORS.VALIDATION, 'La catégorie est requise (homme ou femme)')
   const rows = await deps.db`
-    INSERT INTO candidates (full_name, atelier, commune, profile_photo_url)
+    INSERT INTO candidates (full_name, atelier, commune, profile_photo_url, category)
     VALUES (${fullName}, ${cleanText(input.atelier, MAX_NAME_LENGTH)},
             ${cleanText(input.commune, MAX_NAME_LENGTH)},
-            ${cleanText(input.profile_photo_url, 300)})
+            ${cleanText(input.profile_photo_url, 300)}, ${category})
     RETURNING id`
   return ok({ id: String(rows[0]?.id) }, 201)
 }
@@ -55,12 +65,18 @@ export async function updateCandidate(
   if (!isUuid(id)) return fail(ERRORS.NOT_FOUND, 'Candidat introuvable')
   const fullName = cleanText(input.full_name, MAX_NAME_LENGTH)
   if (!fullName) return fail(ERRORS.VALIDATION, 'Le nom du candidat est requis')
+  let category: string | null = null
+  if (input.category !== undefined) {
+    category = cleanCategory(input.category)
+    if (!category) return fail(ERRORS.VALIDATION, 'Catégorie invalide (homme ou femme)')
+  }
   const rows = await deps.db`
     UPDATE candidates
     SET full_name = ${fullName},
         atelier = ${cleanText(input.atelier, MAX_NAME_LENGTH)},
         commune = ${cleanText(input.commune, MAX_NAME_LENGTH)},
         profile_photo_url = ${cleanText(input.profile_photo_url, 300)},
+        category = COALESCE(${category}, category),
         updated_at = now()
     WHERE id = ${id} AND deleted_at IS NULL
     RETURNING id`

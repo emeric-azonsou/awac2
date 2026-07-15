@@ -32,11 +32,11 @@ describe('listAdminCandidates', () => {
   })
 })
 describe('createCandidate', () => {
-  it('crée un candidat avec nom seul (autres champs optionnels)', async () => {
+  it('crée un candidat avec nom + catégorie (autres champs optionnels)', async () => {
     const db = recordingDb([{ id: CANDIDATE_ID }])
     const res = await createCandidate(
       { db: asDb(db) as unknown as Db },
-      { full_name: 'Awa Bocovo' },
+      { full_name: 'Awa Bocovo', category: 'femme' },
     )
     expect(res.status).toBe(201)
     expect((res.body as Record<string, unknown>).id).toBe(CANDIDATE_ID)
@@ -120,5 +120,67 @@ describe('removeCandidatePhoto', () => {
     const sqls = db.calls.map((c) => c.sql).join(' | ')
     expect(sqls).toContain('DELETE FROM candidate_photos')
     expect(sqls).toContain('DELETE FROM photo_files')
+  })
+})
+describe('createCandidate — catégorie', () => {
+  it('refuse une création sans catégorie (400) sans insertion', async () => {
+    const db = recordingDb([{ id: CANDIDATE_ID }])
+    const res = await createCandidate(
+      { db: asDb(db) as unknown as Db },
+      { full_name: 'Awa Bocovo' },
+    )
+    expect(res.status).toBe(400)
+    expect(db.calls.length).toBe(0)
+  })
+
+  it('refuse une catégorie hors liste (400)', async () => {
+    const db = recordingDb([{ id: CANDIDATE_ID }])
+    const res = await createCandidate(
+      { db: asDb(db) as unknown as Db },
+      { full_name: 'Awa Bocovo', category: 'autre' },
+    )
+    expect(res.status).toBe(400)
+    expect(db.calls.length).toBe(0)
+  })
+
+  it('crée avec une catégorie valide et la transmet à l’INSERT', async () => {
+    const db = recordingDb([{ id: CANDIDATE_ID }])
+    const res = await createCandidate(
+      { db: asDb(db) as unknown as Db },
+      { full_name: 'Awa Bocovo', category: 'femme' },
+    )
+    expect(res.status).toBe(201)
+    expect(db.calls[0]!.params).toContain('femme')
+  })
+})
+
+describe('updateCandidate — catégorie', () => {
+  it('refuse une catégorie invalide (400) sans update', async () => {
+    const db = recordingDb([{ id: CANDIDATE_ID }])
+    const res = await updateCandidate({ db: asDb(db) as unknown as Db }, CANDIDATE_ID, {
+      full_name: 'Awa B.',
+      category: 'x',
+    })
+    expect(res.status).toBe(400)
+    expect(db.calls.length).toBe(0)
+  })
+
+  it('modifie la catégorie quand fournie', async () => {
+    const db = recordingDb((sql) => (sql.includes('UPDATE') ? [{ id: CANDIDATE_ID }] : []))
+    const res = await updateCandidate({ db: asDb(db) as unknown as Db }, CANDIDATE_ID, {
+      full_name: 'Awa B.',
+      category: 'homme',
+    })
+    expect(res.status).toBe(200)
+    expect(db.calls[0]!.params).toContain('homme')
+  })
+
+  it('sans catégorie fournie, l’update passe (champ inchangé via COALESCE)', async () => {
+    const db = recordingDb((sql) => (sql.includes('UPDATE') ? [{ id: CANDIDATE_ID }] : []))
+    const res = await updateCandidate({ db: asDb(db) as unknown as Db }, CANDIDATE_ID, {
+      full_name: 'Awa B.',
+    })
+    expect(res.status).toBe(200)
+    expect(db.calls[0]!.sql).toContain('COALESCE')
   })
 })

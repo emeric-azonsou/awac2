@@ -26,6 +26,11 @@ describe('listCandidates', () => {
     expect(res.body).toHaveLength(1)
     expect(db.calls[0]!.sql).toContain('ORDER BY vote_count DESC')
   })
+  it('sélectionne la catégorie des candidats', async () => {
+    const db = recordingDb([])
+    await listCandidates(asDb(db))
+    expect(db.calls[0]!.sql).toContain('category')
+  })
 })
 describe('getCandidateWithPhotos', () => {
   it('renvoie candidat + photos (200)', async () => {

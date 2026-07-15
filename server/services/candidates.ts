@@ -6,7 +6,7 @@ export function isUuid(value: unknown): value is string {
 }
 export async function listCandidates(db: Db): Promise<HttpResult> {
   const rows = await db`
-    SELECT id, full_name, atelier, commune, profile_photo_url, vote_count
+    SELECT id, full_name, atelier, commune, profile_photo_url, vote_count, category
     FROM candidates
     WHERE deleted_at IS NULL
     ORDER BY vote_count DESC, created_at ASC`
@@ -15,7 +15,7 @@ export async function listCandidates(db: Db): Promise<HttpResult> {
 export async function getCandidateWithPhotos(db: Db, id: string): Promise<HttpResult> {
   if (!isUuid(id)) return fail(ERRORS.NOT_FOUND, 'Candidat introuvable')
   const rows = await db`
-    SELECT id, full_name, atelier, commune, profile_photo_url, vote_count
+    SELECT id, full_name, atelier, commune, profile_photo_url, vote_count, category
     FROM candidates
     WHERE id = ${id} AND deleted_at IS NULL`
   const candidate = rows[0]
