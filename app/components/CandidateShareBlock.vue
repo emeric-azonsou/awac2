@@ -24,7 +24,8 @@
         :href="whatsappShareUrl"
         target="_blank"
         rel="noopener"
-        class="share-action bg-[#25D366] text-white border-[#25D366] hover:brightness-95"
+        aria-label="Partager sur WhatsApp (nouvelle fenêtre)"
+        class="share-action bg-[#25D366] text-awac-dark border-[#25D366] hover:brightness-95"
       >
         WhatsApp
       </a>
@@ -33,7 +34,8 @@
         :href="facebookShareUrl"
         target="_blank"
         rel="noopener"
-        class="share-action bg-[#1877F2] text-white border-[#1877F2] hover:brightness-95"
+        aria-label="Partager sur Facebook (nouvelle fenêtre)"
+        class="share-action bg-[#0B5FCC] text-white border-[#0B5FCC] hover:brightness-95"
       >
         Facebook
       </a>
@@ -72,7 +74,8 @@ const firstName = computed(() => props.candidate.full_name.split(' ')[0] || '')
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.625rem 1rem;
+  min-height: 44px;
+  padding: 0.75rem 1.125rem;
   border-width: 1px;
   border-radius: 0.75rem;
   font-family: theme('fontFamily.heading');
@@ -82,5 +85,14 @@ const firstName = computed(() => props.candidate.full_name.split(' ')[0] || '')
   text-transform: uppercase;
   transition: all 0.2s ease;
   cursor: pointer;
+}
+.share-action:focus-visible {
+  outline: 2px solid #0b0b0b;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .share-action {
+    transition: none;
+  }
 }
 </style>
