@@ -118,6 +118,8 @@
                 <span class="font-heading font-black tracking-wider">Voir ses réalisations</span>
               </router-link>
 
+              <CandidateShareCompact :candidate="candidat" />
+
               <button
                 @click="openVoteModal(candidat)"
                 class="btn-awac w-full text-[11px] py-3.5 px-4"

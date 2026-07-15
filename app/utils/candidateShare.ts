@@ -26,3 +26,7 @@ export function buildFacebookShareUrl(shareUrl: string): string {
 export function shouldAutoOpenVote(query: Record<string, unknown>): boolean {
   return query[SHARE_QUERY_PARAM] === SHARE_QUERY_VALUE
 }
+
+export function getFirstName(fullName: string): string {
+  return fullName.split(' ')[0] ?? ''
+}

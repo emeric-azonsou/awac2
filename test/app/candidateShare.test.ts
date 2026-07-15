@@ -5,6 +5,7 @@ import {
   buildShareMessage,
   buildShareText,
   buildWhatsAppShareUrl,
+  getFirstName,
   shouldAutoOpenVote,
 } from '../../app/utils/candidateShare'
 
@@ -62,5 +63,16 @@ describe('shouldAutoOpenVote', () => {
     expect(shouldAutoOpenVote({})).toBe(false)
     expect(shouldAutoOpenVote({ vote: '2' })).toBe(false)
     expect(shouldAutoOpenVote({ vote: ['1'] })).toBe(false)
+  })
+})
+
+describe('getFirstName', () => {
+  it('retourne le premier mot du nom complet', () => {
+    expect(getFirstName('Awa Bocovo')).toBe('Awa')
+  })
+
+  it('gère nom vide ou simple', () => {
+    expect(getFirstName('')).toBe('')
+    expect(getFirstName('Awa')).toBe('Awa')
   })
 })
