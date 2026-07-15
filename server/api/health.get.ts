@@ -1,4 +1,4 @@
-import { getSebpay } from '../utils/context'
+import { getFeexpay } from '../utils/context'
 export default defineEventHandler(() => {
-  return { status: 'ok', payment: getSebpay() ? 'sebpay' : 'simulated' }
+  return { status: 'ok', payment: getFeexpay() ? 'feexpay' : 'simulated' }
 })

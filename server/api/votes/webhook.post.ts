@@ -1,13 +1,14 @@
 import { getDb } from '../../lib/db'
-import { getSebpaySecret } from '../../utils/context'
+import { getFeexpay, getFeexpayWebhookSecret } from '../../utils/context'
 import { processWebhook } from '../../services/votes'
 export default defineEventHandler(async (event) => {
   const rawBody = (await readRawBody(event)) ?? ''
-  const signature = getHeader(event, 'x-sebpay-signature') ?? null
+  const queryToken = getQuery(event).token
+  const token = typeof queryToken === 'string' && queryToken ? queryToken : null
   const result = await processWebhook(
-    { db: getDb(), secret: getSebpaySecret() },
+    { db: getDb(), feexpay: getFeexpay(), secret: getFeexpayWebhookSecret() },
     rawBody,
-    signature,
+    token,
   )
   setResponseStatus(event, result.status)
   return result.body

@@ -1,9 +1,9 @@
-import { getSebpay } from '../../utils/context'
+import { getFeexpay } from '../../utils/context'
 import { getOperatorsList } from '../../services/payment'
-export default defineEventHandler(async (event) => {
+export default defineEventHandler((event) => {
   const country = getQuery(event).country
   const value = typeof country === 'string' && country ? country : 'BJ'
-  const result = await getOperatorsList(getSebpay(), value)
+  const result = getOperatorsList(Boolean(getFeexpay()), value)
   setResponseStatus(event, result.status)
   return result.body
 })

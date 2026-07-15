@@ -1,10 +1,10 @@
-import type { Db, SebpayClient, PaymentConfig } from '../types'
+import type { Db, FeexpayClient } from '../types'
 import { ok, fail, ERRORS, type HttpResult, type ErrorEntry } from '../lib/errors'
 import { isUuid } from './candidates'
-import { verifyWebhookSignature } from '../lib/sebpay'
+import { verifyWebhookToken, toFeexpayPhone } from '../lib/feexpay'
+import { getNetworkSlugs } from './payment'
 import { confirmVote, rejectVote } from './voteConfirmation'
 const MAX_QUANTITY_PER_VOTE = 999
-const DEFAULT_COUNTRY = 'BJ'
 const MAX_PENDING_PER_PHONE = 5
 const PENDING_PHONE_WINDOW_MINUTES = 30
 const PAYMENT_ERROR: ErrorEntry = {
@@ -24,15 +24,15 @@ const SIMULATED_IN_PRODUCTION: ErrorEntry = {
 }
 export interface VoteDeps {
   db: Db
-  sebpay: SebpayClient | null
-  config: PaymentConfig
+  feexpay: FeexpayClient | null
 }
 export interface VoteStatusDeps {
   db: Db
-  sebpay: SebpayClient | null
+  feexpay: FeexpayClient | null
 }
 export interface WebhookDeps {
   db: Db
+  feexpay: FeexpayClient | null
   secret: string
 }
 function generateReceiptCode(): string {
@@ -48,8 +48,6 @@ export async function submitVote(deps: VoteDeps, body: unknown): Promise<HttpRes
   const quantity = input.quantity
   const operator = typeof input.operator === 'string' ? input.operator.trim() : ''
   const voterPhone = typeof input.voter_phone === 'string' ? input.voter_phone.trim() : ''
-  const country =
-    typeof input.country === 'string' && input.country ? input.country : DEFAULT_COUNTRY
   if (!isUuid(candidateId)) return fail(ERRORS.VALIDATION, 'candidate_id invalide')
   if (!Number.isInteger(quantity) || (quantity as number) <= 0) {
     return fail(ERRORS.VALIDATION, 'La quantité doit être un entier positif')
@@ -59,10 +57,13 @@ export async function submitVote(deps: VoteDeps, body: unknown): Promise<HttpRes
   }
   if (!operator) return fail(ERRORS.VALIDATION, 'Opérateur requis')
   if (!voterPhone) return fail(ERRORS.VALIDATION, 'Numéro de téléphone requis')
-  const { db, sebpay, config } = deps
-  const simulated = !sebpay
+  const { db, feexpay } = deps
+  const simulated = !feexpay
   if (simulated && process.env.NODE_ENV === 'production') {
     return fail(SIMULATED_IN_PRODUCTION)
+  }
+  if (feexpay && !getNetworkSlugs().includes(operator)) {
+    return fail(ERRORS.VALIDATION, 'Opérateur non pris en charge')
   }
   const quantityNum = quantity as number
   const normalizedPhone = normalizePhone(voterPhone)
@@ -96,22 +97,15 @@ export async function submitVote(deps: VoteDeps, body: unknown): Promise<HttpRes
             ${normalizedPhone}, ${receiptCode}, ${voteCount}, ${voteCount},
             ${operator}, 'pending', ${null})
     RETURNING id, receipt_code`
-  let providerLink: string | null = null
-  if (sebpay) {
+  if (feexpay) {
     try {
-      const collection = await sebpay.createCollection({
+      const payment = await feexpay.initPayment({
         amount: totalAmount,
-        currency,
-        phone: normalizedPhone,
-        operator,
-        country,
-        externalReference: receiptCode,
-        callbackUrl: config.callbackUrl,
+        network: operator,
+        phoneNumber: toFeexpayPhone(normalizedPhone),
+        callbackInfo: receiptCode,
       })
-      providerLink = collection.provider_link ?? null
-      if (collection.transaction_id) {
-        await db`UPDATE votes SET payment_reference = ${collection.transaction_id} WHERE receipt_code = ${receiptCode}`
-      }
+      await db`UPDATE votes SET payment_reference = ${payment.reference} WHERE receipt_code = ${receiptCode}`
     } catch (err) {
       await rejectVote(db, receiptCode)
       return fail(PAYMENT_ERROR, err instanceof Error ? err.message : undefined)
@@ -129,7 +123,6 @@ export async function submitVote(deps: VoteDeps, body: unknown): Promise<HttpRes
       id: inserted[0]?.id,
       receipt_code: receiptCode,
       payment_status: paymentStatus,
-      provider_link: providerLink,
       amount: totalAmount,
       currency,
       votes_after: votesAfter,
@@ -141,36 +134,52 @@ export interface ReconcileResult {
   paymentStatus: 'confirmed' | 'rejected' | 'pending'
   votesAfter: number | null
 }
+export interface PendingVoteRef {
+  receiptCode: string
+  paymentReference: string | null
+  expectedAmount: number
+}
 export async function reconcilePendingVote(
   db: Db,
-  sebpay: SebpayClient,
-  receiptCode: string,
+  feexpay: FeexpayClient,
+  vote: PendingVoteRef,
 ): Promise<ReconcileResult> {
-  const collection = await sebpay.getCollection(receiptCode)
-  if (collection.status === 'approved') {
-    const result = await confirmVote(db, receiptCode, collection.transaction_id)
+  if (!vote.paymentReference) return { paymentStatus: 'pending', votesAfter: null }
+  const payment = await feexpay.getPaymentStatus(vote.paymentReference)
+  const status = String(payment.status || '').toUpperCase()
+  if (status === 'SUCCESSFUL') {
+    const paidAmount = payment.amount === undefined ? null : Number(payment.amount)
+    if (paidAmount !== null && paidAmount !== Number(vote.expectedAmount)) {
+      return { paymentStatus: 'pending', votesAfter: null }
+    }
+    const result = await confirmVote(db, vote.receiptCode, vote.paymentReference)
     return {
       paymentStatus: result.status === 'not_found' ? 'pending' : 'confirmed',
       votesAfter: result.votesAfter ?? null,
     }
   }
-  if (collection.status === 'rejected') {
-    await rejectVote(db, receiptCode)
+  if (status === 'FAILED') {
+    await rejectVote(db, vote.receiptCode)
     return { paymentStatus: 'rejected', votesAfter: null }
   }
   return { paymentStatus: 'pending', votesAfter: null }
 }
 export async function getVoteStatus(deps: VoteStatusDeps, id: string): Promise<HttpResult> {
   if (!isUuid(id)) return fail(ERRORS.NOT_FOUND, 'Vote introuvable')
-  const { db, sebpay } = deps
-  const rows =
-    await db`SELECT id, receipt_code, payment_status, votes_after FROM votes WHERE id = ${id}`
+  const { db, feexpay } = deps
+  const rows = await db`
+    SELECT id, receipt_code, payment_status, payment_reference, total_amount, votes_after
+    FROM votes WHERE id = ${id}`
   const vote = rows[0]
   if (!vote) return fail(ERRORS.NOT_FOUND, 'Vote introuvable')
   let { payment_status: paymentStatus, votes_after: votesAfter } = vote
-  if (paymentStatus === 'pending' && sebpay) {
+  if (paymentStatus === 'pending' && feexpay) {
     try {
-      const reconciled = await reconcilePendingVote(db, sebpay, vote.receipt_code)
+      const reconciled = await reconcilePendingVote(db, feexpay, {
+        receiptCode: vote.receipt_code,
+        paymentReference: vote.payment_reference,
+        expectedAmount: Number(vote.total_amount),
+      })
       if (reconciled.paymentStatus !== 'pending') paymentStatus = reconciled.paymentStatus
       votesAfter = reconciled.votesAfter ?? votesAfter
     } catch {}
@@ -180,11 +189,11 @@ export async function getVoteStatus(deps: VoteStatusDeps, id: string): Promise<H
 export async function processWebhook(
   deps: WebhookDeps,
   rawBody: string,
-  signature: string | null,
+  token: string | null,
 ): Promise<HttpResult> {
-  const { db, secret } = deps
-  if (!verifyWebhookSignature(rawBody, signature, secret)) {
-    return fail(ERRORS.UNAUTHORIZED, 'Signature invalide')
+  const { db, feexpay, secret } = deps
+  if (!verifyWebhookToken(token, secret)) {
+    return fail(ERRORS.UNAUTHORIZED, 'Jeton invalide')
   }
   let payload: Record<string, unknown>
   try {
@@ -192,11 +201,21 @@ export async function processWebhook(
   } catch {
     return fail(ERRORS.VALIDATION, 'Corps invalide')
   }
-  const reference = payload.external_reference
-  if (typeof reference === 'string' && reference) {
-    if (payload.status === 'approved')
-      await confirmVote(db, reference, (payload.transaction_id as string) ?? null)
-    else if (payload.status === 'rejected') await rejectVote(db, reference)
+  const reference = payload.reference
+  if (feexpay && typeof reference === 'string' && reference) {
+    const rows = await db`
+      SELECT receipt_code, payment_status, total_amount
+      FROM votes WHERE payment_reference = ${reference}`
+    const vote = rows[0]
+    if (vote && vote.payment_status === 'pending') {
+      try {
+        await reconcilePendingVote(db, feexpay, {
+          receiptCode: vote.receipt_code,
+          paymentReference: reference,
+          expectedAmount: Number(vote.total_amount),
+        })
+      } catch {}
+    }
   }
   return ok({ received: true })
 }

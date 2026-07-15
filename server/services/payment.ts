@@ -1,57 +1,64 @@
-import type { SebpayClient } from '../types'
 import { ok, type HttpResult } from '../lib/errors'
 
 const XOF = { code: 'XOF', name: 'Franc CFA (UEMOA)' }
-export const FALLBACK_COUNTRIES = [
+const XAF = { code: 'XAF', name: 'Franc CFA (CEMAC)' }
+export const SUPPORTED_COUNTRIES = [
   { country_code: 'BJ', country_name: 'Bénin', prefix: '+229', currency: XOF },
   { country_code: 'TG', country_name: 'Togo', prefix: '+228', currency: XOF },
   { country_code: 'CI', country_name: "Côte d'Ivoire", prefix: '+225', currency: XOF },
   { country_code: 'SN', country_name: 'Sénégal', prefix: '+221', currency: XOF },
   { country_code: 'BF', country_name: 'Burkina Faso', prefix: '+226', currency: XOF },
   { country_code: 'ML', country_name: 'Mali', prefix: '+223', currency: XOF },
-  { country_code: 'NE', country_name: 'Niger', prefix: '+227', currency: XOF },
-  { country_code: 'GW', country_name: 'Guinée-Bissau', prefix: '+245', currency: XOF },
+  { country_code: 'CG', country_name: 'Congo Brazzaville', prefix: '+242', currency: XAF },
 ]
+interface Network {
+  slug: string
+  name: string
+  otp_required: boolean
+}
+export const NETWORKS_BY_COUNTRY: Record<string, Network[]> = {
+  BJ: [
+    { slug: 'mtn', name: 'MTN Bénin', otp_required: false },
+    { slug: 'moov', name: 'Moov Bénin', otp_required: false },
+    { slug: 'celtiis_bj', name: 'Celtiis Bénin', otp_required: false },
+    { slug: 'coris', name: 'Coris Money Bénin', otp_required: false },
+  ],
+  TG: [
+    { slug: 'togocom_tg', name: 'Togocom Togo', otp_required: false },
+    { slug: 'moov_tg', name: 'Moov Togo', otp_required: false },
+  ],
+  CI: [
+    { slug: 'mtn_ci', name: "MTN Côte d'Ivoire", otp_required: false },
+    { slug: 'moov_ci', name: "Moov Côte d'Ivoire", otp_required: false },
+    { slug: 'orange_ci', name: "Orange Côte d'Ivoire", otp_required: false },
+    { slug: 'wave_ci', name: "Wave Côte d'Ivoire", otp_required: false },
+  ],
+  SN: [
+    { slug: 'orange_sn', name: 'Orange Sénégal', otp_required: false },
+    { slug: 'wave_sn', name: 'Wave Sénégal', otp_required: false },
+    { slug: 'free_sn', name: 'Free Sénégal', otp_required: false },
+  ],
+  BF: [
+    { slug: 'moov_bf', name: 'Moov Burkina', otp_required: false },
+    { slug: 'orange_bf', name: 'Orange Burkina', otp_required: false },
+    { slug: 'wave_bf', name: 'Wave Burkina', otp_required: false },
+  ],
+  ML: [
+    { slug: 'orange_ml', name: 'Orange Mali', otp_required: false },
+    { slug: 'mobicash_ml', name: 'Mobicash Mali', otp_required: false },
+  ],
+  CG: [{ slug: 'mtn_cg', name: 'MTN Congo Brazzaville', otp_required: false }],
+}
 export const FALLBACK_OPERATORS = [{ slug: 'demo', name: 'Démo (simulation)', otp_required: false }]
-const CACHE_TTL_MS = 60 * 60 * 1000
-interface CacheEntry {
-  value: unknown
-  at: number
+export function getNetworkSlugs(): string[] {
+  return Object.values(NETWORKS_BY_COUNTRY).flatMap((networks) =>
+    networks.map((network) => network.slug),
+  )
 }
-
-const cacheByClient = new WeakMap<SebpayClient, Map<string, CacheEntry>>()
-async function cached<T>(sebpay: SebpayClient, key: string, loader: () => Promise<T>): Promise<T> {
-  let clientCache = cacheByClient.get(sebpay)
-  if (!clientCache) {
-    clientCache = new Map<string, CacheEntry>()
-    cacheByClient.set(sebpay, clientCache)
-  }
-  const entry = clientCache.get(key)
-  if (entry && Date.now() - entry.at < CACHE_TTL_MS) return entry.value as T
-  const value = await loader()
-  clientCache.set(key, { value, at: Date.now() })
-  return value
+export function getCountriesList(): HttpResult {
+  return ok({ countries: SUPPORTED_COUNTRIES })
 }
-export async function getCountriesList(sebpay: SebpayClient | null): Promise<HttpResult> {
-  if (!sebpay) return ok({ countries: FALLBACK_COUNTRIES })
-  try {
-    const countries = await cached(sebpay, 'countries', () => sebpay.getCountries())
-    return ok({ countries })
-  } catch {
-    return ok({ countries: FALLBACK_COUNTRIES })
-  }
-}
-export async function getOperatorsList(
-  sebpay: SebpayClient | null,
-  country: string,
-): Promise<HttpResult> {
-  if (!sebpay) return ok({ operators: FALLBACK_OPERATORS })
-  try {
-    const operators = await cached(sebpay, `operators:${country}`, () =>
-      sebpay.getOperators(country),
-    )
-    return ok({ operators })
-  } catch {
-    return ok({ operators: FALLBACK_OPERATORS })
-  }
+export function getOperatorsList(live: boolean, country: string): HttpResult {
+  if (!live) return ok({ operators: FALLBACK_OPERATORS })
+  return ok({ operators: NETWORKS_BY_COUNTRY[country] ?? [] })
 }

@@ -10,6 +10,10 @@ export default defineNuxtConfig({
       htmlAttrs: { lang: 'fr' },
       title: 'AWAC',
       link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png' },
+        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/favicon-180.png' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {
@@ -53,10 +57,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // serveur-only (jamais dans le bundle client)
     databaseUrl: process.env.DATABASE_URL ?? '',
-    sebpayPublicKey: process.env.SEBPAY_PUBLIC_KEY ?? '',
-    sebpaySecretKey: process.env.SEBPAY_SECRET_KEY ?? '',
-    sebpayBaseUrl: process.env.SEBPAY_BASE_URL ?? '',
-    sebpayCallbackUrl: process.env.SEBPAY_CALLBACK_URL ?? '',
+    feexpayApiKey: process.env.FEEXPAY_API_KEY ?? '',
+    feexpayShopId: process.env.FEEXPAY_SHOP_ID ?? '',
+    feexpayBaseUrl: process.env.FEEXPAY_BASE_URL ?? '',
+    feexpayWebhookSecret: process.env.FEEXPAY_WEBHOOK_SECRET ?? '',
     sessionSecret: process.env.SESSION_SECRET ?? '',
   },
 })

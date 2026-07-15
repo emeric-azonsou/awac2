@@ -1,6 +1,6 @@
 import crypto from 'node:crypto'
 import { getDb } from '../../lib/db'
-import { getSebpay } from '../../utils/context'
+import { getFeexpay } from '../../utils/context'
 import { createNotifierFromEnv } from '../../lib/notifier'
 import { reconcilePendingVotes } from '../../services/reconciliation'
 
@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     return { error: { code: 'unauthorized', message: 'Authentification requise' } }
   }
   const summary = await reconcilePendingVotes(
-    { db: getDb(), sebpay: getSebpay(), notifier: createNotifierFromEnv() },
+    { db: getDb(), feexpay: getFeexpay(), notifier: createNotifierFromEnv() },
     {},
   )
   return summary

@@ -54,7 +54,6 @@ export interface SubmitVoteResult {
   id: string
   receipt_code: string
   payment_status: string
-  provider_link: string | null
   amount: number
   currency: string
 }

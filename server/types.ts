@@ -1,43 +1,27 @@
 import type { Sql } from 'postgres'
 export type Db = Sql
-export interface SebpayCollection {
-  transaction_id: string
-  status: string
-  external_reference?: string
-  amount?: number
-  currency?: string
-  provider_link?: string | null
-  message?: string
-}
-export interface SebpayCollectionInput {
+export interface PaymentInitInput {
   amount: number
-  currency: string
-  phone: string
-  operator: string
-  country?: string
-  externalReference: string
-  callbackUrl: string
+  network: string
+  phoneNumber: string
+  callbackInfo: string
 }
-export interface SebpayCountry {
-  country_code: string
-  country_name?: string
-  prefix?: string
-  currency?: { code: string; name?: string; symbol?: string }
-  [key: string]: unknown
+export interface PaymentInitResult {
+  reference: string
+  status: string
+  message?: string
+  amount?: number
+  phoneNumber?: string
 }
-export interface SebpayOperator {
-  slug: string
-  name?: string
-  code?: string
-  otp_required?: boolean
-  [key: string]: unknown
+export interface PaymentStatusResult {
+  reference: string
+  status: string
+  amount?: number
+  phoneNumber?: string
+  reason?: string
+  callback_info?: string | null
 }
-export interface SebpayClient {
-  createCollection(input: SebpayCollectionInput): Promise<SebpayCollection>
-  getCollection(reference: string): Promise<SebpayCollection>
-  getCountries(): Promise<SebpayCountry[]>
-  getOperators(country?: string): Promise<SebpayOperator[]>
-}
-export interface PaymentConfig {
-  callbackUrl: string
+export interface FeexpayClient {
+  initPayment(input: PaymentInitInput): Promise<PaymentInitResult>
+  getPaymentStatus(reference: string): Promise<PaymentStatusResult>
 }

@@ -1,19 +1,20 @@
-import type { Db, SebpayClient } from '../types'
+import type { Db, FeexpayClient } from '../types'
 import { ok, fail, ERRORS, type HttpResult } from '../lib/errors'
 import { reconcilePendingVote } from './votes'
 const RECEIPT_CODE_PATTERN = /^AWAC-\d{10,16}-[A-Z0-9]{8}$/
 export interface ReceiptDeps {
   db: Db
-  sebpay: SebpayClient | null
+  feexpay: FeexpayClient | null
 }
 export async function getReceipt(deps: ReceiptDeps, code: string): Promise<HttpResult> {
   if (typeof code !== 'string' || !RECEIPT_CODE_PATTERN.test(code)) {
     return fail(ERRORS.NOT_FOUND, 'Reçu introuvable')
   }
-  const { db, sebpay } = deps
+  const { db, feexpay } = deps
   const rows = await db`
-    SELECT v.receipt_code, v.payment_status, v.quantity, v.total_amount, v.currency,
-           v.created_at, v.votes_before, v.votes_after, c.full_name AS candidate_name
+    SELECT v.receipt_code, v.payment_status, v.payment_reference, v.quantity, v.total_amount,
+           v.currency, v.created_at, v.votes_before, v.votes_after,
+           c.full_name AS candidate_name
     FROM votes v
     JOIN candidates c ON c.id = v.candidate_id
     WHERE v.receipt_code = ${code}`
@@ -23,9 +24,13 @@ export async function getReceipt(deps: ReceiptDeps, code: string): Promise<HttpR
 
   let votesBefore = paymentStatus === 'confirmed' ? receipt.votes_before : null
   let votesAfter = paymentStatus === 'confirmed' ? receipt.votes_after : null
-  if (paymentStatus === 'pending' && sebpay) {
+  if (paymentStatus === 'pending' && feexpay) {
     try {
-      const reconciled = await reconcilePendingVote(db, sebpay, code)
+      const reconciled = await reconcilePendingVote(db, feexpay, {
+        receiptCode: code,
+        paymentReference: receipt.payment_reference,
+        expectedAmount: Number(receipt.total_amount),
+      })
       if (reconciled.paymentStatus !== 'pending') paymentStatus = reconciled.paymentStatus
       if (reconciled.paymentStatus === 'confirmed' && reconciled.votesAfter !== null) {
         votesAfter = reconciled.votesAfter

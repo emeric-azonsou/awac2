@@ -93,7 +93,7 @@
               type="tel"
               required
               class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-awac-primary focus:ring-2 focus:ring-awac-primary/20 outline-none transition-all text-sm"
-              placeholder="01 97 00 00 00"
+              :placeholder="phonePlaceholder"
             />
           </div>
         </div>
@@ -316,6 +316,9 @@ const selectedCountry = computed(() =>
   countries.value.find((entry) => entry.country_code === form.value.country),
 )
 const selectedPrefix = computed(() => selectedCountry.value?.prefix || '')
+const phonePlaceholder = computed(() =>
+  form.value.country === 'BJ' ? '01 97 00 00 00' : 'Numéro sans indicatif',
+)
 const loadCountries = async () => {
   metaLoading.value = true
   try {
@@ -398,7 +401,6 @@ const submitVote = async () => {
       currency: selectedCountry.value?.currency?.code,
     })
     receiptCode.value = result.receipt_code
-    if (result.provider_link) window.open(result.provider_link, '_blank', 'noopener')
     if (result.payment_status === 'confirmed') {
       emit('voted', { votes_after: result.votes_after })
       phase.value = 'thanks'

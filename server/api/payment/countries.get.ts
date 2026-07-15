@@ -1,7 +1,6 @@
-import { getSebpay } from '../../utils/context'
 import { getCountriesList } from '../../services/payment'
-export default defineEventHandler(async (event) => {
-  const result = await getCountriesList(getSebpay())
+export default defineEventHandler((event) => {
+  const result = getCountriesList()
   setResponseStatus(event, result.status)
   return result.body
 })

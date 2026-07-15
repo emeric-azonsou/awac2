@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
 import { reconcilePendingVotes } from '../../server/services/reconciliation'
 import { asDb } from './helpers'
-import type { Db, SebpayClient } from '../../server/types'
+import type { Db, FeexpayClient } from '../../server/types'
 import type { LateConfirmationNotifier } from '../../server/lib/notifier'
-const asSebpay = (o: unknown): SebpayClient => o as unknown as SebpayClient
+const asFeexpay = (o: unknown): FeexpayClient => o as unknown as FeexpayClient
 interface StaleVote {
   receipt_code: string
   candidate_id: string
@@ -15,19 +15,23 @@ interface StaleVote {
   candidate_name: string
 }
 function makeDb(staleVotes: Partial<StaleVote>[]) {
-  const votes = staleVotes.map((vote, index) => ({
-    receipt_code: `AWAC-170000000000${index}-CODE000${index}`,
-    candidate_id: 'c-1',
-    quantity: 2,
-    payment_status: 'pending',
-    voter_phone: '+2290197000000',
-    total_amount: 200,
-    currency: 'XOF',
-    candidate_name: 'Awa Bocovo',
-    votes_before: 10,
-    votes_after: 10,
-    ...vote,
-  }))
+  const votes = staleVotes.map((vote, index) => {
+    const receiptCode = vote.receipt_code ?? `AWAC-170000000000${index}-CODE000${index}`
+    return {
+      receipt_code: receiptCode,
+      candidate_id: 'c-1',
+      quantity: 2,
+      payment_status: 'pending',
+      payment_reference: `fx-${receiptCode}`,
+      voter_phone: '+2290197000000',
+      total_amount: 200,
+      currency: 'XOF',
+      candidate_name: 'Awa Bocovo',
+      votes_before: 10,
+      votes_after: 10,
+      ...vote,
+    }
+  })
   const state = { votes, voteCount: 10 }
   const run = (strings: TemplateStringsArray, params: unknown[]): unknown[] => {
     const sql = strings.join('?')
@@ -77,16 +81,16 @@ describe('reconcilePendingVotes', () => {
       { receipt_code: 'AWAC-1700000000002-REJECTED' },
       { receipt_code: 'AWAC-1700000000003-WAITING0' },
     ])
-    const getCollection = vi.fn().mockImplementation(async (code: string) => {
-      if (code.endsWith('APPROVED')) return { transaction_id: 'sp_1', status: 'approved' }
-      if (code.endsWith('REJECTED')) return { transaction_id: 'sp_2', status: 'rejected' }
-      return { transaction_id: 'sp_3', status: 'pending' }
+    const getPaymentStatus = vi.fn().mockImplementation(async (reference: string) => {
+      if (reference.endsWith('APPROVED')) return { reference, status: 'SUCCESSFUL', amount: 200 }
+      if (reference.endsWith('REJECTED')) return { reference, status: 'FAILED' }
+      return { reference, status: 'PENDING' }
     })
     const notifier = makeNotifier()
     const summary = await reconcilePendingVotes(
       {
         db: asDb(db) as unknown as Db,
-        sebpay: asSebpay({ getCollection }),
+        feexpay: asFeexpay({ getPaymentStatus }),
         notifier: notifier as LateConfirmationNotifier,
       },
       {},
@@ -99,15 +103,15 @@ describe('reconcilePendingVotes', () => {
       { receipt_code: 'AWAC-1700000000001-APPROVED' },
       { receipt_code: 'AWAC-1700000000002-REJECTED' },
     ])
-    const getCollection = vi.fn().mockImplementation(async (code: string) => ({
-      transaction_id: 'sp',
-      status: code.endsWith('APPROVED') ? 'approved' : 'rejected',
+    const getPaymentStatus = vi.fn().mockImplementation(async (reference: string) => ({
+      reference,
+      status: reference.endsWith('APPROVED') ? 'SUCCESSFUL' : 'FAILED',
     }))
     const notifier = makeNotifier()
     await reconcilePendingVotes(
       {
         db: asDb(db) as unknown as Db,
-        sebpay: asSebpay({ getCollection }),
+        feexpay: asFeexpay({ getPaymentStatus }),
         notifier: notifier as LateConfirmationNotifier,
       },
       {},
@@ -119,25 +123,25 @@ describe('reconcilePendingVotes', () => {
     expect(info.candidateName).toBe('Awa Bocovo')
     expect(info.quantity).toBe(2)
   })
-  it("une erreur SebPay sur un vote n'empêche pas les suivants (et il reste pending)", async () => {
+  it("une erreur FeexPay sur un vote n'empêche pas les suivants (et il reste pending)", async () => {
     const db = makeDb([
       { receipt_code: 'AWAC-1700000000001-BROKEN00' },
       { receipt_code: 'AWAC-1700000000002-APPROVED' },
     ])
-    const getCollection = vi.fn().mockImplementation(async (code: string) => {
-      if (code.endsWith('BROKEN00')) throw new Error('timeout')
-      return { transaction_id: 'sp', status: 'approved' }
+    const getPaymentStatus = vi.fn().mockImplementation(async (reference: string) => {
+      if (reference.endsWith('BROKEN00')) throw new Error('timeout')
+      return { reference, status: 'SUCCESSFUL' }
     })
     const summary = await reconcilePendingVotes(
-      { db: asDb(db) as unknown as Db, sebpay: asSebpay({ getCollection }), notifier: null },
+      { db: asDb(db) as unknown as Db, feexpay: asFeexpay({ getPaymentStatus }), notifier: null },
       {},
     )
     expect(summary).toMatchObject({ checked: 2, confirmed: 1, errors: 1 })
   })
-  it('sans client SebPay, ne touche à rien', async () => {
+  it('sans client FeexPay, ne touche à rien', async () => {
     const db = makeDb([{ receipt_code: 'AWAC-1700000000001-WAITING0' }])
     const summary = await reconcilePendingVotes(
-      { db: asDb(db) as unknown as Db, sebpay: null, notifier: null },
+      { db: asDb(db) as unknown as Db, feexpay: null, notifier: null },
       {},
     )
     expect(summary).toMatchObject({ checked: 0 })

@@ -5,7 +5,9 @@
         <h1 class="text-gray-900 font-heading font-black text-3xl tracking-tight uppercase">
           Votes
         </h1>
-        <p class="text-gray-500 font-sans text-sm">Suivi des paiements et réconciliation SebPay.</p>
+        <p class="text-gray-500 font-sans text-sm">
+          Suivi des paiements et réconciliation FeexPay.
+        </p>
       </div>
       <button
         class="btn-awac-dark text-[11px] py-3 px-5"
