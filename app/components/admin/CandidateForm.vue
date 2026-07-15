@@ -301,7 +301,7 @@ const removeCandidate = async () => {
   deleting.value = true
   try {
     await $fetch(`/api/admin/candidates/${props.candidate.id}`, { method: 'DELETE' })
-    router.push('/admin/candidats')
+    router.push({ path: '/admin/candidats', query: { saved: 'deleted' } })
   } catch {
     errorMessage.value = 'Échec de la suppression.'
   } finally {
