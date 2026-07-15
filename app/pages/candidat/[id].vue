@@ -278,6 +278,10 @@ const {
     }),
 )
 
+if (import.meta.server && loadError.value) {
+  setResponseStatus(useRequestEvent(), loadError.value.statusCode ?? 500)
+}
+
 const loading = computed(() => status.value === 'pending')
 const notFound = computed(() => loadError.value?.statusCode === 404)
 const error = computed(() =>
