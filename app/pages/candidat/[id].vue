@@ -304,13 +304,9 @@ const ogImage = computed(() => {
 
 useSeoMeta({
   title: () =>
-    candidate.value
-      ? `${candidate.value.full_name} — Awards des Couturier·e·s du Mono`
-      : 'AWAC',
+    candidate.value ? `${candidate.value.full_name} — Awards des Couturier·e·s du Mono` : 'AWAC',
   ogTitle: () =>
-    candidate.value
-      ? `${candidate.value.full_name} — Awards des Couturier·e·s du Mono`
-      : 'AWAC',
+    candidate.value ? `${candidate.value.full_name} — Awards des Couturier·e·s du Mono` : 'AWAC',
   description: () =>
     candidate.value
       ? `Vote pour ${candidate.value.full_name} et propulse ce talent vers la victoire aux Awards des Couturier·e·s du Mono.`

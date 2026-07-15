@@ -61,14 +61,8 @@ const props = defineProps({
   candidate: { type: Object, required: true },
 })
 
-const {
-  whatsappShareUrl,
-  facebookShareUrl,
-  copied,
-  copyShareLink,
-  canNativeShare,
-  nativeShare,
-} = useCandidateShare(toRef(props, 'candidate'))
+const { whatsappShareUrl, facebookShareUrl, copied, copyShareLink, canNativeShare, nativeShare } =
+  useCandidateShare(toRef(props, 'candidate'))
 
 const firstName = computed(() => props.candidate.full_name.split(' ')[0] || '')
 </script>
