@@ -184,3 +184,28 @@ describe('updateCandidate — catégorie', () => {
     expect(db.calls[0]!.sql).toContain('COALESCE')
   })
 })
+
+describe('updateCandidate — PATCH partiel (régression UQA-001)', () => {
+  it('préserve atelier/commune/photo quand omis', async () => {
+    const db = recordingDb((sql) => (sql.includes('UPDATE') ? [{ id: CANDIDATE_ID }] : []))
+    const res = await updateCandidate({ db: asDb(db) as unknown as Db }, CANDIDATE_ID, {
+      full_name: 'QA Patch Probe 2',
+    })
+    expect(res.status).toBe(200)
+    const call = db.calls[0]!
+    expect(call.sql).toContain('CASE WHEN')
+    expect(call.params.filter((param) => param === true).length).toBe(3)
+  })
+
+  it('vide explicitement atelier quand fourni vide', async () => {
+    const db = recordingDb((sql) => (sql.includes('UPDATE') ? [{ id: CANDIDATE_ID }] : []))
+    const res = await updateCandidate({ db: asDb(db) as unknown as Db }, CANDIDATE_ID, {
+      full_name: 'QA Patch Probe 2',
+      atelier: '',
+    })
+    expect(res.status).toBe(200)
+    const call = db.calls[0]!
+    expect(call.params).toContain(false)
+    expect(call.params).toContain(null)
+  })
+})

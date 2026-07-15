@@ -70,12 +70,15 @@ export async function updateCandidate(
     category = cleanCategory(input.category)
     if (!category) return fail(ERRORS.VALIDATION, 'Catégorie invalide (homme ou femme)')
   }
+  const atelierOmitted = input.atelier === undefined
+  const communeOmitted = input.commune === undefined
+  const profilePhotoOmitted = input.profile_photo_url === undefined
   const rows = await deps.db`
     UPDATE candidates
     SET full_name = ${fullName},
-        atelier = ${cleanText(input.atelier, MAX_NAME_LENGTH)},
-        commune = ${cleanText(input.commune, MAX_NAME_LENGTH)},
-        profile_photo_url = ${cleanText(input.profile_photo_url, 300)},
+        atelier = CASE WHEN ${atelierOmitted} THEN atelier ELSE ${cleanText(input.atelier, MAX_NAME_LENGTH)} END,
+        commune = CASE WHEN ${communeOmitted} THEN commune ELSE ${cleanText(input.commune, MAX_NAME_LENGTH)} END,
+        profile_photo_url = CASE WHEN ${profilePhotoOmitted} THEN profile_photo_url ELSE ${cleanText(input.profile_photo_url, 300)} END,
         category = COALESCE(${category}, category),
         updated_at = now()
     WHERE id = ${id} AND deleted_at IS NULL

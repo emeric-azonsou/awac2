@@ -15,6 +15,15 @@
       </NuxtLink>
     </div>
 
+    <p
+      v-if="savedMessage"
+      class="flex items-center gap-2 bg-green-50 border border-green-200 text-green-800 text-sm font-medium rounded-xl px-4 py-3"
+      role="status"
+    >
+      <span class="material-icons text-base text-green-600" aria-hidden="true">check_circle</span>
+      {{ savedMessage }}
+    </p>
+
     <div v-if="pending" class="flex justify-center py-20">
       <div
         class="animate-spin rounded-full h-8 w-8 border-2 border-awac-primary border-t-transparent"
@@ -84,6 +93,21 @@
 </template>
 
 <script setup lang="ts">
+import { getCandidateSavedMessage } from '~/utils/adminMessages'
+
+const route = useRoute()
+const router = useRouter()
+const savedMessage = ref(getCandidateSavedMessage(route.query.saved))
+const SAVED_MESSAGE_VISIBLE_MS = 4000
+onMounted(() => {
+  if (!savedMessage.value) return
+  const { saved: _savedParam, ...remainingQuery } = route.query
+  router.replace({ query: remainingQuery })
+  setTimeout(() => {
+    savedMessage.value = ''
+  }, SAVED_MESSAGE_VISIBLE_MS)
+})
+
 import { getCategoryPersonLabel } from '~/utils/candidateCategories'
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 interface AdminCandidate {

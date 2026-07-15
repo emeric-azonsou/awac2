@@ -286,7 +286,10 @@ const save = async () => {
     } else {
       await $fetch('/api/admin/candidates', { method: 'POST', body: form.value })
     }
-    router.push('/admin/candidats')
+    router.push({
+      path: '/admin/candidats',
+      query: { saved: props.candidate ? 'updated' : 'created' },
+    })
   } catch {
     errorMessage.value = "Échec de l'enregistrement."
   } finally {
