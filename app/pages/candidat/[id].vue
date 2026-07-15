@@ -245,44 +245,88 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { voteService } from '~/utils/voteService'
 import { useVotePricing } from '@/composables/useVotePricing'
 import { ApiError } from '~/utils/api'
 import { MIN_VOTE_QUANTITY } from '~/utils/voteQuantity'
+import { shouldAutoOpenVote } from '~/utils/candidateShare'
+
 const route = useRoute()
+const router = useRouter()
+const requestUrl = useRequestURL()
 const defaultPhoto = new URL('../../assets/img/candidat/candidat.jpg', import.meta.url).href
-const candidate = ref(null)
-const loading = ref(true)
-const notFound = ref(false)
-const error = ref('')
 const showVote = ref(false)
 const voteQuantity = ref(MIN_VOTE_QUANTITY)
 const { unitPrice, currency, loadVotePricing } = useVotePricing()
+
+const candidateId = computed(() => String(route.params.id))
+
+const {
+  data: candidate,
+  status,
+  error: loadError,
+  refresh: loadCandidate,
+} = await useAsyncData(
+  `candidate-${candidateId.value}`,
+  () =>
+    voteService.getCandidate(candidateId.value).catch((err) => {
+      throw createError({
+        statusCode: err instanceof ApiError ? err.status : 500,
+        statusMessage: err instanceof Error ? err.message : 'Erreur chargement candidat',
+      })
+    }),
+)
+
+const loading = computed(() => status.value === 'pending')
+const notFound = computed(() => loadError.value?.statusCode === 404)
+const error = computed(() =>
+  loadError.value && !notFound.value
+    ? 'Impossible de charger ce profil. Vérifiez votre connexion.'
+    : '',
+)
 const firstName = computed(() => candidate.value?.full_name.split(' ')[0] || '')
-const loadCandidate = async () => {
-  loading.value = true
-  error.value = ''
-  notFound.value = false
-  try {
-    candidate.value = await voteService.getCandidate(route.params.id)
-  } catch (err) {
-    if (err instanceof ApiError && err.status === 404) {
-      notFound.value = true
-    } else {
-      console.error('Erreur chargement candidat:', err)
-      error.value = 'Impossible de charger ce profil. Vérifiez votre connexion.'
-    }
-  } finally {
-    loading.value = false
-  }
-}
+
+const pageUrl = computed(() => `${requestUrl.origin}/candidat/${candidateId.value}`)
+const ogImage = computed(() => {
+  const photo = candidate.value?.profile_photo_url
+  if (!photo) return `${requestUrl.origin}/favicon-180.png`
+  return photo.startsWith('http') ? photo : `${requestUrl.origin}${photo}`
+})
+
+useSeoMeta({
+  title: () =>
+    candidate.value
+      ? `${candidate.value.full_name} — Awards des Couturier·e·s du Mono`
+      : 'AWAC',
+  ogTitle: () =>
+    candidate.value
+      ? `${candidate.value.full_name} — Awards des Couturier·e·s du Mono`
+      : 'AWAC',
+  description: () =>
+    candidate.value
+      ? `Vote pour ${candidate.value.full_name} et propulse ce talent vers la victoire aux Awards des Couturier·e·s du Mono.`
+      : 'Awards des Couturier·e·s du Mono',
+  ogDescription: () =>
+    candidate.value
+      ? `Vote pour ${candidate.value.full_name} et propulse ce talent vers la victoire aux Awards des Couturier·e·s du Mono.`
+      : 'Awards des Couturier·e·s du Mono',
+  ogImage,
+  ogUrl: pageUrl,
+  twitterCard: 'summary_large_image',
+})
+
 const onVoted = (result) => {
   if (candidate.value) candidate.value.vote_count = result.votes_after
 }
+
 onMounted(() => {
-  loadCandidate()
   loadVotePricing()
+  if (shouldAutoOpenVote(route.query)) {
+    if (candidate.value) showVote.value = true
+    const { vote: _voteParam, ...remainingQuery } = route.query
+    router.replace({ query: remainingQuery })
+  }
 })
 </script>
 
