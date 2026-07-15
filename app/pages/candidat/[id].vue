@@ -298,7 +298,7 @@ const firstName = computed(() => candidate.value?.full_name.split(' ')[0] || '')
 const pageUrl = computed(() => `${requestUrl.origin}/candidat/${candidateId.value}`)
 const ogImage = computed(() => {
   const photo = candidate.value?.profile_photo_url
-  if (!photo) return `${requestUrl.origin}/favicon-180.png`
+  if (!photo) return `${requestUrl.origin}/favicon-512.png`
   return photo.startsWith('http') ? photo : `${requestUrl.origin}${photo}`
 })
 
