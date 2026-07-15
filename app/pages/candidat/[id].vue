@@ -134,6 +134,8 @@
               <span class="material-icons text-lg">how_to_vote</span>
               Voter pour {{ firstName }}
             </button>
+
+            <CandidateShareBlock :candidate="candidate" />
           </div>
         </div>
       </section>
