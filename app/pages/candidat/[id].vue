@@ -91,7 +91,7 @@
             </h1>
 
             <p
-              v-if="candidate.atelier || candidate.commune"
+              v-if="candidate.atelier || candidate.commune || categoryLabel"
               class="text-gray-500 font-sans font-medium text-sm md:text-base tracking-wider uppercase"
             >
               <span v-if="candidate.atelier" class="text-gray-900 font-semibold">{{
@@ -99,6 +99,8 @@
               }}</span>
               <span v-if="candidate.atelier && candidate.commune"> · </span>
               <span v-if="candidate.commune">{{ candidate.commune }}</span>
+              <span v-if="(candidate.atelier || candidate.commune) && categoryLabel"> · </span>
+              <span v-if="categoryLabel">Catégorie {{ categoryLabel }}</span>
             </p>
 
             <div class="flex items-center justify-center md:justify-start gap-3">
@@ -251,6 +253,7 @@ import { useVotePricing } from '@/composables/useVotePricing'
 import { ApiError } from '~/utils/api'
 import { MIN_VOTE_QUANTITY } from '~/utils/voteQuantity'
 import { getFirstName, shouldAutoOpenVote } from '~/utils/candidateShare'
+import { getCategoryLabel } from '~/utils/candidateCategories'
 import defaultPhoto from '~/assets/img/candidat/candidat.jpg'
 
 const route = useRoute()
@@ -294,6 +297,7 @@ const error = computed(() =>
     : '',
 )
 const firstName = computed(() => getFirstName(candidate.value?.full_name ?? ''))
+const categoryLabel = computed(() => getCategoryLabel(candidate.value?.category))
 
 const pageUrl = computed(() => `${siteOrigin.value}/candidat/${candidateId.value}`)
 const ogImage = computed(() => {

@@ -6,6 +6,7 @@ export interface Candidate {
   commune: string | null
   profile_photo_url: string | null
   vote_count: number
+  category: string
 }
 export interface CandidatePhoto {
   id: string

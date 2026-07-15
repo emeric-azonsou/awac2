@@ -5,7 +5,7 @@
     class="bg-[#F9F8F6] py-24 md:py-32 border-t border-gray-100 selection:bg-awac-primary/10"
   >
     <div class="container mx-auto px-6 max-w-6xl">
-      <div class="text-center max-w-xl mx-auto mb-24 space-y-4">
+      <div class="text-center max-w-xl mx-auto mb-10 space-y-4">
         <h2
           class="text-gray-900 font-heading font-black text-4xl md:text-5xl tracking-tight uppercase leading-none opacity-0 translate-y-8 transition-all duration-700 ease-out"
           :class="isVisible ? 'opacity-100 translate-y-0' : ''"
@@ -21,6 +21,21 @@
         </p>
       </div>
 
+      <div class="flex justify-center gap-3 mb-14" role="group" aria-label="Choisir la catégorie">
+        <button
+          v-for="cat in CATEGORIES"
+          :key="cat.key"
+          type="button"
+          class="category-tab"
+          :class="activeCategory === cat.key ? 'category-tab-active' : ''"
+          :aria-pressed="activeCategory === cat.key"
+          @click="activeCategory = cat.key"
+        >
+          {{ cat.label }}
+          <span class="tabular-nums opacity-70">· {{ categoryCount(cat.key) }}</span>
+        </button>
+      </div>
+
       <div v-if="loading" class="flex justify-center py-12">
         <div
           class="animate-spin rounded-full h-8 w-8 border-2 border-awac-primary border-t-transparent"
@@ -31,13 +46,13 @@
         {{ error }}
       </div>
 
-      <div v-else-if="candidats.length === 0" class="text-center py-12 text-gray-400">
+      <div v-else-if="displayedCandidats.length === 0" class="text-center py-12 text-gray-400">
         Aucun candidat pour le moment.
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 max-w-5xl mx-auto">
         <div
-          v-for="(candidat, index) in candidats"
+          v-for="(candidat, index) in displayedCandidats"
           :key="candidat.id"
           class="flex flex-col group relative bg-white border rounded-[2.5rem_0_2.5rem_0] overflow-hidden transition-all duration-500 hover:-translate-y-1"
           :class="[
@@ -145,17 +160,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { voteService } from '~/utils/voteService'
 import { useVotePricing } from '~/composables/useVotePricing'
 import { MIN_VOTE_QUANTITY, clampVoteQuantity } from '~/utils/voteQuantity'
 import defaultPhoto from '~/assets/img/candidat/candidat.jpg'
+import { CATEGORIES, filterByCategory } from '~/utils/candidateCategories'
 const sectionRef = ref(null)
 const isVisible = ref(false)
 const loading = ref(true)
 const error = ref('')
 const selectedCandidate = ref(null)
 const candidats = ref([])
+const activeCategory = ref(CATEGORIES[0].key)
+const displayedCandidats = computed(() => filterByCategory(candidats.value, activeCategory.value))
+const categoryCount = (key) => filterByCategory(candidats.value, key).length
 const voteQuantities = ref({})
 const { unitPrice, currency, loadVotePricing } = useVotePricing()
 const getQuantity = (candidateId) => voteQuantities.value[candidateId] ?? MIN_VOTE_QUANTITY
@@ -354,6 +373,44 @@ input[type='number']:focus {
 @media (max-width: 768px) {
   .card-visible {
     animation-duration: 0.6s;
+  }
+}
+
+.category-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 44px;
+  padding: 0 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid theme('colors.gray.200');
+  background: white;
+  color: theme('colors.gray.700');
+  font-family: theme('fontFamily.heading');
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.category-tab:hover {
+  border-color: theme('colors.awac.primary');
+  color: theme('colors.awac.primary');
+}
+.category-tab-active,
+.category-tab-active:hover {
+  background: theme('colors.awac.primary');
+  border-color: theme('colors.awac.primary');
+  color: white;
+}
+.category-tab:focus-visible {
+  outline: 2px solid #0b0b0b;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .category-tab {
+    transition: none;
   }
 }
 </style>
