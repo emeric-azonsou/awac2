@@ -53,6 +53,30 @@
           </label>
           <input id="cand-name" v-model="form.full_name" type="text" class="admin-input" />
         </div>
+        <fieldset class="space-y-1">
+          <legend class="admin-label">Catégorie <span class="text-red-500">*</span></legend>
+          <div class="flex gap-3">
+            <label
+              v-for="cat in CATEGORIES"
+              :key="cat.key"
+              class="flex items-center gap-2 border rounded-xl px-4 min-h-[44px] cursor-pointer transition-colors"
+              :class="
+                form.category === cat.key
+                  ? 'border-awac-primary text-awac-primary bg-awac-primary/5'
+                  : 'border-gray-200 text-gray-700 hover:border-gray-300'
+              "
+            >
+              <input
+                v-model="form.category"
+                type="radio"
+                name="cand-category"
+                :value="cat.key"
+                class="accent-[#EF7952]"
+              />
+              <span class="text-sm font-semibold">{{ cat.labelPerson }}</span>
+            </label>
+          </div>
+        </fieldset>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1">
             <label for="cand-atelier" class="admin-label">Atelier</label>
@@ -157,6 +181,7 @@
 
 <script setup lang="ts">
 import { uploadCandidatePhoto } from '~/utils/imageCompress'
+import { CATEGORIES } from '~/utils/candidateCategories'
 interface CandidatePhoto {
   id: string
   photo_url: string
@@ -168,6 +193,7 @@ interface AdminCandidate {
   atelier: string | null
   commune: string | null
   profile_photo_url: string | null
+  category: string
 }
 const props = defineProps<{ candidate: AdminCandidate | null }>()
 const router = useRouter()
@@ -177,6 +203,7 @@ const form = ref({
   atelier: props.candidate?.atelier ?? '',
   commune: props.candidate?.commune ?? '',
   profile_photo_url: props.candidate?.profile_photo_url ?? '',
+  category: props.candidate?.category ?? '',
 })
 const photos = ref<CandidatePhoto[]>([])
 const saving = ref(false)
@@ -242,6 +269,10 @@ const removePhoto = async (photoId: string) => {
 const save = async () => {
   if (!form.value.full_name.trim()) {
     errorMessage.value = 'Le nom du candidat est requis.'
+    return
+  }
+  if (!form.value.category) {
+    errorMessage.value = 'La catégorie est requise.'
     return
   }
   saving.value = true

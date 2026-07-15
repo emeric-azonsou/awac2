@@ -27,6 +27,7 @@ interface AdminCandidate {
   atelier: string | null
   commune: string | null
   profile_photo_url: string | null
+  category: string
 }
 const route = useRoute()
 const { data: candidate, pending } = await useFetch<AdminCandidate>(

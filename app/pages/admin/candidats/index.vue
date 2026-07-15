@@ -47,6 +47,16 @@
         <div class="min-w-0 flex-1">
           <p class="font-heading font-black text-sm text-gray-900 truncate">
             {{ candidate.full_name }}
+            <span
+              class="ml-2 align-middle text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border"
+              :class="
+                candidate.category === 'femme'
+                  ? 'border-awac-accent/40 text-awac-accent'
+                  : 'border-gray-300 text-gray-600'
+              "
+            >
+              {{ getCategoryPersonLabel(candidate.category) }}
+            </span>
           </p>
           <p class="text-xs text-gray-500 truncate">
             <span v-if="candidate.atelier">{{ candidate.atelier }}</span>
@@ -74,6 +84,7 @@
 </template>
 
 <script setup lang="ts">
+import { getCategoryPersonLabel } from '~/utils/candidateCategories'
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 interface AdminCandidate {
   id: string
@@ -81,6 +92,7 @@ interface AdminCandidate {
   atelier: string | null
   commune: string | null
   profile_photo_url: string | null
+  category: string
   vote_count: number
   photos_count: number
 }
