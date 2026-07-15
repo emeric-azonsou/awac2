@@ -135,7 +135,7 @@
               Voter pour {{ firstName }}
             </button>
 
-            <CandidateShareBlock :candidate="candidate" />
+            <CandidateShareCompact :candidate="candidate" class="md:justify-start" />
           </div>
         </div>
       </section>
