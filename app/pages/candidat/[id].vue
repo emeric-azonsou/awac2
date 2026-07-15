@@ -271,11 +271,15 @@ const {
   `candidate-${candidateId.value}`,
   () =>
     voteService.getCandidate(candidateId.value).catch((err) => {
+      if (!(err instanceof ApiError) || err.status !== 404) {
+        console.error('Erreur chargement candidat:', err)
+      }
       throw createError({
         statusCode: err instanceof ApiError ? err.status : 500,
         statusMessage: err instanceof Error ? err.message : 'Erreur chargement candidat',
       })
     }),
+  { watch: [candidateId] },
 )
 
 if (import.meta.server && loadError.value) {
