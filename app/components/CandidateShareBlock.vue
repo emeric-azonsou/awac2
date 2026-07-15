@@ -41,7 +41,7 @@
       <button
         type="button"
         class="share-action bg-white text-gray-700 border-gray-200 hover:border-awac-primary hover:text-awac-primary"
-        :aria-live="copied ? 'polite' : undefined"
+        aria-live="polite"
         @click="copyShareLink"
       >
         <span class="material-icons text-base" aria-hidden="true">{{
