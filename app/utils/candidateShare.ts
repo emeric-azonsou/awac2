@@ -30,3 +30,8 @@ export function shouldAutoOpenVote(query: Record<string, unknown>): boolean {
 export function getFirstName(fullName: string): string {
   return fullName.split(' ')[0] ?? ''
 }
+
+export function resolveSiteOrigin(configuredSiteUrl: string, requestOrigin: string): string {
+  const canonical = configuredSiteUrl.trim().replace(/\/+$/, '')
+  return canonical || requestOrigin
+}

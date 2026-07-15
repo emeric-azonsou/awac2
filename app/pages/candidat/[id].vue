@@ -255,7 +255,7 @@ import defaultPhoto from '~/assets/img/candidat/candidat.jpg'
 
 const route = useRoute()
 const router = useRouter()
-const requestUrl = useRequestURL()
+const siteOrigin = useSiteOrigin()
 const showVote = ref(false)
 const voteQuantity = ref(MIN_VOTE_QUANTITY)
 const { unitPrice, currency, loadVotePricing } = useVotePricing()
@@ -295,11 +295,11 @@ const error = computed(() =>
 )
 const firstName = computed(() => getFirstName(candidate.value?.full_name ?? ''))
 
-const pageUrl = computed(() => `${requestUrl.origin}/candidat/${candidateId.value}`)
+const pageUrl = computed(() => `${siteOrigin.value}/candidat/${candidateId.value}`)
 const ogImage = computed(() => {
   const photo = candidate.value?.profile_photo_url
-  if (!photo) return `${requestUrl.origin}/favicon-512.png`
-  return photo.startsWith('http') ? photo : `${requestUrl.origin}${photo}`
+  if (!photo) return `${siteOrigin.value}/favicon-512.png`
+  return photo.startsWith('http') ? photo : `${siteOrigin.value}${photo}`
 })
 
 useSeoMeta({

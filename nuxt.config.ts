@@ -55,6 +55,10 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
+    public: {
+      // URL canonique du site (liens de partage, meta OG) — ex. https://awacmono.com
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL ?? '',
+    },
     // serveur-only (jamais dans le bundle client)
     databaseUrl: process.env.DATABASE_URL ?? '',
     feexpayApiKey: process.env.FEEXPAY_API_KEY ?? '',

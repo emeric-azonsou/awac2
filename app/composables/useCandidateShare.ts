@@ -7,6 +7,7 @@ import {
   buildWhatsAppShareUrl,
 } from '~/utils/candidateShare'
 import { useCopyToClipboard } from '~/composables/useCopyToClipboard'
+import { useSiteOrigin } from '~/composables/useSiteOrigin'
 
 interface ShareCandidate {
   id: string
@@ -14,9 +15,9 @@ interface ShareCandidate {
 }
 
 export function useCandidateShare(candidate: Ref<ShareCandidate | null>) {
-  const requestUrl = useRequestURL()
+  const siteOrigin = useSiteOrigin()
   const shareUrl = computed(() =>
-    candidate.value ? buildCandidateShareUrl(requestUrl.origin, candidate.value.id) : '',
+    candidate.value ? buildCandidateShareUrl(siteOrigin.value, candidate.value.id) : '',
   )
   const shareMessage = computed(() =>
     candidate.value ? buildShareMessage(candidate.value.full_name, shareUrl.value) : '',

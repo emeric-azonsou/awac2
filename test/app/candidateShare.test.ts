@@ -6,6 +6,7 @@ import {
   buildShareText,
   buildWhatsAppShareUrl,
   getFirstName,
+  resolveSiteOrigin,
   shouldAutoOpenVote,
 } from '../../app/utils/candidateShare'
 
@@ -74,5 +75,24 @@ describe('getFirstName', () => {
   it('gère nom vide ou simple', () => {
     expect(getFirstName('')).toBe('')
     expect(getFirstName('Awa')).toBe('Awa')
+  })
+})
+
+describe('resolveSiteOrigin', () => {
+  it('préfère l’URL canonique configurée', () => {
+    expect(resolveSiteOrigin('https://awacmono.com', 'https://xxx.up.railway.app')).toBe(
+      'https://awacmono.com',
+    )
+  })
+
+  it('retire les slashs finaux de l’URL configurée', () => {
+    expect(resolveSiteOrigin('https://awacmono.com//', 'https://x.test')).toBe(
+      'https://awacmono.com',
+    )
+  })
+
+  it('retombe sur l’origine de la requête si non configurée', () => {
+    expect(resolveSiteOrigin('', 'http://localhost:3000')).toBe('http://localhost:3000')
+    expect(resolveSiteOrigin('   ', 'http://localhost:3000')).toBe('http://localhost:3000')
   })
 })
