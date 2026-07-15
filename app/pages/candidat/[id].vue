@@ -250,7 +250,7 @@ import { voteService } from '~/utils/voteService'
 import { useVotePricing } from '@/composables/useVotePricing'
 import { ApiError } from '~/utils/api'
 import { MIN_VOTE_QUANTITY } from '~/utils/voteQuantity'
-import { shouldAutoOpenVote } from '~/utils/candidateShare'
+import { getFirstName, shouldAutoOpenVote } from '~/utils/candidateShare'
 import defaultPhoto from '~/assets/img/candidat/candidat.jpg'
 
 const route = useRoute()
@@ -293,7 +293,7 @@ const error = computed(() =>
     ? 'Impossible de charger ce profil. Vérifiez votre connexion.'
     : '',
 )
-const firstName = computed(() => candidate.value?.full_name.split(' ')[0] || '')
+const firstName = computed(() => getFirstName(candidate.value?.full_name ?? ''))
 
 const pageUrl = computed(() => `${requestUrl.origin}/candidat/${candidateId.value}`)
 const ogImage = computed(() => {

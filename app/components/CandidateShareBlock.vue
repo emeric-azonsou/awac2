@@ -58,6 +58,7 @@
 <script setup>
 import { computed, toRef } from 'vue'
 import { useCandidateShare } from '@/composables/useCandidateShare'
+import { getFirstName } from '~/utils/candidateShare'
 
 const props = defineProps({
   candidate: { type: Object, required: true },
@@ -66,7 +67,7 @@ const props = defineProps({
 const { whatsappShareUrl, facebookShareUrl, copied, copyShareLink, canNativeShare, nativeShare } =
   useCandidateShare(toRef(props, 'candidate'))
 
-const firstName = computed(() => props.candidate.full_name.split(' ')[0] || '')
+const firstName = computed(() => getFirstName(props.candidate.full_name))
 </script>
 
 <style scoped>
