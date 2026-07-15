@@ -147,12 +147,12 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { voteService } from '~/utils/voteService'
 import { useVotePricing } from '~/composables/useVotePricing'
 import { MIN_VOTE_QUANTITY, clampVoteQuantity } from '~/utils/voteQuantity'
+import defaultPhoto from '~/assets/img/candidat/candidat.jpg'
 const sectionRef = ref(null)
 const isVisible = ref(false)
 const loading = ref(true)
 const error = ref('')
 const selectedCandidate = ref(null)
-const defaultPhoto = new URL('../assets/img/candidat/candidat.jpg', import.meta.url).href
 const candidats = ref([])
 const voteQuantities = ref({})
 const { unitPrice, currency, loadVotePricing } = useVotePricing()

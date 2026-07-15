@@ -251,11 +251,11 @@ import { useVotePricing } from '@/composables/useVotePricing'
 import { ApiError } from '~/utils/api'
 import { MIN_VOTE_QUANTITY } from '~/utils/voteQuantity'
 import { shouldAutoOpenVote } from '~/utils/candidateShare'
+import defaultPhoto from '~/assets/img/candidat/candidat.jpg'
 
 const route = useRoute()
 const router = useRouter()
 const requestUrl = useRequestURL()
-const defaultPhoto = new URL('../../assets/img/candidat/candidat.jpg', import.meta.url).href
 const showVote = ref(false)
 const voteQuantity = ref(MIN_VOTE_QUANTITY)
 const { unitPrice, currency, loadVotePricing } = useVotePricing()
