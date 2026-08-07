@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { handlerOf } from './routeHelpers'
 
 const getPhotoFileMock = vi.fn()
 const storePhotoFileMock = vi.fn()
@@ -24,7 +25,7 @@ describe('GET /api/photos/$id', () => {
     const data = Buffer.from([0x89, 0x50, 0x4e, 0x47])
     getPhotoFileMock.mockResolvedValue({ contentType: 'image/png', data })
     const { Route } = await import('../../src/routes/api/photos.$id')
-    const res = await Route.options.server.handlers.GET({
+    const res = await handlerOf(Route, 'GET')({
       request: new Request('https://awac.test/api/photos/p-1'),
       params: { id: 'p-1' },
     })
@@ -37,7 +38,7 @@ describe('GET /api/photos/$id', () => {
   it("renvoie l'enveloppe d'erreur 404 quand la photo n'existe pas", async () => {
     getPhotoFileMock.mockResolvedValue(null)
     const { Route } = await import('../../src/routes/api/photos.$id')
-    const res = await Route.options.server.handlers.GET({
+    const res = await handlerOf(Route, 'GET')({
       request: new Request('https://awac.test/api/photos/nope'),
       params: { id: 'nope' },
     })
@@ -53,7 +54,7 @@ describe('POST /api/admin/photos', () => {
     storePhotoFileMock.mockResolvedValue({ status: 201, body: { id: 'blob-1' } })
     const bytes = Buffer.from([1, 2, 3, 4, 5])
     const { Route } = await import('../../src/routes/api/admin/photos/index')
-    await Route.options.server.handlers.POST({
+    await handlerOf(Route, 'POST')({
       request: new Request('https://awac.test/api/admin/photos', { method: 'POST', body: bytes }),
       params: {},
     })
@@ -65,7 +66,7 @@ describe('POST /api/admin/photos', () => {
       Object.assign(new Error('Authentification requise'), { status: 401, code: 'unauthorized' }),
     )
     const { Route } = await import('../../src/routes/api/admin/photos/index')
-    const res = await Route.options.server.handlers.POST({
+    const res = await handlerOf(Route, 'POST')({
       request: new Request('https://awac.test/api/admin/photos', { method: 'POST', body: 'x' }),
       params: {},
     })

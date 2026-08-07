@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { handlerOf } from './routeHelpers'
 
 const listAdminVotesMock = vi.fn()
 const getAdminStatsMock = vi.fn()
@@ -31,7 +32,7 @@ describe('GET /api/admin/votes', () => {
   it('transmet tous les filtres de query au service', async () => {
     listAdminVotesMock.mockResolvedValue({ status: 200, body: { items: [] } })
     const { Route } = await import('../../src/routes/api/admin/votes')
-    await Route.options.server.handlers.GET({
+    await handlerOf(Route, 'GET')({
       request: new Request(
         'https://awac.test/api/admin/votes?status=paid&candidate=c-1&search=abc&page=2&limit=50',
       ),
@@ -49,7 +50,7 @@ describe('GET /api/admin/votes', () => {
   it('laisse les filtres absents à undefined', async () => {
     listAdminVotesMock.mockResolvedValue({ status: 200, body: { items: [] } })
     const { Route } = await import('../../src/routes/api/admin/votes')
-    await Route.options.server.handlers.GET({
+    await handlerOf(Route, 'GET')({
       request: new Request('https://awac.test/api/admin/votes'),
       params: {},
     })
@@ -67,7 +68,7 @@ describe('GET /api/admin/votes', () => {
       Object.assign(new Error('Authentification requise'), { status: 401, code: 'unauthorized' }),
     )
     const { Route } = await import('../../src/routes/api/admin/votes')
-    const res = await Route.options.server.handlers.GET({
+    const res = await handlerOf(Route, 'GET')({
       request: new Request('https://awac.test/api/admin/votes'),
       params: {},
     })
@@ -80,7 +81,7 @@ describe('/api/admin/candidates/$id', () => {
   it('PATCH transmet id et corps au service', async () => {
     updateCandidateMock.mockResolvedValue({ status: 200, body: { id: 'c-1' } })
     const { Route } = await import('../../src/routes/api/admin/candidates.$id')
-    await Route.options.server.handlers.PATCH({
+    await handlerOf(Route, 'PATCH')({
       request: new Request('https://awac.test/api/admin/candidates/c-1', {
         method: 'PATCH',
         headers: { 'content-type': 'application/json' },
@@ -95,7 +96,7 @@ describe('/api/admin/candidates/$id', () => {
   it('DELETE transmet id au service', async () => {
     deleteCandidateMock.mockResolvedValue({ status: 200, body: { ok: true } })
     const { Route } = await import('../../src/routes/api/admin/candidates.$id')
-    await Route.options.server.handlers.DELETE({
+    await handlerOf(Route, 'DELETE')({
       request: new Request('https://awac.test/api/admin/candidates/c-1', { method: 'DELETE' }),
       params: { id: 'c-1' },
     })
@@ -107,7 +108,7 @@ describe('/api/admin/candidates/$id', () => {
       Object.assign(new Error('Authentification requise'), { status: 401, code: 'unauthorized' }),
     )
     const { Route } = await import('../../src/routes/api/admin/candidates.$id')
-    const res = await Route.options.server.handlers.DELETE({
+    const res = await handlerOf(Route, 'DELETE')({
       request: new Request('https://awac.test/api/admin/candidates/c-1', { method: 'DELETE' }),
       params: { id: 'c-1' },
     })

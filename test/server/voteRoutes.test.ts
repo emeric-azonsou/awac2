@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { handlerOf } from './routeHelpers'
 
 const submitVoteMock = vi.fn()
 const getVoteStatusMock = vi.fn()
@@ -19,7 +20,7 @@ describe('POST /api/votes', () => {
   it('transmet le corps JSON au service', async () => {
     submitVoteMock.mockResolvedValue({ status: 201, body: { id: 'v-1' } })
     const { Route } = await import('../../src/routes/api/votes/index')
-    const res = await Route.options.server.handlers.POST({
+    const res = await handlerOf(Route, 'POST')({
       request: new Request('https://awac.test/api/votes', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -37,7 +38,7 @@ describe('POST /api/votes', () => {
       body: { error: { code: 'validation_error', message: 'Candidat requis' } },
     })
     const { Route } = await import('../../src/routes/api/votes/index')
-    const res = await Route.options.server.handlers.POST({
+    const res = await handlerOf(Route, 'POST')({
       request: new Request('https://awac.test/api/votes', { method: 'POST', body: 'pas-du-json' }),
       params: {},
     })
@@ -50,7 +51,7 @@ describe('GET /api/votes/$id/status', () => {
   it('transmet le paramètre de route au service', async () => {
     getVoteStatusMock.mockResolvedValue({ status: 200, body: { status: 'pending' } })
     const { Route } = await import('../../src/routes/api/votes.$id.status')
-    await Route.options.server.handlers.GET({
+    await handlerOf(Route, 'GET')({
       request: new Request('https://awac.test/api/votes/v-1/status'),
       params: { id: 'v-1' },
     })

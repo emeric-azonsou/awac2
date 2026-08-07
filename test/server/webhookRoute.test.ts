@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { handlerOf } from './routeHelpers'
 
 const processWebhookMock = vi.fn()
 vi.mock('../../server/services/votes', () => ({ processWebhook: processWebhookMock }))
@@ -12,7 +13,7 @@ beforeEach(() => processWebhookMock.mockReset())
 
 async function callWebhook(rawBody: string, url: string) {
   const { Route } = await import('../../src/routes/api/votes/webhook')
-  const handler = Route.options.server.handlers.POST
+  const handler = handlerOf(Route, 'POST')
   return handler({ request: new Request(url, { method: 'POST', body: rawBody }), params: {} })
 }
 

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { handlerOf } from './routeHelpers'
 
 const verifyAdminLoginMock = vi.fn()
 const sessionUpdate = vi.fn()
@@ -42,7 +43,7 @@ describe('POST /api/admin/login', () => {
       body: { error: { code: 'unauthorized', message: 'Identifiants invalides' } },
     })
     const { Route } = await import('../../src/routes/api/admin/login')
-    await Route.options.server.handlers.POST({
+    await handlerOf(Route, 'POST')({
       request: loginRequest(
         { email: 'a@awac.bj', password: 'x' },
         { 'x-forwarded-for': '41.2.3.4, 10.0.0.1' },
@@ -55,7 +56,7 @@ describe('POST /api/admin/login', () => {
   it("retombe sur 'ip-inconnue' quand aucune IP n'est disponible", async () => {
     verifyAdminLoginMock.mockResolvedValue({ status: 401, body: {} })
     const { Route } = await import('../../src/routes/api/admin/login')
-    await Route.options.server.handlers.POST({
+    await handlerOf(Route, 'POST')({
       request: loginRequest({ email: 'a@awac.bj', password: 'x' }),
       params: {},
     })
@@ -68,7 +69,7 @@ describe('POST /api/admin/login', () => {
       body: { id: 'admin-1', email: 'a@awac.bj', full_name: 'Emeric', token_version: 3 },
     })
     const { Route } = await import('../../src/routes/api/admin/login')
-    const res = await Route.options.server.handlers.POST({
+    const res = await handlerOf(Route, 'POST')({
       request: loginRequest({ email: 'a@awac.bj', password: 'bon' }),
       params: {},
     })
@@ -84,7 +85,7 @@ describe('POST /api/admin/login', () => {
   it("n'ouvre aucune session en cas d'échec", async () => {
     verifyAdminLoginMock.mockResolvedValue({ status: 401, body: {} })
     const { Route } = await import('../../src/routes/api/admin/login')
-    await Route.options.server.handlers.POST({
+    await handlerOf(Route, 'POST')({
       request: loginRequest({ email: 'a@awac.bj', password: 'faux' }),
       params: {},
     })
@@ -95,7 +96,7 @@ describe('POST /api/admin/login', () => {
 describe('POST /api/admin/logout', () => {
   it('incrémente token_version puis vide la session', async () => {
     const { Route } = await import('../../src/routes/api/admin/logout')
-    const res = await Route.options.server.handlers.POST({
+    const res = await handlerOf(Route, 'POST')({
       request: new Request('https://awac.test/api/admin/logout', { method: 'POST' }),
       params: {},
     })
@@ -115,7 +116,7 @@ describe('GET /api/admin/me', () => {
       tokenVersion: 3,
     })
     const { Route } = await import('../../src/routes/api/admin/me')
-    const res = await Route.options.server.handlers.GET({
+    const res = await handlerOf(Route, 'GET')({
       request: new Request('https://awac.test/api/admin/me'),
       params: {},
     })
@@ -131,7 +132,7 @@ describe('GET /api/admin/me', () => {
       Object.assign(new Error('Authentification requise'), { status: 401, code: 'unauthorized' }),
     )
     const { Route } = await import('../../src/routes/api/admin/me')
-    const res = await Route.options.server.handlers.GET({
+    const res = await handlerOf(Route, 'GET')({
       request: new Request('https://awac.test/api/admin/me'),
       params: {},
     })

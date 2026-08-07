@@ -19,6 +19,7 @@ import { Route as ApiAdminStatsRouteImport } from './routes/api/admin/stats'
 import { Route as ApiAdminVotesRouteImport } from './routes/api/admin/votes'
 import { Route as ApiCandidatesIndexRouteImport } from './routes/api/candidates/index'
 import { Route as ApiCandidatesIdRouteImport } from './routes/api/candidates.$id'
+import { Route as ApiCronReconcileRouteImport } from './routes/api/cron/reconcile'
 import { Route as ApiPaymentCountriesRouteImport } from './routes/api/payment/countries'
 import { Route as ApiPaymentOperatorsRouteImport } from './routes/api/payment/operators'
 import { Route as ApiPhotosIdRouteImport } from './routes/api/photos.$id'
@@ -81,6 +82,11 @@ const ApiCandidatesIndexRoute = ApiCandidatesIndexRouteImport.update({
 const ApiCandidatesIdRoute = ApiCandidatesIdRouteImport.update({
   id: '/api/candidates/$id',
   path: '/api/candidates/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronReconcileRoute = ApiCronReconcileRouteImport.update({
+  id: '/api/cron/reconcile',
+  path: '/api/cron/reconcile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPaymentCountriesRoute = ApiPaymentCountriesRouteImport.update({
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/stats': typeof ApiAdminStatsRoute
   '/api/admin/votes': typeof ApiAdminVotesRoute
   '/api/candidates/$id': typeof ApiCandidatesIdRoute
+  '/api/cron/reconcile': typeof ApiCronReconcileRoute
   '/api/payment/countries': typeof ApiPaymentCountriesRoute
   '/api/payment/operators': typeof ApiPaymentOperatorsRoute
   '/api/photos/$id': typeof ApiPhotosIdRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/api/admin/stats': typeof ApiAdminStatsRoute
   '/api/admin/votes': typeof ApiAdminVotesRoute
   '/api/candidates/$id': typeof ApiCandidatesIdRoute
+  '/api/cron/reconcile': typeof ApiCronReconcileRoute
   '/api/payment/countries': typeof ApiPaymentCountriesRoute
   '/api/payment/operators': typeof ApiPaymentOperatorsRoute
   '/api/photos/$id': typeof ApiPhotosIdRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/api/admin/stats': typeof ApiAdminStatsRoute
   '/api/admin/votes': typeof ApiAdminVotesRoute
   '/api/candidates/$id': typeof ApiCandidatesIdRoute
+  '/api/cron/reconcile': typeof ApiCronReconcileRoute
   '/api/payment/countries': typeof ApiPaymentCountriesRoute
   '/api/payment/operators': typeof ApiPaymentOperatorsRoute
   '/api/photos/$id': typeof ApiPhotosIdRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/api/admin/stats'
     | '/api/admin/votes'
     | '/api/candidates/$id'
+    | '/api/cron/reconcile'
     | '/api/payment/countries'
     | '/api/payment/operators'
     | '/api/photos/$id'
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/api/admin/stats'
     | '/api/admin/votes'
     | '/api/candidates/$id'
+    | '/api/cron/reconcile'
     | '/api/payment/countries'
     | '/api/payment/operators'
     | '/api/photos/$id'
@@ -288,6 +299,7 @@ export interface FileRouteTypes {
     | '/api/admin/stats'
     | '/api/admin/votes'
     | '/api/candidates/$id'
+    | '/api/cron/reconcile'
     | '/api/payment/countries'
     | '/api/payment/operators'
     | '/api/photos/$id'
@@ -314,6 +326,7 @@ export interface RootRouteChildren {
   ApiAdminStatsRoute: typeof ApiAdminStatsRoute
   ApiAdminVotesRoute: typeof ApiAdminVotesRoute
   ApiCandidatesIdRoute: typeof ApiCandidatesIdRoute
+  ApiCronReconcileRoute: typeof ApiCronReconcileRoute
   ApiPaymentCountriesRoute: typeof ApiPaymentCountriesRoute
   ApiPaymentOperatorsRoute: typeof ApiPaymentOperatorsRoute
   ApiPhotosIdRoute: typeof ApiPhotosIdRoute
@@ -399,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/api/candidates/$id'
       fullPath: '/api/candidates/$id'
       preLoaderRoute: typeof ApiCandidatesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/reconcile': {
+      id: '/api/cron/reconcile'
+      path: '/api/cron/reconcile'
+      fullPath: '/api/cron/reconcile'
+      preLoaderRoute: typeof ApiCronReconcileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/payment/countries': {
@@ -516,6 +536,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminStatsRoute: ApiAdminStatsRoute,
   ApiAdminVotesRoute: ApiAdminVotesRoute,
   ApiCandidatesIdRoute: ApiCandidatesIdRoute,
+  ApiCronReconcileRoute: ApiCronReconcileRoute,
   ApiPaymentCountriesRoute: ApiPaymentCountriesRoute,
   ApiPaymentOperatorsRoute: ApiPaymentOperatorsRoute,
   ApiPhotosIdRoute: ApiPhotosIdRoute,
