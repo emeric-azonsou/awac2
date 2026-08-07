@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as CandidatIdRouteImport } from './routes/candidat/$id'
 import { Route as RecuIndexRouteImport } from './routes/recu/index'
 import { Route as RecuCodeRouteImport } from './routes/recu/$code'
 import { Route as ApiAdminLoginRouteImport } from './routes/api/admin/login'
@@ -50,6 +51,11 @@ const AProposRoute = AProposRouteImport.update({
 const ApiHealthRoute = ApiHealthRouteImport.update({
   id: '/api/health',
   path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CandidatIdRoute = CandidatIdRouteImport.update({
+  id: '/candidat/$id',
+  path: '/candidat/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecuIndexRoute = RecuIndexRouteImport.update({
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
   '/api/health': typeof ApiHealthRoute
+  '/candidat/$id': typeof CandidatIdRoute
   '/recu/$code': typeof RecuCodeRoute
   '/recu/': typeof RecuIndexRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
@@ -207,6 +214,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
   '/api/health': typeof ApiHealthRoute
+  '/candidat/$id': typeof CandidatIdRoute
   '/recu/$code': typeof RecuCodeRoute
   '/recu': typeof RecuIndexRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
   '/api/health': typeof ApiHealthRoute
+  '/candidat/$id': typeof CandidatIdRoute
   '/recu/$code': typeof RecuCodeRoute
   '/recu/': typeof RecuIndexRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/'
     | '/a-propos'
     | '/api/health'
+    | '/candidat/$id'
     | '/recu/$code'
     | '/recu/'
     | '/api/admin/login'
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/'
     | '/a-propos'
     | '/api/health'
+    | '/candidat/$id'
     | '/recu/$code'
     | '/recu'
     | '/api/admin/login'
@@ -326,6 +337,7 @@ export interface FileRouteTypes {
     | '/'
     | '/a-propos'
     | '/api/health'
+    | '/candidat/$id'
     | '/recu/$code'
     | '/recu/'
     | '/api/admin/login'
@@ -356,6 +368,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AProposRoute: typeof AProposRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  CandidatIdRoute: typeof CandidatIdRoute
   RecuCodeRoute: typeof RecuCodeRoute
   RecuIndexRoute: typeof RecuIndexRoute
   ApiAdminLoginRoute: typeof ApiAdminLoginRoute
@@ -402,6 +415,13 @@ declare module '@tanstack/react-router' {
       path: '/api/health'
       fullPath: '/api/health'
       preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/candidat/$id': {
+      id: '/candidat/$id'
+      path: '/candidat/$id'
+      fullPath: '/candidat/$id'
+      preLoaderRoute: typeof CandidatIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/recu/': {
@@ -590,6 +610,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AProposRoute: AProposRoute,
   ApiHealthRoute: ApiHealthRoute,
+  CandidatIdRoute: CandidatIdRoute,
   RecuCodeRoute: RecuCodeRoute,
   RecuIndexRoute: RecuIndexRoute,
   ApiAdminLoginRoute: ApiAdminLoginRoute,

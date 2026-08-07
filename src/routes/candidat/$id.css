@@ -1,0 +1,31 @@
+/* Repris du <style scoped> de pages/candidat/[id].vue, scopé par .awac-candidat
+   (la règle nue `button { cursor: pointer }` toucherait sinon tout le site). */
+.awac-candidat .profile-reveal {
+  animation: awac-profile-reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.awac-candidat .profile-reveal-delayed {
+  animation-delay: 0.15s;
+}
+@keyframes awac-profile-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.awac-candidat .gallery-item {
+  animation: awac-profile-reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .awac-candidat .profile-reveal,
+  .awac-candidat .profile-reveal-delayed,
+  .awac-candidat .gallery-item {
+    animation: none;
+  }
+}
+.awac-candidat button {
+  cursor: pointer;
+}

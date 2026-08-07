@@ -19,10 +19,21 @@ interface ErrorEnvelope {
   error?: { code?: string; message?: string }
 }
 
+// Une URL relative n'a pas de base côté serveur : pendant le rendu SSR (les
+// loaders de route), fetch la rejette. On reconstruit l'URL absolue à partir de
+// l'origine de la requête entrante. Le test import.meta.env.SSR est remplacé
+// statiquement par Vite, donc le module serveur est éliminé du bundle client.
+async function resolveUrl(path: string): Promise<string> {
+  const relative = `/api${path}`
+  if (!import.meta.env.SSR) return relative
+  const { getRequest } = await import('@tanstack/react-start/server')
+  return new URL(relative, new URL(getRequest().url).origin).toString()
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   let response: Response
   try {
-    response = await fetch(`/api${path}`, {
+    response = await fetch(await resolveUrl(path), {
       method: options.method ?? 'GET',
       headers: options.body === undefined ? undefined : { 'content-type': 'application/json' },
       body: options.body === undefined ? undefined : JSON.stringify(options.body),

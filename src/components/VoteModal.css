@@ -1,0 +1,19 @@
+/* Repris tel quel du <style scoped> de VoteModal.vue. */
+@keyframes awac-modal-slide-up {
+  from {
+    transform: translateY(20px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+.animate-slide-up {
+  animation: awac-modal-slide-up 0.25s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-up {
+    animation: none;
+  }
+}
