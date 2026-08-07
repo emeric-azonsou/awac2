@@ -1,0 +1,26 @@
+/* Repris tel quel du <style scoped> de CandidateShareCompact.vue.
+   theme() est résolu par Tailwind via PostCSS, qui traite aussi ce fichier. */
+.share-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  border: 1px solid theme('colors.gray.100');
+  background: white;
+  transition: border-color 0.2s ease;
+  cursor: pointer;
+}
+.share-dot:hover {
+  border-color: theme('colors.awac.primary');
+}
+.share-dot:focus-visible {
+  outline: 2px solid #0b0b0b;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .share-dot {
+    transition: none;
+  }
+}
