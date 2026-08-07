@@ -1,0 +1,58 @@
+.awac-urgency {
+  background: linear-gradient(90deg, #f49537 0%, #ef7952 55%, #df413a 100%);
+}
+
+/* Le texte défile en boucle : deux copies identiques se suivent, la piste se
+   translate de la moitié de sa largeur, ce qui rend la reprise invisible. */
+.awac-urgency-track {
+  display: flex;
+  width: max-content;
+  animation: awac-urgency-scroll 38s linear infinite;
+}
+
+.awac-urgency:hover .awac-urgency-track,
+.awac-urgency:focus-within .awac-urgency-track {
+  animation-play-state: paused;
+}
+
+@keyframes awac-urgency-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Un défilement infini est une gêne réelle pour la lecture : sans mouvement
+   demandé, le texte se fige et reste entièrement lisible. */
+@media (prefers-reduced-motion: reduce) {
+  .awac-urgency-track {
+    animation: none;
+    width: 100%;
+    justify-content: center;
+  }
+  .awac-urgency-track > span:nth-child(2) {
+    display: none;
+  }
+}
+
+.awac-urgency-pulse {
+  animation: awac-urgency-pulse 1s steps(2, end) infinite;
+}
+
+@keyframes awac-urgency-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .awac-urgency-pulse {
+    animation: none;
+  }
+}
