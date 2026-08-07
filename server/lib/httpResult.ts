@@ -26,6 +26,17 @@ export async function readJsonBody(request: Request): Promise<Record<string, unk
   }
 }
 
+// Reproduit getRequestIP(event, { xForwardedFor: true }). Cette IP alimente le
+// limiteur de tentatives de connexion : la perdre desarmerait la limitation par
+// IP. Derivee de la Request plutot que du getRequestIP de TanStack, qui lit un
+// contexte async implicite et rendrait les handlers intestables isolement.
+export function clientIpFrom(request: Request): string {
+  const forwarded = request.headers.get('x-forwarded-for')
+  const first = forwarded?.split(',')[0]?.trim()
+  if (first) return first
+  return request.headers.get('x-real-ip')?.trim() || 'ip-inconnue'
+}
+
 // Une erreur inattendue ne doit jamais transporter son message vers le client :
 // il peut contenir une chaîne de connexion ou un secret. Seules les erreurs
 // applicatives, qui portent un `status` non-500 explicite, gardent leur message.

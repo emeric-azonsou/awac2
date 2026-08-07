@@ -11,6 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiAdminLoginRouteImport } from './routes/api/admin/login'
+import { Route as ApiAdminLogoutRouteImport } from './routes/api/admin/logout'
+import { Route as ApiAdminMeRouteImport } from './routes/api/admin/me'
 import { Route as ApiCandidatesIndexRouteImport } from './routes/api/candidates/index'
 import { Route as ApiCandidatesIdRouteImport } from './routes/api/candidates.$id'
 import { Route as ApiPaymentCountriesRouteImport } from './routes/api/payment/countries'
@@ -32,6 +35,21 @@ const IndexRoute = IndexRouteImport.update({
 const ApiHealthRoute = ApiHealthRouteImport.update({
   id: '/api/health',
   path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminLoginRoute = ApiAdminLoginRouteImport.update({
+  id: '/api/admin/login',
+  path: '/api/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminLogoutRoute = ApiAdminLogoutRouteImport.update({
+  id: '/api/admin/logout',
+  path: '/api/admin/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminMeRoute = ApiAdminMeRouteImport.update({
+  id: '/api/admin/me',
+  path: '/api/admin/me',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCandidatesIndexRoute = ApiCandidatesIndexRouteImport.update({
@@ -98,6 +116,9 @@ const ApiVotesIdStatusRoute = ApiVotesIdStatusRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/admin/login': typeof ApiAdminLoginRoute
+  '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/me': typeof ApiAdminMeRoute
   '/api/candidates/$id': typeof ApiCandidatesIdRoute
   '/api/payment/countries': typeof ApiPaymentCountriesRoute
   '/api/payment/operators': typeof ApiPaymentOperatorsRoute
@@ -114,6 +135,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/admin/login': typeof ApiAdminLoginRoute
+  '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/me': typeof ApiAdminMeRoute
   '/api/candidates/$id': typeof ApiCandidatesIdRoute
   '/api/payment/countries': typeof ApiPaymentCountriesRoute
   '/api/payment/operators': typeof ApiPaymentOperatorsRoute
@@ -131,6 +155,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/admin/login': typeof ApiAdminLoginRoute
+  '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/me': typeof ApiAdminMeRoute
   '/api/candidates/$id': typeof ApiCandidatesIdRoute
   '/api/payment/countries': typeof ApiPaymentCountriesRoute
   '/api/payment/operators': typeof ApiPaymentOperatorsRoute
@@ -149,6 +176,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/api/health'
+    | '/api/admin/login'
+    | '/api/admin/logout'
+    | '/api/admin/me'
     | '/api/candidates/$id'
     | '/api/payment/countries'
     | '/api/payment/operators'
@@ -165,6 +195,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/api/health'
+    | '/api/admin/login'
+    | '/api/admin/logout'
+    | '/api/admin/me'
     | '/api/candidates/$id'
     | '/api/payment/countries'
     | '/api/payment/operators'
@@ -181,6 +214,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/api/health'
+    | '/api/admin/login'
+    | '/api/admin/logout'
+    | '/api/admin/me'
     | '/api/candidates/$id'
     | '/api/payment/countries'
     | '/api/payment/operators'
@@ -198,6 +234,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  ApiAdminLoginRoute: typeof ApiAdminLoginRoute
+  ApiAdminLogoutRoute: typeof ApiAdminLogoutRoute
+  ApiAdminMeRoute: typeof ApiAdminMeRoute
   ApiCandidatesIdRoute: typeof ApiCandidatesIdRoute
   ApiPaymentCountriesRoute: typeof ApiPaymentCountriesRoute
   ApiPaymentOperatorsRoute: typeof ApiPaymentOperatorsRoute
@@ -226,6 +265,27 @@ declare module '@tanstack/react-router' {
       path: '/api/health'
       fullPath: '/api/health'
       preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/login': {
+      id: '/api/admin/login'
+      path: '/api/admin/login'
+      fullPath: '/api/admin/login'
+      preLoaderRoute: typeof ApiAdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/logout': {
+      id: '/api/admin/logout'
+      path: '/api/admin/logout'
+      fullPath: '/api/admin/logout'
+      preLoaderRoute: typeof ApiAdminLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/me': {
+      id: '/api/admin/me'
+      path: '/api/admin/me'
+      fullPath: '/api/admin/me'
+      preLoaderRoute: typeof ApiAdminMeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/candidates/': {
@@ -318,6 +378,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiHealthRoute: ApiHealthRoute,
+  ApiAdminLoginRoute: ApiAdminLoginRoute,
+  ApiAdminLogoutRoute: ApiAdminLogoutRoute,
+  ApiAdminMeRoute: ApiAdminMeRoute,
   ApiCandidatesIdRoute: ApiCandidatesIdRoute,
   ApiPaymentCountriesRoute: ApiPaymentCountriesRoute,
   ApiPaymentOperatorsRoute: ApiPaymentOperatorsRoute,
