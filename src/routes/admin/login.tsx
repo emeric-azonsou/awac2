@@ -91,7 +91,11 @@ function AdminLogin() {
             </p>
           ) : null}
 
-          <button type="submit" disabled={submitting} className="btn-awac w-full text-[11px] py-3.5">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="btn-awac w-full text-[11px] py-3.5"
+          >
             {submitting ? (
               <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
             ) : null}

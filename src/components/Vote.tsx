@@ -120,7 +120,11 @@ export function Vote() {
           </p>
         </div>
 
-        <div className="flex justify-center gap-3 mb-14" role="group" aria-label="Choisir la catégorie">
+        <div
+          className="flex justify-center gap-3 mb-14"
+          role="group"
+          aria-label="Choisir la catégorie"
+        >
           {CATEGORIES.map((cat) => (
             <button
               key={cat.key}

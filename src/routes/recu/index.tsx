@@ -35,8 +35,16 @@ function ReceiptLookup() {
     <div className="min-h-screen bg-[#F9F8F6] selection:bg-awac-primary/10">
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100">
         <div className="container mx-auto px-6 max-w-6xl h-16 flex items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="Retour à l'accueil AWAC">
-            <img src={awacLogo} alt="AWAC — Awards des Couturier·e·s du Mono" className="h-9 w-auto" />
+          <Link
+            to="/"
+            className="flex items-center gap-2 shrink-0"
+            aria-label="Retour à l'accueil AWAC"
+          >
+            <img
+              src={awacLogo}
+              alt="AWAC — Awards des Couturier·e·s du Mono"
+              className="h-9 w-auto"
+            />
           </Link>
           <Link
             to="/"

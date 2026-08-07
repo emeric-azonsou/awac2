@@ -8,14 +8,8 @@ interface ShareCandidate {
 }
 
 export function CandidateShareCompact({ candidate }: { candidate: ShareCandidate }) {
-  const {
-    whatsappShareUrl,
-    facebookShareUrl,
-    copied,
-    copyShareLink,
-    canNativeShare,
-    nativeShare,
-  } = useCandidateShare(candidate)
+  const { whatsappShareUrl, facebookShareUrl, copied, copyShareLink, canNativeShare, nativeShare } =
+    useCandidateShare(candidate)
 
   const firstName = getFirstName(candidate.full_name)
 

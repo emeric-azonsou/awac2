@@ -4,7 +4,12 @@ export function useCopyToClipboard(resetMs = 2000) {
   const [copied, setCopied] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current) }, [])
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current)
+    },
+    [],
+  )
 
   const copy = useCallback(
     async (text: string) => {

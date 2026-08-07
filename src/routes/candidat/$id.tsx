@@ -51,9 +51,7 @@ export const Route = createFileRoute('/candidat/$id')({
   head: ({ loaderData }) => {
     const candidate = loaderData?.candidate
     const siteOrigin = loaderData?.siteOrigin ?? ''
-    const title = candidate
-      ? `${candidate.full_name} — Awards des Couturier·e·s du Mono`
-      : 'AWAC'
+    const title = candidate ? `${candidate.full_name} — Awards des Couturier·e·s du Mono` : 'AWAC'
     const description = candidate
       ? `Vote pour ${candidate.full_name} et propulse ce talent vers la victoire aux Awards des Couturier·e·s du Mono.`
       : 'Awards des Couturier·e·s du Mono'
@@ -100,7 +98,12 @@ function CandidatePage() {
       // Le paramètre `vote` est retiré de l'URL après ouverture, pour qu'un
       // rechargement ne rouvre pas la modale.
       const { vote: _vote, ...rest } = query
-      void navigate({ to: '/candidat/$id', params: { id: loaded?.id ?? '' }, search: rest, replace: true })
+      void navigate({
+        to: '/candidat/$id',
+        params: { id: loaded?.id ?? '' },
+        search: rest,
+        replace: true,
+      })
     }
   }, [loaded, loadVotePricing, navigate])
 
@@ -108,17 +111,23 @@ function CandidatePage() {
   const categoryLabel = getCategoryLabel(candidate?.category)
 
   const onVoted = (result: VotedResult) => {
-    setCandidate((current) =>
-      current ? { ...current, vote_count: result.votes_after } : current,
-    )
+    setCandidate((current) => (current ? { ...current, vote_count: result.votes_after } : current))
   }
 
   return (
     <div className="awac-candidat min-h-screen bg-[#F9F8F6] selection:bg-awac-primary/10">
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100">
         <div className="container mx-auto px-6 max-w-6xl h-16 flex items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="Retour à l'accueil AWAC">
-            <img src={awacLogo} alt="AWAC — Awards des Couturier·e·s du Mono" className="h-9 w-auto" />
+          <Link
+            to="/"
+            className="flex items-center gap-2 shrink-0"
+            aria-label="Retour à l'accueil AWAC"
+          >
+            <img
+              src={awacLogo}
+              alt="AWAC — Awards des Couturier·e·s du Mono"
+              className="h-9 w-auto"
+            />
           </Link>
 
           <Link
@@ -271,8 +280,7 @@ function CandidatePage() {
                         <img
                           src={candidate.photos[0].photo_url}
                           alt={
-                            candidate.photos[0].caption ||
-                            `Réalisation de ${candidate.full_name}`
+                            candidate.photos[0].caption || `Réalisation de ${candidate.full_name}`
                           }
                           className="w-full h-full object-cover"
                           loading="eager"

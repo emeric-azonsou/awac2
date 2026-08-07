@@ -174,9 +174,7 @@ function AdminVotes() {
                 {formatNumber(data.totals_by_status[key].amount)}{' '}
                 <span className="text-xs font-bold text-gray-400">FCFA</span>
               </p>
-              <p className="text-xs text-gray-400">
-                {data.totals_by_status[key].count} paiements
-              </p>
+              <p className="text-xs text-gray-400">{data.totals_by_status[key].count} paiements</p>
             </button>
           ))}
         </section>

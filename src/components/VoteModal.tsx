@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from '@tanstack/react-router'
-import {
-  voteService,
-  type Candidate,
-  type Country,
-  type Operator,
-} from '../utils/voteService'
+import { voteService, type Candidate, type Country, type Operator } from '../utils/voteService'
 import { pollPaymentStatus } from '../hooks/usePaymentPolling'
 import { clampVoteQuantity } from '../utils/voteQuantity'
 import { rememberPendingVote, forgetPendingVote } from '../utils/pendingVotes'
@@ -370,7 +365,9 @@ export function VoteModal({
                 </div>
 
                 <div className="space-y-3">
-                  <h4 className="font-heading font-black text-lg text-gray-900">Presque terminé !</h4>
+                  <h4 className="font-heading font-black text-lg text-gray-900">
+                    Presque terminé !
+                  </h4>
                   <p className="text-sm leading-relaxed text-gray-600 text-justify sm:text-center">
                     Une demande de paiement de{' '}
                     <span className="font-heading font-black text-awac-accent">
@@ -440,7 +437,9 @@ export function VoteModal({
                 </div>
                 <div className="space-y-2">
                   <h4 className="font-heading font-black text-gray-900">Paiement non confirmé</h4>
-                  <p className="text-sm text-gray-600 text-justify sm:text-center">{errorMessage}</p>
+                  <p className="text-sm text-gray-600 text-justify sm:text-center">
+                    {errorMessage}
+                  </p>
                   {receiptCode ? (
                     <Link
                       to="/recu/$code"
