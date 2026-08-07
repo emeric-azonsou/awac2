@@ -162,6 +162,12 @@ export function VoteModal({
     onClose()
   }
 
+  // Le formulaire porte `noValidate` : la validation native du navigateur
+  // bloquait la soumission avant que cette fonction ne s'exécute et affichait
+  // sa propre bulle, en anglais, sur un site français. Le message ci-dessous
+  // existait depuis la version Vue mais n'a jamais été atteignable. Les
+  // attributs `required` restent en place — ils annoncent le champ obligatoire
+  // aux lecteurs d'écran ; seule leur bulle native est neutralisée.
   const submitVote = async (event: FormEvent) => {
     event.preventDefault()
     if (!form.operator || !form.phone_number.trim()) {
@@ -233,7 +239,7 @@ export function VoteModal({
             </div>
 
             {phase === 'form' ? (
-              <form onSubmit={submitVote} className="space-y-4">
+              <form onSubmit={submitVote} noValidate className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
                     Pays <span className="text-red-500">*</span>
