@@ -1,35 +1,46 @@
-import type { H3Event } from 'h3'
+import { useSession } from '@tanstack/react-start/server'
 import { getDb } from './db'
+
 const SESSION_NAME = 'awac_admin'
 const SESSION_MAX_AGE_SECONDS = 12 * 60 * 60
+
 export interface AdminSessionData {
   adminId?: string
   email?: string
   fullName?: string
   tokenVersion?: number
 }
+
 function sessionPassword(): string {
-  const secret = useRuntimeConfig().sessionSecret
+  const secret = process.env.SESSION_SECRET ?? ''
   if (!secret || secret.length < 32) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'SESSION_SECRET manquant ou trop court (32 caractères minimum)',
-    })
+    throw Object.assign(
+      new Error('SESSION_SECRET manquant ou trop court (32 caractères minimum)'),
+      { status: 500, code: 'internal_error' },
+    )
   }
   return secret
 }
-export function getAdminSession(event: H3Event) {
-  return useSession<AdminSessionData>(event, {
+
+export function getAdminSession() {
+  return useSession<AdminSessionData>({
     name: SESSION_NAME,
     password: sessionPassword(),
     maxAge: SESSION_MAX_AGE_SECONDS,
-    cookie: { httpOnly: true, sameSite: 'lax', secure: !import.meta.dev },
+    cookie: { httpOnly: true, sameSite: 'lax', secure: !import.meta.env.DEV },
   })
 }
+
 const UNAUTHORIZED = () =>
-  createError({ statusCode: 401, statusMessage: 'Authentification requise' })
-export async function requireAdminSession(event: H3Event): Promise<Required<AdminSessionData>> {
-  const session = await getAdminSession(event)
+  Object.assign(new Error('Authentification requise'), {
+    status: 401,
+    code: 'unauthorized',
+  })
+
+// token_version est incrémenté à la déconnexion : une session scellée avant
+// cette incrémentation reste déchiffrable mais doit être refusée.
+export async function requireAdminSession(): Promise<Required<AdminSessionData>> {
+  const session = await getAdminSession()
   const { adminId, email, fullName, tokenVersion } = session.data
   if (!adminId) throw UNAUTHORIZED()
 
