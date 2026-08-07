@@ -17,7 +17,9 @@ import { Route as ApiPaymentCountriesRouteImport } from './routes/api/payment/co
 import { Route as ApiPaymentOperatorsRouteImport } from './routes/api/payment/operators'
 import { Route as ApiReceiptsCodeRouteImport } from './routes/api/receipts.$code'
 import { Route as ApiSettingsPublicRouteImport } from './routes/api/settings/public'
+import { Route as ApiVotesIndexRouteImport } from './routes/api/votes/index'
 import { Route as ApiVotesWebhookRouteImport } from './routes/api/votes/webhook'
+import { Route as ApiVotesIdStatusRouteImport } from './routes/api/votes.$id.status'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -59,9 +61,19 @@ const ApiSettingsPublicRoute = ApiSettingsPublicRouteImport.update({
   path: '/api/settings/public',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiVotesIndexRoute = ApiVotesIndexRouteImport.update({
+  id: '/api/votes/',
+  path: '/api/votes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiVotesWebhookRoute = ApiVotesWebhookRouteImport.update({
   id: '/api/votes/webhook',
   path: '/api/votes/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVotesIdStatusRoute = ApiVotesIdStatusRouteImport.update({
+  id: '/api/votes/$id/status',
+  path: '/api/votes/$id/status',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -75,6 +87,8 @@ export interface FileRoutesByFullPath {
   '/api/settings/public': typeof ApiSettingsPublicRoute
   '/api/votes/webhook': typeof ApiVotesWebhookRoute
   '/api/candidates/': typeof ApiCandidatesIndexRoute
+  '/api/votes/': typeof ApiVotesIndexRoute
+  '/api/votes/$id/status': typeof ApiVotesIdStatusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +100,8 @@ export interface FileRoutesByTo {
   '/api/settings/public': typeof ApiSettingsPublicRoute
   '/api/votes/webhook': typeof ApiVotesWebhookRoute
   '/api/candidates': typeof ApiCandidatesIndexRoute
+  '/api/votes': typeof ApiVotesIndexRoute
+  '/api/votes/$id/status': typeof ApiVotesIdStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +114,8 @@ export interface FileRoutesById {
   '/api/settings/public': typeof ApiSettingsPublicRoute
   '/api/votes/webhook': typeof ApiVotesWebhookRoute
   '/api/candidates/': typeof ApiCandidatesIndexRoute
+  '/api/votes/': typeof ApiVotesIndexRoute
+  '/api/votes/$id/status': typeof ApiVotesIdStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +129,8 @@ export interface FileRouteTypes {
     | '/api/settings/public'
     | '/api/votes/webhook'
     | '/api/candidates/'
+    | '/api/votes/'
+    | '/api/votes/$id/status'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +142,8 @@ export interface FileRouteTypes {
     | '/api/settings/public'
     | '/api/votes/webhook'
     | '/api/candidates'
+    | '/api/votes'
+    | '/api/votes/$id/status'
   id:
     | '__root__'
     | '/'
@@ -133,6 +155,8 @@ export interface FileRouteTypes {
     | '/api/settings/public'
     | '/api/votes/webhook'
     | '/api/candidates/'
+    | '/api/votes/'
+    | '/api/votes/$id/status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,6 +169,8 @@ export interface RootRouteChildren {
   ApiSettingsPublicRoute: typeof ApiSettingsPublicRoute
   ApiVotesWebhookRoute: typeof ApiVotesWebhookRoute
   ApiCandidatesIndexRoute: typeof ApiCandidatesIndexRoute
+  ApiVotesIndexRoute: typeof ApiVotesIndexRoute
+  ApiVotesIdStatusRoute: typeof ApiVotesIdStatusRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -205,11 +231,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSettingsPublicRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/votes/': {
+      id: '/api/votes/'
+      path: '/api/votes'
+      fullPath: '/api/votes/'
+      preLoaderRoute: typeof ApiVotesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/votes/webhook': {
       id: '/api/votes/webhook'
       path: '/api/votes/webhook'
       fullPath: '/api/votes/webhook'
       preLoaderRoute: typeof ApiVotesWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/votes/$id/status': {
+      id: '/api/votes/$id/status'
+      path: '/api/votes/$id/status'
+      fullPath: '/api/votes/$id/status'
+      preLoaderRoute: typeof ApiVotesIdStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -225,6 +265,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSettingsPublicRoute: ApiSettingsPublicRoute,
   ApiVotesWebhookRoute: ApiVotesWebhookRoute,
   ApiCandidatesIndexRoute: ApiCandidatesIndexRoute,
+  ApiVotesIndexRoute: ApiVotesIndexRoute,
+  ApiVotesIdStatusRoute: ApiVotesIdStatusRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -14,6 +14,18 @@ export function errorResponse(status: number, code: string, message: string): Re
   return Response.json({ error: { code, message } }, { status })
 }
 
+// Reproduit readBody(event).catch(() => ({})) : un corps illisible devient un
+// objet vide et laisse le service produire son erreur de validation métier,
+// plutôt que de remonter une 500 technique.
+export async function readJsonBody(request: Request): Promise<Record<string, unknown>> {
+  try {
+    const parsed = await request.json()
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {}
+  } catch {
+    return {}
+  }
+}
+
 // Une erreur inattendue ne doit jamais transporter son message vers le client :
 // il peut contenir une chaîne de connexion ou un secret. Seules les erreurs
 // applicatives, qui portent un `status` non-500 explicite, gardent leur message.
