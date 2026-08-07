@@ -1,0 +1,80 @@
+/* Repris tel quel du <style scoped> de Works.vue, scopé par .awac-works.
+   Attention : ce fichier définit son propre pulse-slow, aux valeurs
+   DIFFÉRENTES de celui de Hero (0.4/0.2 sur 6s ici, 0.7/0.4 sur 8s là-bas).
+   Le scoping de Vue les isolait ; les noms sont donc préfixés pour qu'aucune
+   des deux animations n'écrase l'autre. */
+.awac-works .step-item {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.awac-works .step-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.awac-works .step-circle {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.awac-works .step-item.step-visible .step-circle {
+  animation: awac-works-pop-circle 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes awac-works-pop-circle {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.awac-works .step-content {
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.awac-works .step-item.step-visible .step-content {
+  animation: awac-works-slide-content 0.6s ease-out both;
+}
+@keyframes awac-works-slide-content {
+  0% {
+    opacity: 0;
+    transform: translateX(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.awac-works .step-line svg path {
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  transition: stroke-dashoffset 1.2s ease-out;
+}
+.awac-works .step-item.step-visible .step-line svg path {
+  stroke-dashoffset: 0;
+}
+.awac-works .step-item:last-child .step-line {
+  opacity: 0;
+}
+@keyframes awac-works-pulse-slow {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.2;
+    transform: scale(1.1);
+  }
+}
+.awac-works .animate-pulse-slow {
+  animation: awac-works-pulse-slow 6s ease-in-out infinite;
+}
+.awac-works .step-item:nth-child(1) {
+  transition-delay: 0.1s;
+}
+.awac-works .step-item:nth-child(2) {
+  transition-delay: 0.3s;
+}
+.awac-works .step-item:nth-child(3) {
+  transition-delay: 0.5s;
+}
