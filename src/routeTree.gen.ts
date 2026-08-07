@@ -11,10 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AProposRouteImport } from './routes/a-propos'
+import { Route as AdminShellRouteImport } from './routes/admin/_shell'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as CandidatIdRouteImport } from './routes/candidat/$id'
 import { Route as RecuIndexRouteImport } from './routes/recu/index'
 import { Route as RecuCodeRouteImport } from './routes/recu/$code'
+import { Route as AdminShellIndexRouteImport } from './routes/admin/_shell/index'
+import { Route as AdminShellVotesRouteImport } from './routes/admin/_shell/votes'
 import { Route as ApiAdminLoginRouteImport } from './routes/api/admin/login'
 import { Route as ApiAdminLogoutRouteImport } from './routes/api/admin/logout'
 import { Route as ApiAdminMeRouteImport } from './routes/api/admin/me'
@@ -31,6 +35,9 @@ import { Route as ApiReceiptsCodeRouteImport } from './routes/api/receipts.$code
 import { Route as ApiSettingsPublicRouteImport } from './routes/api/settings/public'
 import { Route as ApiVotesIndexRouteImport } from './routes/api/votes/index'
 import { Route as ApiVotesWebhookRouteImport } from './routes/api/votes/webhook'
+import { Route as AdminShellCandidatsIndexRouteImport } from './routes/admin/_shell/candidats/index'
+import { Route as AdminShellCandidatsIdRouteImport } from './routes/admin/_shell/candidats/$id'
+import { Route as AdminShellCandidatsNouveauRouteImport } from './routes/admin/_shell/candidats/nouveau'
 import { Route as ApiAdminCandidatesIndexRouteImport } from './routes/api/admin/candidates/index'
 import { Route as ApiAdminCandidatesIdRouteImport } from './routes/api/admin/candidates.$id'
 import { Route as ApiAdminPhotosIndexRouteImport } from './routes/api/admin/photos/index'
@@ -46,6 +53,16 @@ const IndexRoute = IndexRouteImport.update({
 const AProposRoute = AProposRouteImport.update({
   id: '/a-propos',
   path: '/a-propos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminShellRoute = AdminShellRouteImport.update({
+  id: '/admin/_shell',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
@@ -67,6 +84,16 @@ const RecuCodeRoute = RecuCodeRouteImport.update({
   id: '/recu/$code',
   path: '/recu/$code',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminShellIndexRoute = AdminShellIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminShellRoute,
+} as any)
+const AdminShellVotesRoute = AdminShellVotesRouteImport.update({
+  id: '/votes',
+  path: '/votes',
+  getParentRoute: () => AdminShellRoute,
 } as any)
 const ApiAdminLoginRoute = ApiAdminLoginRouteImport.update({
   id: '/api/admin/login',
@@ -148,6 +175,23 @@ const ApiVotesWebhookRoute = ApiVotesWebhookRouteImport.update({
   path: '/api/votes/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminShellCandidatsIndexRoute =
+  AdminShellCandidatsIndexRouteImport.update({
+    id: '/candidats/',
+    path: '/candidats/',
+    getParentRoute: () => AdminShellRoute,
+  } as any)
+const AdminShellCandidatsIdRoute = AdminShellCandidatsIdRouteImport.update({
+  id: '/candidats/$id',
+  path: '/candidats/$id',
+  getParentRoute: () => AdminShellRoute,
+} as any)
+const AdminShellCandidatsNouveauRoute =
+  AdminShellCandidatsNouveauRouteImport.update({
+    id: '/candidats/nouveau',
+    path: '/candidats/nouveau',
+    getParentRoute: () => AdminShellRoute,
+  } as any)
 const ApiAdminCandidatesIndexRoute = ApiAdminCandidatesIndexRouteImport.update({
   id: '/api/admin/candidates/',
   path: '/api/admin/candidates/',
@@ -183,10 +227,13 @@ const ApiAdminCandidatesIdPhotosRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
+  '/admin': typeof AdminShellRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/api/health': typeof ApiHealthRoute
   '/candidat/$id': typeof CandidatIdRoute
   '/recu/$code': typeof RecuCodeRoute
   '/recu/': typeof RecuIndexRoute
+  '/admin/votes': typeof AdminShellVotesRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
   '/api/admin/me': typeof ApiAdminMeRoute
@@ -201,11 +248,15 @@ export interface FileRoutesByFullPath {
   '/api/receipts/$code': typeof ApiReceiptsCodeRoute
   '/api/settings/public': typeof ApiSettingsPublicRoute
   '/api/votes/webhook': typeof ApiVotesWebhookRoute
+  '/admin/': typeof AdminShellIndexRoute
   '/api/candidates/': typeof ApiCandidatesIndexRoute
   '/api/votes/': typeof ApiVotesIndexRoute
+  '/admin/candidats/$id': typeof AdminShellCandidatsIdRoute
+  '/admin/candidats/nouveau': typeof AdminShellCandidatsNouveauRoute
   '/api/admin/candidates/$id': typeof ApiAdminCandidatesIdRouteWithChildren
   '/api/admin/photos/$id': typeof ApiAdminPhotosIdRoute
   '/api/votes/$id/status': typeof ApiVotesIdStatusRoute
+  '/admin/candidats/': typeof AdminShellCandidatsIndexRoute
   '/api/admin/candidates/': typeof ApiAdminCandidatesIndexRoute
   '/api/admin/photos/': typeof ApiAdminPhotosIndexRoute
   '/api/admin/candidates/$id/photos': typeof ApiAdminCandidatesIdPhotosRoute
@@ -213,10 +264,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
+  '/admin/login': typeof AdminLoginRoute
   '/api/health': typeof ApiHealthRoute
   '/candidat/$id': typeof CandidatIdRoute
   '/recu/$code': typeof RecuCodeRoute
   '/recu': typeof RecuIndexRoute
+  '/admin/votes': typeof AdminShellVotesRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
   '/api/admin/me': typeof ApiAdminMeRoute
@@ -231,11 +284,15 @@ export interface FileRoutesByTo {
   '/api/receipts/$code': typeof ApiReceiptsCodeRoute
   '/api/settings/public': typeof ApiSettingsPublicRoute
   '/api/votes/webhook': typeof ApiVotesWebhookRoute
+  '/admin': typeof AdminShellIndexRoute
   '/api/candidates': typeof ApiCandidatesIndexRoute
   '/api/votes': typeof ApiVotesIndexRoute
+  '/admin/candidats/$id': typeof AdminShellCandidatsIdRoute
+  '/admin/candidats/nouveau': typeof AdminShellCandidatsNouveauRoute
   '/api/admin/candidates/$id': typeof ApiAdminCandidatesIdRouteWithChildren
   '/api/admin/photos/$id': typeof ApiAdminPhotosIdRoute
   '/api/votes/$id/status': typeof ApiVotesIdStatusRoute
+  '/admin/candidats': typeof AdminShellCandidatsIndexRoute
   '/api/admin/candidates': typeof ApiAdminCandidatesIndexRoute
   '/api/admin/photos': typeof ApiAdminPhotosIndexRoute
   '/api/admin/candidates/$id/photos': typeof ApiAdminCandidatesIdPhotosRoute
@@ -244,10 +301,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
+  '/admin/_shell': typeof AdminShellRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/api/health': typeof ApiHealthRoute
   '/candidat/$id': typeof CandidatIdRoute
   '/recu/$code': typeof RecuCodeRoute
   '/recu/': typeof RecuIndexRoute
+  '/admin/_shell/votes': typeof AdminShellVotesRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
   '/api/admin/me': typeof ApiAdminMeRoute
@@ -262,11 +322,15 @@ export interface FileRoutesById {
   '/api/receipts/$code': typeof ApiReceiptsCodeRoute
   '/api/settings/public': typeof ApiSettingsPublicRoute
   '/api/votes/webhook': typeof ApiVotesWebhookRoute
+  '/admin/_shell/': typeof AdminShellIndexRoute
   '/api/candidates/': typeof ApiCandidatesIndexRoute
   '/api/votes/': typeof ApiVotesIndexRoute
+  '/admin/_shell/candidats/$id': typeof AdminShellCandidatsIdRoute
+  '/admin/_shell/candidats/nouveau': typeof AdminShellCandidatsNouveauRoute
   '/api/admin/candidates/$id': typeof ApiAdminCandidatesIdRouteWithChildren
   '/api/admin/photos/$id': typeof ApiAdminPhotosIdRoute
   '/api/votes/$id/status': typeof ApiVotesIdStatusRoute
+  '/admin/_shell/candidats/': typeof AdminShellCandidatsIndexRoute
   '/api/admin/candidates/': typeof ApiAdminCandidatesIndexRoute
   '/api/admin/photos/': typeof ApiAdminPhotosIndexRoute
   '/api/admin/candidates/$id/photos': typeof ApiAdminCandidatesIdPhotosRoute
@@ -276,10 +340,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/a-propos'
+    | '/admin'
+    | '/admin/login'
     | '/api/health'
     | '/candidat/$id'
     | '/recu/$code'
     | '/recu/'
+    | '/admin/votes'
     | '/api/admin/login'
     | '/api/admin/logout'
     | '/api/admin/me'
@@ -294,11 +361,15 @@ export interface FileRouteTypes {
     | '/api/receipts/$code'
     | '/api/settings/public'
     | '/api/votes/webhook'
+    | '/admin/'
     | '/api/candidates/'
     | '/api/votes/'
+    | '/admin/candidats/$id'
+    | '/admin/candidats/nouveau'
     | '/api/admin/candidates/$id'
     | '/api/admin/photos/$id'
     | '/api/votes/$id/status'
+    | '/admin/candidats/'
     | '/api/admin/candidates/'
     | '/api/admin/photos/'
     | '/api/admin/candidates/$id/photos'
@@ -306,10 +377,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/a-propos'
+    | '/admin/login'
     | '/api/health'
     | '/candidat/$id'
     | '/recu/$code'
     | '/recu'
+    | '/admin/votes'
     | '/api/admin/login'
     | '/api/admin/logout'
     | '/api/admin/me'
@@ -324,11 +397,15 @@ export interface FileRouteTypes {
     | '/api/receipts/$code'
     | '/api/settings/public'
     | '/api/votes/webhook'
+    | '/admin'
     | '/api/candidates'
     | '/api/votes'
+    | '/admin/candidats/$id'
+    | '/admin/candidats/nouveau'
     | '/api/admin/candidates/$id'
     | '/api/admin/photos/$id'
     | '/api/votes/$id/status'
+    | '/admin/candidats'
     | '/api/admin/candidates'
     | '/api/admin/photos'
     | '/api/admin/candidates/$id/photos'
@@ -336,10 +413,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/a-propos'
+    | '/admin/_shell'
+    | '/admin/login'
     | '/api/health'
     | '/candidat/$id'
     | '/recu/$code'
     | '/recu/'
+    | '/admin/_shell/votes'
     | '/api/admin/login'
     | '/api/admin/logout'
     | '/api/admin/me'
@@ -354,11 +434,15 @@ export interface FileRouteTypes {
     | '/api/receipts/$code'
     | '/api/settings/public'
     | '/api/votes/webhook'
+    | '/admin/_shell/'
     | '/api/candidates/'
     | '/api/votes/'
+    | '/admin/_shell/candidats/$id'
+    | '/admin/_shell/candidats/nouveau'
     | '/api/admin/candidates/$id'
     | '/api/admin/photos/$id'
     | '/api/votes/$id/status'
+    | '/admin/_shell/candidats/'
     | '/api/admin/candidates/'
     | '/api/admin/photos/'
     | '/api/admin/candidates/$id/photos'
@@ -367,6 +451,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AProposRoute: typeof AProposRoute
+  AdminShellRoute: typeof AdminShellRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
   ApiHealthRoute: typeof ApiHealthRoute
   CandidatIdRoute: typeof CandidatIdRoute
   RecuCodeRoute: typeof RecuCodeRoute
@@ -410,6 +496,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AProposRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/_shell': {
+      id: '/admin/_shell'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminShellRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/health': {
       id: '/api/health'
       path: '/api/health'
@@ -437,6 +537,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/recu/$code'
       preLoaderRoute: typeof RecuCodeRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/_shell/': {
+      id: '/admin/_shell/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminShellIndexRouteImport
+      parentRoute: typeof AdminShellRoute
+    }
+    '/admin/_shell/votes': {
+      id: '/admin/_shell/votes'
+      path: '/votes'
+      fullPath: '/admin/votes'
+      preLoaderRoute: typeof AdminShellVotesRouteImport
+      parentRoute: typeof AdminShellRoute
     }
     '/api/admin/login': {
       id: '/api/admin/login'
@@ -550,6 +664,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiVotesWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/_shell/candidats/': {
+      id: '/admin/_shell/candidats/'
+      path: '/candidats'
+      fullPath: '/admin/candidats/'
+      preLoaderRoute: typeof AdminShellCandidatsIndexRouteImport
+      parentRoute: typeof AdminShellRoute
+    }
+    '/admin/_shell/candidats/$id': {
+      id: '/admin/_shell/candidats/$id'
+      path: '/candidats/$id'
+      fullPath: '/admin/candidats/$id'
+      preLoaderRoute: typeof AdminShellCandidatsIdRouteImport
+      parentRoute: typeof AdminShellRoute
+    }
+    '/admin/_shell/candidats/nouveau': {
+      id: '/admin/_shell/candidats/nouveau'
+      path: '/candidats/nouveau'
+      fullPath: '/admin/candidats/nouveau'
+      preLoaderRoute: typeof AdminShellCandidatsNouveauRouteImport
+      parentRoute: typeof AdminShellRoute
+    }
     '/api/admin/candidates/': {
       id: '/api/admin/candidates/'
       path: '/api/admin/candidates'
@@ -595,6 +730,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminShellRouteChildren {
+  AdminShellVotesRoute: typeof AdminShellVotesRoute
+  AdminShellIndexRoute: typeof AdminShellIndexRoute
+  AdminShellCandidatsIdRoute: typeof AdminShellCandidatsIdRoute
+  AdminShellCandidatsNouveauRoute: typeof AdminShellCandidatsNouveauRoute
+  AdminShellCandidatsIndexRoute: typeof AdminShellCandidatsIndexRoute
+}
+
+const AdminShellRouteChildren: AdminShellRouteChildren = {
+  AdminShellVotesRoute: AdminShellVotesRoute,
+  AdminShellIndexRoute: AdminShellIndexRoute,
+  AdminShellCandidatsIdRoute: AdminShellCandidatsIdRoute,
+  AdminShellCandidatsNouveauRoute: AdminShellCandidatsNouveauRoute,
+  AdminShellCandidatsIndexRoute: AdminShellCandidatsIndexRoute,
+}
+
+const AdminShellRouteWithChildren = AdminShellRoute._addFileChildren(
+  AdminShellRouteChildren,
+)
+
 interface ApiAdminCandidatesIdRouteChildren {
   ApiAdminCandidatesIdPhotosRoute: typeof ApiAdminCandidatesIdPhotosRoute
 }
@@ -609,6 +764,8 @@ const ApiAdminCandidatesIdRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AProposRoute: AProposRoute,
+  AdminShellRoute: AdminShellRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
   ApiHealthRoute: ApiHealthRoute,
   CandidatIdRoute: CandidatIdRoute,
   RecuCodeRoute: RecuCodeRoute,

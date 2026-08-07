@@ -7,8 +7,10 @@ export class ApiError extends Error {
     this.status = status
   }
 }
+type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE'
+
 interface RequestOptions {
-  method?: 'GET' | 'POST'
+  method?: HttpMethod
   body?: unknown
 }
 const DEFAULT_ERROR_CODE = 'unknown_error'
@@ -63,4 +65,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body }),
+  // PATCH et DELETE servent l'administration des candidats et des photos.
+  request: <T>(path: string, method: HttpMethod, body?: unknown) =>
+    request<T>(path, { method, body }),
 }
