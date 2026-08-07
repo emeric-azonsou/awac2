@@ -1,0 +1,71 @@
+/* Repris du <style scoped> de VoteQuantityStepper.vue, scopé par .vote-stepper
+   et son conteneur. */
+.vote-stepper {
+  background: linear-gradient(135deg, rgba(239, 121, 82, 0.1), rgba(223, 65, 58, 0.08));
+  box-shadow: inset 0 0 0 1px rgba(239, 121, 82, 0.25);
+}
+.vote-stepper .stepper-btn {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  background: #fff;
+  color: #4b5563;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(11, 11, 11, 0.08);
+  transition:
+    background-color 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.vote-stepper .stepper-btn:active {
+  transform: scale(0.95);
+}
+.vote-stepper .stepper-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ef7952, #df413a);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(239, 121, 82, 0.35);
+}
+.vote-stepper .stepper-btn:focus-visible {
+  outline: 2px solid #ef7952;
+  outline-offset: 2px;
+}
+.vote-stepper .stepper-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+.vote-stepper .stepper-count {
+  min-width: 2.75ch;
+}
+
+/* <Transition name="count-pop" mode="out-in"> de Vue. React démonte l'ancien
+   nœud sans phase de sortie : seule l'animation d'entrée est reproduite, la
+   valeur sortante disparaît au lieu de glisser vers le haut. */
+.vote-stepper .count-pop-enter {
+  animation: awac-count-pop-enter 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes awac-count-pop-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vote-stepper .count-pop-enter {
+    animation: awac-count-pop-fade 0.1s linear both;
+  }
+  @keyframes awac-count-pop-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}

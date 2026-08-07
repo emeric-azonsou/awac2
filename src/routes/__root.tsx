@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import tailwindUrl from '../styles/tailwind.css?url'
+import { VoteReminderBanner } from '../components/VoteReminderBanner'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -32,9 +33,8 @@ export const Route = createRootRoute({
   component: Outlet,
 })
 
-// Le composant VoteReminderBanner, monté globalement dans app/app.vue à côté de
-// <NuxtPage />, viendra ici sous {children} au lot 3 : c'est le seul élément
-// d'interface qui vit en dehors des pages.
+// VoteReminderBanner était monté globalement dans app/app.vue, à côté de
+// <NuxtPage /> : c'est le seul élément d'interface qui vit en dehors des pages.
 function RootDocument({ children }: { children: ReactNode }) {
   return (
     <html lang="fr">
@@ -43,6 +43,7 @@ function RootDocument({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
+        <VoteReminderBanner />
         <Scripts />
       </body>
     </html>
