@@ -10,11 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiCandidatesIndexRouteImport } from './routes/api/candidates/index'
+import { Route as ApiCandidatesIdRouteImport } from './routes/api/candidates.$id'
+import { Route as ApiPaymentCountriesRouteImport } from './routes/api/payment/countries'
+import { Route as ApiPaymentOperatorsRouteImport } from './routes/api/payment/operators'
+import { Route as ApiReceiptsCodeRouteImport } from './routes/api/receipts.$code'
+import { Route as ApiSettingsPublicRouteImport } from './routes/api/settings/public'
 import { Route as ApiVotesWebhookRouteImport } from './routes/api/votes/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCandidatesIndexRoute = ApiCandidatesIndexRouteImport.update({
+  id: '/api/candidates/',
+  path: '/api/candidates/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCandidatesIdRoute = ApiCandidatesIdRouteImport.update({
+  id: '/api/candidates/$id',
+  path: '/api/candidates/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPaymentCountriesRoute = ApiPaymentCountriesRouteImport.update({
+  id: '/api/payment/countries',
+  path: '/api/payment/countries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPaymentOperatorsRoute = ApiPaymentOperatorsRouteImport.update({
+  id: '/api/payment/operators',
+  path: '/api/payment/operators',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReceiptsCodeRoute = ApiReceiptsCodeRouteImport.update({
+  id: '/api/receipts/$code',
+  path: '/api/receipts/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSettingsPublicRoute = ApiSettingsPublicRouteImport.update({
+  id: '/api/settings/public',
+  path: '/api/settings/public',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiVotesWebhookRoute = ApiVotesWebhookRouteImport.update({
@@ -25,28 +67,84 @@ const ApiVotesWebhookRoute = ApiVotesWebhookRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/health': typeof ApiHealthRoute
+  '/api/candidates/$id': typeof ApiCandidatesIdRoute
+  '/api/payment/countries': typeof ApiPaymentCountriesRoute
+  '/api/payment/operators': typeof ApiPaymentOperatorsRoute
+  '/api/receipts/$code': typeof ApiReceiptsCodeRoute
+  '/api/settings/public': typeof ApiSettingsPublicRoute
   '/api/votes/webhook': typeof ApiVotesWebhookRoute
+  '/api/candidates/': typeof ApiCandidatesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/health': typeof ApiHealthRoute
+  '/api/candidates/$id': typeof ApiCandidatesIdRoute
+  '/api/payment/countries': typeof ApiPaymentCountriesRoute
+  '/api/payment/operators': typeof ApiPaymentOperatorsRoute
+  '/api/receipts/$code': typeof ApiReceiptsCodeRoute
+  '/api/settings/public': typeof ApiSettingsPublicRoute
   '/api/votes/webhook': typeof ApiVotesWebhookRoute
+  '/api/candidates': typeof ApiCandidatesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/health': typeof ApiHealthRoute
+  '/api/candidates/$id': typeof ApiCandidatesIdRoute
+  '/api/payment/countries': typeof ApiPaymentCountriesRoute
+  '/api/payment/operators': typeof ApiPaymentOperatorsRoute
+  '/api/receipts/$code': typeof ApiReceiptsCodeRoute
+  '/api/settings/public': typeof ApiSettingsPublicRoute
   '/api/votes/webhook': typeof ApiVotesWebhookRoute
+  '/api/candidates/': typeof ApiCandidatesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/votes/webhook'
+  fullPaths:
+    | '/'
+    | '/api/health'
+    | '/api/candidates/$id'
+    | '/api/payment/countries'
+    | '/api/payment/operators'
+    | '/api/receipts/$code'
+    | '/api/settings/public'
+    | '/api/votes/webhook'
+    | '/api/candidates/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/votes/webhook'
-  id: '__root__' | '/' | '/api/votes/webhook'
+  to:
+    | '/'
+    | '/api/health'
+    | '/api/candidates/$id'
+    | '/api/payment/countries'
+    | '/api/payment/operators'
+    | '/api/receipts/$code'
+    | '/api/settings/public'
+    | '/api/votes/webhook'
+    | '/api/candidates'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/health'
+    | '/api/candidates/$id'
+    | '/api/payment/countries'
+    | '/api/payment/operators'
+    | '/api/receipts/$code'
+    | '/api/settings/public'
+    | '/api/votes/webhook'
+    | '/api/candidates/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiHealthRoute: typeof ApiHealthRoute
+  ApiCandidatesIdRoute: typeof ApiCandidatesIdRoute
+  ApiPaymentCountriesRoute: typeof ApiPaymentCountriesRoute
+  ApiPaymentOperatorsRoute: typeof ApiPaymentOperatorsRoute
+  ApiReceiptsCodeRoute: typeof ApiReceiptsCodeRoute
+  ApiSettingsPublicRoute: typeof ApiSettingsPublicRoute
   ApiVotesWebhookRoute: typeof ApiVotesWebhookRoute
+  ApiCandidatesIndexRoute: typeof ApiCandidatesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -56,6 +154,55 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/candidates/': {
+      id: '/api/candidates/'
+      path: '/api/candidates'
+      fullPath: '/api/candidates/'
+      preLoaderRoute: typeof ApiCandidatesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/candidates/$id': {
+      id: '/api/candidates/$id'
+      path: '/api/candidates/$id'
+      fullPath: '/api/candidates/$id'
+      preLoaderRoute: typeof ApiCandidatesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/payment/countries': {
+      id: '/api/payment/countries'
+      path: '/api/payment/countries'
+      fullPath: '/api/payment/countries'
+      preLoaderRoute: typeof ApiPaymentCountriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/payment/operators': {
+      id: '/api/payment/operators'
+      path: '/api/payment/operators'
+      fullPath: '/api/payment/operators'
+      preLoaderRoute: typeof ApiPaymentOperatorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/receipts/$code': {
+      id: '/api/receipts/$code'
+      path: '/api/receipts/$code'
+      fullPath: '/api/receipts/$code'
+      preLoaderRoute: typeof ApiReceiptsCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/settings/public': {
+      id: '/api/settings/public'
+      path: '/api/settings/public'
+      fullPath: '/api/settings/public'
+      preLoaderRoute: typeof ApiSettingsPublicRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/votes/webhook': {
@@ -70,7 +217,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiHealthRoute: ApiHealthRoute,
+  ApiCandidatesIdRoute: ApiCandidatesIdRoute,
+  ApiPaymentCountriesRoute: ApiPaymentCountriesRoute,
+  ApiPaymentOperatorsRoute: ApiPaymentOperatorsRoute,
+  ApiReceiptsCodeRoute: ApiReceiptsCodeRoute,
+  ApiSettingsPublicRoute: ApiSettingsPublicRoute,
   ApiVotesWebhookRoute: ApiVotesWebhookRoute,
+  ApiCandidatesIndexRoute: ApiCandidatesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
