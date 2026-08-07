@@ -10,7 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as RecuIndexRouteImport } from './routes/recu/index'
+import { Route as RecuCodeRouteImport } from './routes/recu/$code'
 import { Route as ApiAdminLoginRouteImport } from './routes/api/admin/login'
 import { Route as ApiAdminLogoutRouteImport } from './routes/api/admin/logout'
 import { Route as ApiAdminMeRouteImport } from './routes/api/admin/me'
@@ -39,9 +42,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AProposRoute = AProposRouteImport.update({
+  id: '/a-propos',
+  path: '/a-propos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
   id: '/api/health',
   path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecuIndexRoute = RecuIndexRouteImport.update({
+  id: '/recu/',
+  path: '/recu/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecuCodeRoute = RecuCodeRouteImport.update({
+  id: '/recu/$code',
+  path: '/recu/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminLoginRoute = ApiAdminLoginRouteImport.update({
@@ -158,7 +176,10 @@ const ApiAdminCandidatesIdPhotosRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/a-propos': typeof AProposRoute
   '/api/health': typeof ApiHealthRoute
+  '/recu/$code': typeof RecuCodeRoute
+  '/recu/': typeof RecuIndexRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
   '/api/admin/me': typeof ApiAdminMeRoute
@@ -184,7 +205,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/a-propos': typeof AProposRoute
   '/api/health': typeof ApiHealthRoute
+  '/recu/$code': typeof RecuCodeRoute
+  '/recu': typeof RecuIndexRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
   '/api/admin/me': typeof ApiAdminMeRoute
@@ -211,7 +235,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/a-propos': typeof AProposRoute
   '/api/health': typeof ApiHealthRoute
+  '/recu/$code': typeof RecuCodeRoute
+  '/recu/': typeof RecuIndexRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
   '/api/admin/me': typeof ApiAdminMeRoute
@@ -239,7 +266,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/a-propos'
     | '/api/health'
+    | '/recu/$code'
+    | '/recu/'
     | '/api/admin/login'
     | '/api/admin/logout'
     | '/api/admin/me'
@@ -265,7 +295,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/a-propos'
     | '/api/health'
+    | '/recu/$code'
+    | '/recu'
     | '/api/admin/login'
     | '/api/admin/logout'
     | '/api/admin/me'
@@ -291,7 +324,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/a-propos'
     | '/api/health'
+    | '/recu/$code'
+    | '/recu/'
     | '/api/admin/login'
     | '/api/admin/logout'
     | '/api/admin/me'
@@ -318,7 +354,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AProposRoute: typeof AProposRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  RecuCodeRoute: typeof RecuCodeRoute
+  RecuIndexRoute: typeof RecuIndexRoute
   ApiAdminLoginRoute: typeof ApiAdminLoginRoute
   ApiAdminLogoutRoute: typeof ApiAdminLogoutRoute
   ApiAdminMeRoute: typeof ApiAdminMeRoute
@@ -351,11 +390,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/a-propos': {
+      id: '/a-propos'
+      path: '/a-propos'
+      fullPath: '/a-propos'
+      preLoaderRoute: typeof AProposRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/health': {
       id: '/api/health'
       path: '/api/health'
       fullPath: '/api/health'
       preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recu/': {
+      id: '/recu/'
+      path: '/recu'
+      fullPath: '/recu/'
+      preLoaderRoute: typeof RecuIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recu/$code': {
+      id: '/recu/$code'
+      path: '/recu/$code'
+      fullPath: '/recu/$code'
+      preLoaderRoute: typeof RecuCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/login': {
@@ -528,7 +588,10 @@ const ApiAdminCandidatesIdRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AProposRoute: AProposRoute,
   ApiHealthRoute: ApiHealthRoute,
+  RecuCodeRoute: RecuCodeRoute,
+  RecuIndexRoute: RecuIndexRoute,
   ApiAdminLoginRoute: ApiAdminLoginRoute,
   ApiAdminLogoutRoute: ApiAdminLogoutRoute,
   ApiAdminMeRoute: ApiAdminMeRoute,

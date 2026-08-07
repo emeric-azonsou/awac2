@@ -1,0 +1,5 @@
+/* Repris tel quel du <style scoped> de pages/recu/[code].vue. */
+.votes-impact {
+  background: linear-gradient(135deg, rgba(239, 121, 82, 0.1), rgba(223, 65, 58, 0.08));
+  box-shadow: inset 0 0 0 1px rgba(239, 121, 82, 0.25);
+}
