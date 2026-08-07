@@ -8,7 +8,7 @@ import {
   getFirstName,
   resolveSiteOrigin,
   shouldAutoOpenVote,
-} from '../../app/utils/candidateShare'
+} from '../../src/utils/candidateShare'
 
 describe('buildCandidateShareUrl', () => {
   it("construit l'URL absolue avec le param vote=1", () => {

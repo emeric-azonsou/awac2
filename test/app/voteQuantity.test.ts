@@ -4,7 +4,7 @@ import {
   MIN_VOTE_QUANTITY,
   clampVoteQuantity,
   formatVoteTotal,
-} from '../../app/utils/voteQuantity'
+} from '../../src/utils/voteQuantity'
 describe('clampVoteQuantity', () => {
   it('garde une quantité valide telle quelle', () => {
     expect(clampVoteQuantity(5)).toBe(5)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getCandidateSavedMessage } from '../../app/utils/adminMessages'
+import { getCandidateSavedMessage } from '../../src/utils/adminMessages'
 
 describe('getCandidateSavedMessage (régression UQA-002)', () => {
   it('messages pour created et updated', () => {

@@ -3,7 +3,7 @@ import {
   listPendingVotes,
   rememberPendingVote,
   forgetPendingVote,
-} from '../../app/utils/pendingVotes'
+} from '../../src/utils/pendingVotes'
 function makeStorage(initial: Record<string, string> = {}) {
   const map = new Map(Object.entries(initial))
   return {

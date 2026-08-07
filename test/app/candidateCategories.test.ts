@@ -4,7 +4,7 @@ import {
   filterByCategory,
   getCategoryLabel,
   getCategoryPersonLabel,
-} from '../../app/utils/candidateCategories'
+} from '../../src/utils/candidateCategories'
 
 describe('CATEGORIES', () => {
   it('expose homme puis femme avec les labels exacts', () => {

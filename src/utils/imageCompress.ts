@@ -1,3 +1,4 @@
+import { ApiError } from './api'
 const MAX_EDGE = 1600
 const JPEG_QUALITY = 0.82
 export async function compressImage(file: File): Promise<Blob> {
@@ -28,11 +29,17 @@ export interface UploadedPhoto {
   url: string
 }
 
+// N'utilise pas le client `api` : celui-ci sérialise son corps en JSON, alors
+// que cette route attend les octets bruts de l'image.
 export async function uploadCandidatePhoto(file: File): Promise<UploadedPhoto> {
   const blob = await compressImage(file)
-  return $fetch<UploadedPhoto>('/api/admin/photos', {
+  const response = await fetch('/api/admin/photos', {
     method: 'POST',
     body: blob,
     headers: { 'content-type': 'image/jpeg' },
   })
+  if (!response.ok) {
+    throw new ApiError('upload_failed', "Échec de l'envoi de l'image", response.status)
+  }
+  return (await response.json()) as UploadedPhoto
 }
