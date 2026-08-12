@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prepare": "git config core.hooksPath .husky || true",
     "dev": "vite dev",
     "build": "vite build",
     "start": "node .output/server/index.mjs",

@@ -40,13 +40,24 @@ class FakeIntersectionObserver {
   thresholds: number[] = []
 }
 
-function setCandidatesInView(isIntersecting: boolean) {
+// `top` positionne la grille par rapport au viewport, exactement comme le fait
+// `boundingClientRect` d'une vraie entrée : positif = encore plus bas dans la
+// page, négatif = déjà dépassée vers le haut.
+function setCandidatesInView(isIntersecting: boolean, top = isIntersecting ? 0 : 500) {
   // Ne PAS instancier FakeIntersectionObserver ici : son constructeur
   // réécrit `ioCallback`, ce qui écraserait celui capturé par le composant
   // avant même l'appel ci-dessous.
   const callback = ioCallback
   act(() => {
-    callback?.([{ isIntersecting } as IntersectionObserverEntry], {} as IntersectionObserver)
+    callback?.(
+      [
+        {
+          isIntersecting,
+          boundingClientRect: { top } as DOMRectReadOnly,
+        } as IntersectionObserverEntry,
+      ],
+      {} as IntersectionObserver,
+    )
   })
 }
 
@@ -97,7 +108,7 @@ describe('FinalWarning', () => {
     expect(screen.queryByRole('alert')).toBeNull()
   })
 
-  it("se cache dès que la grille des candidats entre en vue, pour ne jamais la recouvrir", () => {
+  it('se cache dès que la grille des candidats entre en vue, pour ne jamais la recouvrir', () => {
     render(<FinalWarning />)
     scrollTo(2200 * 0.4)
     expect(screen.getByRole('alert')).toBeDefined()
@@ -112,7 +123,49 @@ describe('FinalWarning', () => {
     setCandidatesInView(true)
     expect(screen.queryByRole('alert')).toBeNull()
 
-    setCandidatesInView(false)
+    // La grille est repassée sous le viewport : on est remonté au-dessus.
+    setCandidatesInView(false, 500)
     expect(screen.getByRole('alert')).toBeDefined()
+  })
+
+  it('ne revient pas une fois la grille dépassée, pour ne pas recouvrir le bas de page', () => {
+    render(<FinalWarning />)
+    scrollTo(2200 * 0.4)
+    setCandidatesInView(true)
+    expect(screen.queryByRole('alert')).toBeNull()
+
+    // La grille est sortie par le haut : le visiteur lit Le Grand Prix ou le
+    // footer, dont le bouton d'assistance WhatsApp ne doit pas être recouvert.
+    setCandidatesInView(false, -800)
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('reste borné en hauteur pour ne jamais recouvrir la barre de navigation', () => {
+    render(<FinalWarning />)
+    scrollTo(2200 * 0.4)
+    const card = screen.getByRole('alert')
+    expect(card.className).toContain('max-h-')
+    expect(card.className).toContain('overflow-y-auto')
+  })
+
+  it('se ferme proprement quand sessionStorage est indisponible', async () => {
+    const user = userEvent.setup({ delay: null })
+    const blocked = () => {
+      throw new Error('sessionStorage indisponible')
+    }
+    const original = Object.getOwnPropertyDescriptor(window, 'sessionStorage')
+    Object.defineProperty(window, 'sessionStorage', {
+      configurable: true,
+      value: { getItem: blocked, setItem: blocked, removeItem: blocked, clear: blocked },
+    })
+
+    try {
+      render(<FinalWarning />)
+      scrollTo(2200 * 0.4)
+      await user.click(screen.getByRole('button', { name: /fermer/i }))
+      expect(screen.queryByRole('alert')).toBeNull()
+    } finally {
+      if (original) Object.defineProperty(window, 'sessionStorage', original)
+    }
   })
 })

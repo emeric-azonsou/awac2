@@ -21,14 +21,33 @@ function hasCrossedTrigger(): boolean {
   return window.scrollY > SCROLL_TRIGGER_PX
 }
 
+// Le stockage de session lève dans un navigateur qui l'a désactivé (mode privé
+// verrouillé, cookies tiers bloqués). L'avertissement doit se fermer quand même :
+// on perd seulement la mémoire du dismiss, jamais l'interaction.
+function readDismissed(): boolean {
+  try {
+    return sessionStorage.getItem(DISMISS_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function rememberDismissed(): void {
+  try {
+    sessionStorage.setItem(DISMISS_KEY, '1')
+  } catch {
+    // Sans persistance, l'avertissement pourra revenir au prochain chargement.
+  }
+}
+
 export function FinalWarning() {
   const [remaining, setRemaining] = useState<TimeRemaining | null>(null)
   const [visible, setVisible] = useState(false)
   const [dismissed, setDismissed] = useState(false)
-  // Le popup ne doit jamais recouvrir la grille des candidats : dès qu'elle
-  // entre dans le viewport, on s'efface — pas un dismiss, juste une éclipse
-  // le temps que l'utilisateur soit dessus.
-  const [candidatesInView, setCandidatesInView] = useState(false)
+  // Le popup ne doit jamais recouvrir la grille des candidats, ni ce qui vient
+  // après elle. On s'efface donc dès qu'elle est atteinte et tant qu'on ne
+  // repasse pas au-dessus — pas un dismiss, juste une éclipse.
+  const [candidatesReached, setCandidatesReached] = useState(false)
 
   useEffect(() => {
     setRemaining(timeRemaining())
@@ -37,7 +56,7 @@ export function FinalWarning() {
   }, [])
 
   useEffect(() => {
-    if (sessionStorage.getItem(DISMISS_KEY) === '1') {
+    if (readDismissed()) {
       setDismissed(true)
       return
     }
@@ -56,7 +75,14 @@ export function FinalWarning() {
     const candidats = document.getElementById('candidats')
     if (!candidats) return
     const observer = new IntersectionObserver(
-      ([entry]) => entry && setCandidatesInView(entry.isIntersecting),
+      ([entry]) => {
+        if (!entry) return
+        // `top < 0` : la grille est sortie par le haut, donc déjà dépassée.
+        // Sans cette distinction, ne plus intersecter suffisait à faire
+        // revenir le popup par-dessus Le Grand Prix et le footer.
+        const passed = entry.boundingClientRect.top < 0
+        setCandidatesReached(entry.isIntersecting || passed)
+      },
       { rootMargin: '0px 0px -15% 0px' },
     )
     observer.observe(candidats)
@@ -66,19 +92,22 @@ export function FinalWarning() {
   const close = () => {
     setVisible(false)
     setDismissed(true)
-    sessionStorage.setItem(DISMISS_KEY, '1')
+    rememberDismissed()
   }
 
   if (remaining?.expired) return null
-  if (dismissed || !visible || candidatesInView) return null
+  if (dismissed || !visible || candidatesReached) return null
 
   const totalHours = remaining ? remaining.days * 24 + remaining.hours : null
   const critical = totalHours !== null && totalHours < CRITICAL_HOURS
 
   return (
     <div className="fixed inset-x-4 bottom-4 z-50 md:inset-x-auto md:right-6 md:bottom-6 md:w-full md:max-w-md animate-[final-warning-in_0.35s_ease-out]">
+      {/* La hauteur est bornée au viewport moins la barre de navigation : sur un
+          téléphone en paysage, la carte couvrait tout l'écran et rendait le
+          bouton VOTER de la Navbar incliquable. */}
       <section
-        className="relative rounded-[2rem_0_2rem_0] border-2 border-awac-accent/30 bg-white shadow-[0_20px_50px_rgba(223,65,58,0.25)] overflow-hidden"
+        className="relative rounded-[2rem_0_2rem_0] border-2 border-awac-accent/30 bg-white shadow-[0_20px_50px_rgba(223,65,58,0.25)] max-h-[calc(100vh-7rem)] overflow-y-auto"
         role="alert"
       >
         <button
