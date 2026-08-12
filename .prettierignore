@@ -1,0 +1,9 @@
+# Fichiers generes par TanStack Router — reformates a chaque build
+src/routeTree.gen.ts
+
+# Artefacts de build
+.output/
+.nitro/
+.tanstack/
+dist/
+node_modules/
