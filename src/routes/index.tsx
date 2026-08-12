@@ -19,11 +19,9 @@ function Home() {
       <Navbar />
       <Hero />
       <Works />
-      {/* L'avertissement précède immédiatement la grille : on lit la contrainte,
-          puis on voit les candidats pour qui voter. */}
-      <div className="bg-[#F9F8F6] pt-24 md:pt-32 px-6">
-        <FinalWarning />
-      </div>
+      {/* Popup déclenché au scroll : pas de wrapper de mise en page, la carte
+          se positionne elle-même en overlay fixe une fois le seuil franchi. */}
+      <FinalWarning />
       <Vote />
       <Prix />
       <Footer />
