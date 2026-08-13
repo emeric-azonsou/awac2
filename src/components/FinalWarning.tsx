@@ -133,22 +133,22 @@ export function FinalWarning() {
         <div className="px-6 py-6 space-y-4 text-center">
           <h3 className="text-gray-900 font-heading font-black text-xl md:text-2xl uppercase tracking-tight leading-none">
             {critical
-              ? 'Il ne reste que quelques heures'
-              : 'Après le 19 août, plus aucun vote ne comptera'}
+              ? 'Demain, il sera trop tard'
+              : 'Après le 14 août, plus aucun vote ne comptera'}
           </h3>
 
           <p className="text-gray-600 font-sans text-sm leading-relaxed">
-            À <span className="font-bold text-gray-900">23h59 précises</span>, le compteur se fige.
-            Le classement devient définitif, sans recours possible.{' '}
+            À <span className="font-bold text-gray-900">23h59 précises</span>, les votes s’arrêtent
+            et le classement devient définitif.{' '}
             <span className="font-bold text-awac-accent">
-              Les écarts se jouent souvent à quelques voix.
+              Votre candidat peut perdre à quelques voix près.
             </span>
           </p>
 
           <div className="pt-1">
             <a href="#candidats" onClick={close} className="btn-awac text-xs py-3.5 px-8 gap-3">
               <span className="material-icons text-lg">how_to_vote</span>
-              Voter maintenant, pas demain
+              Je vote avant qu’il ne soit trop tard
             </a>
           </div>
         </div>

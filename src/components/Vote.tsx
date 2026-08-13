@@ -37,7 +37,7 @@ export function Vote() {
   const [activeCategory, setActiveCategory] = useState(FIRST_CATEGORY)
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null)
   const [voteQuantities, setVoteQuantities] = useState<Record<string, number>>({})
-  const { unitPrice, currency, loadVotePricing } = useVotePricing()
+  const { unitPrice, currency, votingClosed, loadVotePricing } = useVotePricing()
 
   const displayedCandidats = filterByCategory(candidats, activeCategory)
   const categoryCount = (key: string) => filterByCategory(candidats, key).length
@@ -46,6 +46,10 @@ export function Vote() {
   const setQuantity = (candidateId: string, value: number) => {
     setVoteQuantities((current) => ({ ...current, [candidateId]: clampVoteQuantity(value) }))
   }
+
+  useEffect(() => {
+    if (votingClosed) setSelectedCandidate(null)
+  }, [votingClosed])
 
   useEffect(() => {
     const loadCandidates = async () => {
@@ -118,6 +122,14 @@ export function Vote() {
           >
             Découvrez les créateurs du Mono et propulsez votre favori en tête.
           </p>
+          {votingClosed ? (
+            <p
+              className="rounded-xl bg-awac-accent/10 px-4 py-3 font-heading font-black text-awac-accent uppercase tracking-wider"
+              role="status"
+            >
+              Les votes sont clos.
+            </p>
+          ) : null}
         </div>
 
         <div
@@ -236,10 +248,16 @@ export function Vote() {
                   <CandidateShareCompact candidate={candidat} />
 
                   <button
-                    onClick={() => setSelectedCandidate(candidat)}
-                    className="btn-awac w-full text-[11px] py-3.5 px-4"
+                    type="button"
+                    disabled={votingClosed}
+                    onClick={() => {
+                      if (!votingClosed) setSelectedCandidate(candidat)
+                    }}
+                    className="btn-awac w-full text-[11px] py-3.5 px-4 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <span className="material-icons text-base shrink-0">how_to_vote</span>
+                    <span className="material-icons text-base shrink-0" aria-hidden="true">
+                      how_to_vote
+                    </span>
                     <span className="font-heading font-black tracking-wider">VOTER</span>
                   </button>
                 </div>

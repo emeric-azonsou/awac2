@@ -42,6 +42,8 @@ export interface OperatorsResponse {
 export interface VotePricing {
   vote_unit_price: number | null
   currency: string | null
+  server_time: string
+  voting_closed: boolean
 }
 export interface SubmitVotePayload {
   candidateId: string

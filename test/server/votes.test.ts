@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
 import { submitVote, getVoteStatus, processWebhook } from '../../server/services/votes'
 import { asDb } from './helpers'
 import type { Db, FeexpayClient } from '../../server/types'
@@ -7,6 +7,16 @@ const VOTE_ID = '11111111-2222-3333-4444-555555555555'
 const WEBHOOK_SECRET = 'tok_webhook_xyz'
 const FEEXPAY_REFERENCE = 'fx_ref_1'
 const asFeexpay = (o: unknown): FeexpayClient => o as unknown as FeexpayClient
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date('2026-08-14T23:59:58+01:00'))
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+  vi.unstubAllEnvs()
+})
 interface VoteRow {
   id: string
   receipt_code: string | null
@@ -160,6 +170,20 @@ describe('submitVote — mode réel', () => {
     )
     expect(res.status).toBe(502)
   })
+  it('ne révèle jamais le message interne FeexPay au client', async () => {
+    const db = makeDb()
+    const initPayment = vi.fn().mockRejectedValue(new Error('secret fournisseur interne'))
+    const res = await submitVote(
+      { db: asDb(db) as unknown as Db, feexpay: asFeexpay({ initPayment }) },
+      validBody,
+    )
+
+    expect(res).toEqual({
+      status: 502,
+      body: { error: { code: 'payment_error', message: 'Le paiement a échoué' } },
+    })
+    expect(JSON.stringify(res.body)).not.toContain('secret fournisseur interne')
+  })
   it('force la devise des réglages même si le client en envoie une autre', async () => {
     const db = makeDb()
     const initPayment = vi
@@ -225,6 +249,43 @@ describe('submitVote — mode réel', () => {
   })
 })
 describe('submitVote — garde-fous sécurité', () => {
+  it('refuse toute nouvelle initiation exactement à la clôture, avant base et FeexPay (410)', async () => {
+    const db = makeDb()
+    const initPayment = vi.fn()
+    const res = await submitVote(
+      {
+        db: asDb(db) as unknown as Db,
+        feexpay: asFeexpay({ initPayment }),
+        now: () => new Date('2026-08-14T23:59:59+01:00'),
+      },
+      validBody,
+    )
+
+    expect(res).toEqual({
+      status: 410,
+      body: { error: { code: 'voting_closed', message: 'Les votes sont clos' } },
+    })
+    expect(db._state.calls).toEqual([])
+    expect(initPayment).not.toHaveBeenCalled()
+  })
+
+  it('accepte encore une initiation une milliseconde avant la clôture', async () => {
+    const initPayment = vi
+      .fn()
+      .mockResolvedValue({ reference: FEEXPAY_REFERENCE, status: 'PENDING' })
+    const res = await submitVote(
+      {
+        db: asDb(makeDb()) as unknown as Db,
+        feexpay: asFeexpay({ initPayment }),
+        now: () => new Date('2026-08-14T23:59:58.999+01:00'),
+      },
+      validBody,
+    )
+
+    expect(res.status).toBe(201)
+    expect(initPayment).toHaveBeenCalledOnce()
+  })
+
   it('refuse une quantité au-dessus du plafond serveur 999, avant tout appel FeexPay (400)', async () => {
     const initPayment = vi.fn()
     const res = await submitVote(
@@ -267,6 +328,22 @@ describe('submitVote — garde-fous sécurité', () => {
   })
 })
 describe('getVoteStatus — polling', () => {
+  it('réconcilie après la clôture un paiement initié avant celle-ci', async () => {
+    vi.setSystemTime(new Date('2026-08-15T00:00:00+01:00'))
+    const db = makeDb({ voteStatus: 'pending' })
+    const getPaymentStatus = vi
+      .fn()
+      .mockResolvedValue({ reference: FEEXPAY_REFERENCE, status: 'SUCCESSFUL', amount: 300 })
+
+    const res = await getVoteStatus(
+      { db: asDb(db) as unknown as Db, feexpay: asFeexpay({ getPaymentStatus }) },
+      VOTE_ID,
+    )
+
+    expect((res.body as { payment_status: string }).payment_status).toBe('confirmed')
+    expect(db._state.voteCount).toBe(13)
+  })
+
   it('réconcilie via FeexPay et confirme quand SUCCESSFUL', async () => {
     const db = makeDb({ voteStatus: 'pending' })
     const getPaymentStatus = vi

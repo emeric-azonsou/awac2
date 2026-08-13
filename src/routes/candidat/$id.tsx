@@ -86,9 +86,13 @@ function CandidatePage() {
   const [candidate, setCandidate] = useState(loaded)
   const [showVote, setShowVote] = useState(false)
   const [voteQuantity, setVoteQuantity] = useState(MIN_VOTE_QUANTITY)
-  const { unitPrice, currency, loadVotePricing } = useVotePricing()
+  const { unitPrice, currency, votingClosed, loadVotePricing } = useVotePricing()
 
   useEffect(() => setCandidate(loaded), [loaded])
+
+  useEffect(() => {
+    if (votingClosed) setShowVote(false)
+  }, [votingClosed])
 
   useEffect(() => {
     void loadVotePricing()
@@ -140,7 +144,11 @@ function CandidatePage() {
           </Link>
 
           {candidate ? (
-            <button onClick={() => setShowVote(true)} className="btn-awac text-[11px] py-2.5 px-5">
+            <button
+              disabled={votingClosed}
+              onClick={() => setShowVote(true)}
+              className="btn-awac text-[11px] py-2.5 px-5 disabled:cursor-not-allowed disabled:opacity-50"
+            >
               <span className="material-icons text-base">how_to_vote</span>
               Voter
             </button>
@@ -246,7 +254,11 @@ function CandidatePage() {
                   />
                 </div>
 
-                <button onClick={() => setShowVote(true)} className="btn-awac text-xs py-4 px-8">
+                <button
+                  disabled={votingClosed}
+                  onClick={() => setShowVote(true)}
+                  className="btn-awac text-xs py-4 px-8 disabled:cursor-not-allowed disabled:opacity-50"
+                >
                   <span className="material-icons text-lg">how_to_vote</span>
                   Voter pour {firstName}
                 </button>
@@ -331,7 +343,11 @@ function CandidatePage() {
               >
                 Propulsez {firstName} vers la victoire
               </h2>
-              <button onClick={() => setShowVote(true)} className="btn-awac text-xs px-8 py-4">
+              <button
+                disabled={votingClosed}
+                onClick={() => setShowVote(true)}
+                className="btn-awac text-xs px-8 py-4 disabled:cursor-not-allowed disabled:opacity-50"
+              >
                 <span className="material-icons text-lg">how_to_vote</span>
                 Voter pour {firstName}
               </button>
@@ -340,8 +356,9 @@ function CandidatePage() {
 
           <div className="sm:hidden fixed bottom-0 inset-x-0 z-30 p-4 bg-gradient-to-t from-white via-white/95 to-transparent pointer-events-none">
             <button
+              disabled={votingClosed}
               onClick={() => setShowVote(true)}
-              className="btn-awac w-full py-3.5 text-[11px] pointer-events-auto"
+              className="btn-awac w-full py-3.5 text-[11px] pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
             >
               <span className="material-icons text-base">how_to_vote</span>
               Voter pour {firstName} — {candidate.vote_count} votes
@@ -349,7 +366,7 @@ function CandidatePage() {
           </div>
 
           <VoteModal
-            candidate={showVote ? candidate : null}
+            candidate={showVote && !votingClosed ? candidate : null}
             initialQuantity={voteQuantity}
             unitPrice={unitPrice}
             currency={currency}

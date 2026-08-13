@@ -4,6 +4,7 @@ import { isUuid } from './candidates'
 import { verifyWebhookToken, toFeexpayPhone } from '../lib/feexpay'
 import { getNetworkSlugs } from './payment'
 import { confirmVote, rejectVote } from './voteConfirmation'
+import { isVoteDeadlineReached } from '../../shared/voteDeadline'
 const MAX_QUANTITY_PER_VOTE = 999
 const MAX_PENDING_PER_PHONE = 5
 const PENDING_PHONE_WINDOW_MINUTES = 30
@@ -22,9 +23,15 @@ const SIMULATED_IN_PRODUCTION: ErrorEntry = {
   code: 'payment_unavailable',
   message: 'Le paiement est momentanément indisponible',
 }
+const VOTING_CLOSED: ErrorEntry = {
+  status: 410,
+  code: 'voting_closed',
+  message: 'Les votes sont clos',
+}
 export interface VoteDeps {
   db: Db
   feexpay: FeexpayClient | null
+  now?: () => Date
 }
 export interface VoteStatusDeps {
   db: Db
@@ -43,6 +50,7 @@ function normalizePhone(phone: string): string {
   return phone.replace(/[^0-9]/g, '')
 }
 export async function submitVote(deps: VoteDeps, body: unknown): Promise<HttpResult> {
+  if (isVoteDeadlineReached(deps.now?.() ?? new Date())) return fail(VOTING_CLOSED)
   const input = (body ?? {}) as Record<string, unknown>
   const candidateId = input.candidate_id
   const quantity = input.quantity
@@ -106,9 +114,9 @@ export async function submitVote(deps: VoteDeps, body: unknown): Promise<HttpRes
         callbackInfo: receiptCode,
       })
       await db`UPDATE votes SET payment_reference = ${payment.reference} WHERE receipt_code = ${receiptCode}`
-    } catch (err) {
+    } catch {
       await rejectVote(db, receiptCode)
-      return fail(PAYMENT_ERROR, err instanceof Error ? err.message : undefined)
+      return fail(PAYMENT_ERROR)
     }
   }
   let paymentStatus = 'pending'

@@ -95,6 +95,16 @@ describe('FinalWarning', () => {
     expect(screen.queryByText(/Mobile Money met parfois plusieurs minutes/)).toBeNull()
   })
 
+  it('presse le visiteur de voter avant demain pour éviter la défaite de son candidat', () => {
+    render(<FinalWarning />)
+    scrollTo(2200 * 0.4)
+
+    const alert = screen.getByRole('alert')
+    expect(alert.textContent).toContain('Demain, il sera trop tard')
+    expect(alert.textContent).toContain('Votre candidat peut perdre à quelques voix près')
+    expect(alert.textContent).toContain('Je vote avant qu’il ne soit trop tard')
+  })
+
   it('se ferme au clic sur le bouton fermer et ne revient pas après un nouveau montage', async () => {
     const user = userEvent.setup({ delay: null })
     const { unmount } = render(<FinalWarning />)

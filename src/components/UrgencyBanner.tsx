@@ -4,7 +4,7 @@ import './UrgencyBanner.css'
 
 const MESSAGE =
   "CHAQUE HEURE QUI PASSE, UN·E AUTRE CANDIDAT·E PREND DE L'AVANCE — UN VOTE AUJOURD'HUI VAUT MIEUX QU'UN REGRET DEMAIN."
-const DEADLINE_LABEL = 'CLÔTURE LE 19 AOÛT À 23H59'
+const DEADLINE_LABEL = 'CLÔTURE LE 14 AOÛT À 23H59'
 
 const UNITS: { key: keyof Omit<TimeRemaining, 'expired'>; label: string }[] = [
   { key: 'days', label: 'JOURS' },
