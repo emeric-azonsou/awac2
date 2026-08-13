@@ -4,7 +4,7 @@ import './UrgencyBanner.css'
 
 const MESSAGE =
   "CHAQUE HEURE QUI PASSE, UN·E AUTRE CANDIDAT·E PREND DE L'AVANCE — UN VOTE AUJOURD'HUI VAUT MIEUX QU'UN REGRET DEMAIN."
-const DEADLINE_LABEL = 'CLÔTURE LE 14 AOÛT À 23H59'
+const DEADLINE_LABEL = 'CLÔTURE LE 19 AOÛT À 23H59'
 
 const UNITS: { key: keyof Omit<TimeRemaining, 'expired'>; label: string }[] = [
   { key: 'days', label: 'JOURS' },
@@ -56,7 +56,7 @@ export function UrgencyBanner() {
       </div>
 
       <div
-        className="shrink-0 flex items-center gap-3 md:gap-5 bg-black/20 px-3 md:px-6"
+        className="shrink-0 flex items-center gap-1.5 md:gap-5 bg-black/20 px-2 md:px-6"
         role="timer"
         aria-live="off"
         aria-label={
@@ -66,12 +66,12 @@ export function UrgencyBanner() {
         }
       >
         {UNITS.map((unit, index) => (
-          <div key={unit.key} className="flex items-center gap-3 md:gap-5">
+          <div key={unit.key} className="flex items-center gap-1.5 md:gap-5">
             <div className="text-center leading-none">
-              <div className="font-heading font-black text-lg md:text-2xl tabular-nums">
+              <div className="font-heading font-black text-base md:text-2xl tabular-nums">
                 {remaining ? String(remaining[unit.key]).padStart(2, '0') : '--'}
               </div>
-              <div className="text-[8px] md:text-[9px] font-bold tracking-[0.2em] opacity-80 mt-1">
+              <div className="text-[7px] md:text-[9px] font-bold tracking-[0.1em] md:tracking-[0.2em] opacity-80 mt-1">
                 {unit.label}
               </div>
             </div>

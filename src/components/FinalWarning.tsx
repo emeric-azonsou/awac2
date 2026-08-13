@@ -134,7 +134,7 @@ export function FinalWarning() {
           <h3 className="text-gray-900 font-heading font-black text-xl md:text-2xl uppercase tracking-tight leading-none">
             {critical
               ? 'Il ne reste que quelques heures'
-              : 'Après le 14 août, plus aucun vote ne comptera'}
+              : 'Après le 19 août, plus aucun vote ne comptera'}
           </h3>
 
           <p className="text-gray-600 font-sans text-sm leading-relaxed">

@@ -1,8 +1,8 @@
-// Clôture des votes : 14 août 2026 à 23h59:59, heure du Bénin (UTC+1, pas de
-// changement d'heure). L'instant est figé en UTC pour que le décompte soit le
-// même partout : un votant en France ne doit pas voir une heure de plus que la
-// clôture réelle.
-export const VOTE_DEADLINE = new Date('2026-08-14T23:59:59+01:00')
+// Clôture des votes : mercredi 19 août 2026 à 23h59:59, heure du Bénin (UTC+1,
+// pas de changement d'heure). L'instant est figé en UTC pour que le décompte
+// soit le même partout : un votant en France ne doit pas voir une heure de plus
+// que la clôture réelle.
+export const VOTE_DEADLINE = new Date('2026-08-19T23:59:59+01:00')
 
 export interface TimeRemaining {
   days: number

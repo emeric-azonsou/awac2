@@ -10,6 +10,16 @@
   animation: awac-urgency-scroll 38s linear infinite;
 }
 
+/* Sous le point de rupture `md`, l'horloge occupe une part bien plus large du
+   bandeau : à vitesse égale, un fragment de message ne reste lisible qu'environ
+   deux secondes et se retrouve coupé en plein mot. La piste est donc ralentie
+   pour rendre au message un temps de lecture équivalent à celui du desktop. */
+@media (max-width: 767.98px) {
+  .awac-urgency-track {
+    animation-duration: 80s;
+  }
+}
+
 .awac-urgency:hover .awac-urgency-track,
 .awac-urgency:focus-within .awac-urgency-track {
   animation-play-state: paused;
