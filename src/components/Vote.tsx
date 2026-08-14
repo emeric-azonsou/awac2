@@ -7,6 +7,7 @@ import { CATEGORIES, filterByCategory } from '../utils/candidateCategories'
 import { VoteQuantityStepper } from './VoteQuantityStepper'
 import { CandidateShareCompact } from './CandidateShareCompact'
 import { VoteModal, type VotedResult } from './VoteModal'
+import { VoteClosedCelebration } from './VoteClosedCelebration'
 import defaultPhoto from '../assets/candidat/candidat.jpg'
 import './Vote.css'
 
@@ -122,14 +123,7 @@ export function Vote() {
           >
             Découvrez les créateurs du Mono et propulsez votre favori en tête.
           </p>
-          {votingClosed ? (
-            <p
-              className="rounded-xl bg-awac-accent/10 px-4 py-3 font-heading font-black text-awac-accent uppercase tracking-wider"
-              role="status"
-            >
-              Les votes sont clos.
-            </p>
-          ) : null}
+          {votingClosed ? <VoteClosedCelebration /> : null}
         </div>
 
         <div

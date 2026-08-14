@@ -72,6 +72,27 @@ describe('Vote — clôture', () => {
     expect(screen.getByRole('button', { name: 'VOTER' }).hasAttribute('disabled')).toBe(true)
   })
 
+  it('félicite les candidat·e·s avec des confettis une fois les votes clos', async () => {
+    const { container } = render(<Vote />)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(screen.getByText('Félicitations à toutes et à tous les candidat·e·s !')).toBeDefined()
+    expect(container.querySelectorAll('.awac-confetti-piece').length).toBeGreaterThan(0)
+  })
+
+  it("n'affiche aucune félicitation tant que les votes sont ouverts", async () => {
+    hookState.votingClosed = false
+    const { container } = render(<Vote />)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(screen.queryByText('Félicitations à toutes et à tous les candidat·e·s !')).toBeNull()
+    expect(container.querySelectorAll('.awac-confetti-piece').length).toBe(0)
+  })
+
   it('ferme une modal ouverte lorsque la clôture est atteinte', async () => {
     hookState.votingClosed = false
     const { rerender } = render(<Vote />)
