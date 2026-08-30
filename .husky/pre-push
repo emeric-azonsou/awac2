@@ -1,0 +1,2 @@
+#!/bin/sh
+node "${HOME}/.claude/hooks/feature-qa-enforcer.mjs" git-pre-push || exit 1

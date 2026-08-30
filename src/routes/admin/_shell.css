@@ -1,0 +1,5 @@
+/* Repris tel quel du <style scoped> de layouts/admin.vue. */
+.nav-active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(239, 121, 82, 0.25), rgba(223, 65, 58, 0.2));
+}

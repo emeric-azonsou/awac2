@@ -4,29 +4,42 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "prepare": "git config core.hooksPath .husky || true",
+    "dev": "vite dev",
     "build": "vite build",
+    "start": "node .output/server/index.mjs",
     "preview": "vite preview",
-    "format": "prettier --write --experimental-cli src/"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "format": "prettier --write --experimental-cli src/ server/",
+    "format:check": "prettier --check src/ server/",
+    "verify": "npm run format:check && npm run typecheck && npm run test"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.109.0",
-    "@vueuse/core": "^14.3.0",
-    "chart.js": "^4.5.1",
-    "gsap": "^3.15.0",
-    "pinia": "^3.0.4",
-    "vue": "^3.5.38",
-    "vue-chartjs": "^5.3.3",
-    "vue-router": "^4.6.4"
+    "@tanstack/react-router": "^1.170.22",
+    "@tanstack/react-start": "^1.168.39",
+    "bcryptjs": "^3.0.3",
+    "nitro": "^3.0.260610-beta",
+    "postgres": "^3.4.9",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.7",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.3",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
     "autoprefixer": "^10.5.2",
+    "jsdom": "^29.1.1",
     "postcss": "^8.5.16",
     "prettier": "3.8.4",
     "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3",
     "vite": "^8.0.16",
-    "vite-plugin-vue-devtools": "^8.1.2"
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": "^22.18.0 || >=24.12.0"

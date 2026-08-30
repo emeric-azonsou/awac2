@@ -1,0 +1,26 @@
+/* Repris tel quel du <style scoped> de pages/admin/index.vue. */
+.stat-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.stat-revenue {
+  background: linear-gradient(135deg, #df413a, #b3302a);
+  border-color: transparent;
+}
+.stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+.stat-value {
+  font-weight: 900;
+  font-size: 1.75rem;
+  line-height: 1;
+}

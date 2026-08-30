@@ -1,0 +1,184 @@
+/* Repris du <style scoped> de Vote.vue, scopé par .awac-vote.
+   Ce scope est indispensable : les règles nues `button`, `button:active` et
+   `input[type='number']` s'appliqueraient sinon à tous les boutons et champs
+   du site, alors que Vue les confinait à ce composant. */
+.awac-vote .card-visible {
+  animation: awac-vote-card-entry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes awac-vote-card-entry {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.awac-vote .rank-badge {
+  opacity: 0;
+  transform: scale(0.5) rotate(-10deg);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.awac-vote .rank-visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+.awac-vote .card-visible::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 2.5rem 0 2.5rem 0;
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    rgba(239, 121, 82, 0.03) 50%,
+    transparent 60%
+  );
+  animation: awac-vote-shimmer-card 1.2s ease-out both;
+  animation-delay: inherit;
+}
+@keyframes awac-vote-shimmer-card {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(200%) rotate(25deg);
+  }
+}
+
+.awac-vote .card-first {
+  border-color: #ffd700 !important;
+  box-shadow:
+    0 0 30px rgba(255, 215, 0, 0.15),
+    0 15px 40px rgba(0, 0, 0, 0.05) !important;
+}
+.awac-vote .card-first .rank-badge {
+  background: linear-gradient(135deg, #ffd700, #ffa500) !important;
+  border-color: #ffd700 !important;
+  color: #1a1a1a !important;
+}
+.awac-vote .card-second {
+  border-color: #c0c0c0 !important;
+  box-shadow:
+    0 0 20px rgba(192, 192, 192, 0.1),
+    0 15px 40px rgba(0, 0, 0, 0.05) !important;
+}
+.awac-vote .card-second .rank-badge {
+  background: linear-gradient(135deg, #c0c0c0, #a8a8a8) !important;
+  border-color: #c0c0c0 !important;
+  color: #1a1a1a !important;
+}
+.awac-vote .card-third {
+  border-color: #cd7f32 !important;
+  box-shadow:
+    0 0 15px rgba(205, 127, 50, 0.08),
+    0 15px 40px rgba(0, 0, 0, 0.05) !important;
+}
+.awac-vote .card-third .rank-badge {
+  background: linear-gradient(135deg, #cd7f32, #b87333) !important;
+  border-color: #cd7f32 !important;
+  color: #1a1a1a !important;
+}
+.awac-vote .card-other {
+  border-color: #e5e7eb !important;
+}
+.awac-vote .card-other .rank-badge {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.awac-vote .rank-medallion {
+  background: linear-gradient(135deg, #ffd700, #ffa500);
+  color: #1a1a1a;
+  box-shadow: 0 6px 16px rgba(255, 183, 0, 0.4);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.awac-vote .group:hover .rank-medallion {
+  transform: scale(1.06) rotate(-3deg);
+}
+
+.awac-vote .card-first:hover {
+  box-shadow:
+    0 0 50px rgba(255, 215, 0, 0.25),
+    0 30px 60px rgba(0, 0, 0, 0.08) !important;
+  border-color: #ffd700 !important;
+}
+.awac-vote .card-second:hover {
+  box-shadow:
+    0 0 35px rgba(192, 192, 192, 0.2),
+    0 30px 60px rgba(0, 0, 0, 0.08) !important;
+  border-color: #c0c0c0 !important;
+}
+.awac-vote .card-third:hover {
+  box-shadow:
+    0 0 25px rgba(205, 127, 50, 0.15),
+    0 30px 60px rgba(0, 0, 0, 0.08) !important;
+  border-color: #cd7f32 !important;
+}
+
+.awac-vote button {
+  cursor: pointer;
+}
+.awac-vote button:active {
+  transform: scale(0.95);
+}
+.awac-vote input[type='number'] {
+  transition: all 0.2s ease;
+}
+.awac-vote input[type='number']:focus {
+  color: #ef7952;
+}
+.awac-vote .group:hover .rank-badge {
+  background: rgba(239, 121, 82, 0.9) !important;
+  border-color: rgba(239, 121, 82, 0.3) !important;
+}
+.awac-vote .group:hover img {
+  transform: scale(1.05);
+}
+@media (max-width: 768px) {
+  .awac-vote .card-visible {
+    animation-duration: 0.6s;
+  }
+}
+
+.awac-vote .category-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 44px;
+  padding: 0 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid theme('colors.gray.200');
+  background: white;
+  color: theme('colors.gray.700');
+  font-family: theme('fontFamily.heading');
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.awac-vote .category-tab:hover {
+  border-color: theme('colors.awac.primary');
+  color: theme('colors.awac.primary');
+}
+.awac-vote .category-tab-active,
+.awac-vote .category-tab-active:hover {
+  background: theme('colors.awac.primary');
+  border-color: theme('colors.awac.primary');
+  color: white;
+}
+.awac-vote .category-tab:focus-visible {
+  outline: 2px solid #0b0b0b;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .awac-vote .category-tab {
+    transition: none;
+  }
+}

@@ -1,0 +1,44 @@
+.awac-celebration {
+  position: relative;
+  overflow: hidden;
+}
+
+.awac-celebration-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.awac-confetti-piece {
+  position: absolute;
+  top: -12%;
+  width: 8px;
+  height: 14px;
+  border-radius: 1px;
+  opacity: 0;
+  animation: awac-confetti-fall 3.2s linear infinite;
+}
+
+@keyframes awac-confetti-fall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -20%, 0) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(14px, 420%, 0) rotate(540deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .awac-confetti-piece {
+    animation: none;
+    opacity: 0.5;
+  }
+}
